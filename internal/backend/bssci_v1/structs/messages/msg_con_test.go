@@ -1,74 +1,542 @@
 package messages
 
 import (
-	"bytes"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-
+	"mioty-bssci-adapter/internal/common"
+	"reflect"
 	"testing"
 
-
-	"github.com/tinylib/msgp/msgp"
+	"github.com/google/uuid"
 )
 
-var (
-	testMessageConRaw = []byte{137, 167, 99, 111, 109, 109, 97, 110, 100,
-		163, 99, 111, 110, 164, 111, 112, 73, 100, 0, 167, 118, 101, 114, 115, 105, 111, 110, 165,
-		49, 46, 48, 46, 48, 165, 98, 115, 69, 117, 105, 207, 0, 7, 50, 0, 0, 119, 103, 243, 166,
-		118, 101, 110, 100, 111, 114, 174, 68, 105, 101, 104, 108, 32, 77, 101, 116, 101, 114, 105,
-		110, 103, 165, 109, 111, 100, 101, 108, 181, 77, 73, 79, 84, 89, 32, 80, 114, 101, 109,
-		105, 117, 109, 32, 71, 97, 116, 101, 119, 97, 121, 164, 110, 97, 109, 101, 173, 77, 48, 48,
-		48, 55, 51, 50, 55, 55, 54, 55, 70, 51, 164, 98, 105, 100, 105, 195, 168, 115, 110, 66,
-		115, 85, 117, 105, 100, 220, 0, 16, 208, 195, 114, 208, 197, 33, 208, 167, 120, 73, 208,
-		155, 208, 139, 78, 41, 208, 199, 208, 131, 208, 183, 53, 208, 221}
-
-	testVendor     = "Diehl Metering"
-	testModel      = "MIOTY Premium Gateway"
-	testName       = "M0007327767F3"
-	testMessageCon = Con{
-		Command:  structs.MsgCon,
-		OpId:     0,
-		Version:  "1.0.0",
-		BsEui:    2025300426188787,
-		Vendor:   &testVendor,
-		Model:    &testModel,
-		Name:     &testName,
-		SnBsUuid: [16]int8{-61, 114, -59, 33, -89, 120, 73, -101, -117, 78, 41, -57, -125, -73, 53, -35},
-		Bidi:     true,
+func TestCon_GetOpId(t *testing.T) {
+	type fields struct {
+		Command     structs.Command
+		OpId        int64
+		Version     string
+		BsEui       common.EUI64
+		Vendor      *string
+		Model       *string
+		Name        *string
+		SwVersion   *string
+		Info        map[string]interface{}
+		Bidi        bool
+		GeoLocation *GeoLocation
+		SnBsUuid    structs.SessionUuid
+		SnBsOpId    *int64
+		SnScOpId    *int64
 	}
-)
-
-func TestMarshalConMessage(t *testing.T) {
-
-	buf, err := testMessageCon.MarshalMsg(nil)
-
-
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name   string
+		fields fields
+		want   int64
+	}{
+		{
+			name: "con",
+			fields: fields{
+				Command:     structs.MsgCon,
+				OpId:        0,
+				Version:     "",
+				BsEui:       [8]byte{},
+				Vendor:      new(string),
+				Model:       new(string),
+				Name:        new(string),
+				SwVersion:   new(string),
+				Info:        map[string]interface{}{},
+				Bidi:        false,
+				GeoLocation: &GeoLocation{},
+				SnBsUuid:    [16]int8{},
+				SnBsOpId:    new(int64),
+				SnScOpId:    new(int64),
+			},
+			want: 0,
+		},
 	}
-	
-	if bytes.Equal(buf, testMessageConRaw) {
-
-		var raw msgp.Raw
-		var raw2 msgp.Raw
-
-		raw, _ = testMessageCon.MarshalMsg(nil)
-		raw2 = testMessageConRaw[12:]
-		json, _ := raw.MarshalJSON()
-		json2, _ := raw2.MarshalJSON()
-		t.Logf("\n%s\n%s", json, json2)
-		t.Errorf("\nexpected \n%v,\ngot bytes for \n%v", testMessageConRaw, buf)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Con{
+				Command:     tt.fields.Command,
+				OpId:        tt.fields.OpId,
+				Version:     tt.fields.Version,
+				BsEui:       tt.fields.BsEui,
+				Vendor:      tt.fields.Vendor,
+				Model:       tt.fields.Model,
+				Name:        tt.fields.Name,
+				SwVersion:   tt.fields.SwVersion,
+				Info:        tt.fields.Info,
+				Bidi:        tt.fields.Bidi,
+				GeoLocation: tt.fields.GeoLocation,
+				SnBsUuid:    tt.fields.SnBsUuid,
+				SnBsOpId:    tt.fields.SnBsOpId,
+				SnScOpId:    tt.fields.SnScOpId,
+			}
+			if got := m.GetOpId(); got != tt.want {
+				t.Errorf("Con.GetOpId() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
-func TestUnmarshalConMessage(t *testing.T) {
-
-	var con Con
-	_, err := con.UnmarshalMsg(testMessageConRaw)
-
-	if err != nil {
-		t.Fatal(err)
+func TestCon_GetCommand(t *testing.T) {
+	type fields struct {
+		Command     structs.Command
+		OpId        int64
+		Version     string
+		BsEui       common.EUI64
+		Vendor      *string
+		Model       *string
+		Name        *string
+		SwVersion   *string
+		Info        map[string]interface{}
+		Bidi        bool
+		GeoLocation *GeoLocation
+		SnBsUuid    structs.SessionUuid
+		SnBsOpId    *int64
+		SnScOpId    *int64
 	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   structs.Command
+	}{
+		{
+			name: "con",
+			fields: fields{
+				Command:     structs.MsgCon,
+				OpId:        0,
+				Version:     "",
+				BsEui:       [8]byte{},
+				Vendor:      new(string),
+				Model:       new(string),
+				Name:        new(string),
+				SwVersion:   new(string),
+				Info:        map[string]interface{}{},
+				Bidi:        false,
+				GeoLocation: &GeoLocation{},
+				SnBsUuid:    [16]int8{},
+				SnBsOpId:    new(int64),
+				SnScOpId:    new(int64),
+			},
+			want: structs.MsgCon,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Con{
+				Command:     tt.fields.Command,
+				OpId:        tt.fields.OpId,
+				Version:     tt.fields.Version,
+				BsEui:       tt.fields.BsEui,
+				Vendor:      tt.fields.Vendor,
+				Model:       tt.fields.Model,
+				Name:        tt.fields.Name,
+				SwVersion:   tt.fields.SwVersion,
+				Info:        tt.fields.Info,
+				Bidi:        tt.fields.Bidi,
+				GeoLocation: tt.fields.GeoLocation,
+				SnBsUuid:    tt.fields.SnBsUuid,
+				SnBsOpId:    tt.fields.SnBsOpId,
+				SnScOpId:    tt.fields.SnScOpId,
+			}
+			if got := m.GetCommand(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Con.GetCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
-	t.Logf("\n%v", con)
+func TestCon_GetEui(t *testing.T) {
+	type fields struct {
+		Command     structs.Command
+		OpId        int64
+		Version     string
+		BsEui       common.EUI64
+		Vendor      *string
+		Model       *string
+		Name        *string
+		SwVersion   *string
+		Info        map[string]interface{}
+		Bidi        bool
+		GeoLocation *GeoLocation
+		SnBsUuid    structs.SessionUuid
+		SnBsOpId    *int64
+		SnScOpId    *int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   common.EUI64
+	}{
+		{
+			name: "con",
+			fields: fields{
+				Command:     structs.MsgCon,
+				OpId:        0,
+				Version:     "",
+				BsEui:       common.EUI64{0, 1, 2, 3, 4, 5, 6, 7},
+				Vendor:      new(string),
+				Model:       new(string),
+				Name:        new(string),
+				SwVersion:   new(string),
+				Info:        map[string]interface{}{},
+				Bidi:        false,
+				GeoLocation: &GeoLocation{},
+				SnBsUuid:    [16]int8{},
+				SnBsOpId:    new(int64),
+				SnScOpId:    new(int64),
+			},
+			want: common.EUI64{0, 1, 2, 3, 4, 5, 6, 7},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Con{
+				Command:     tt.fields.Command,
+				OpId:        tt.fields.OpId,
+				Version:     tt.fields.Version,
+				BsEui:       tt.fields.BsEui,
+				Vendor:      tt.fields.Vendor,
+				Model:       tt.fields.Model,
+				Name:        tt.fields.Name,
+				SwVersion:   tt.fields.SwVersion,
+				Info:        tt.fields.Info,
+				Bidi:        tt.fields.Bidi,
+				GeoLocation: tt.fields.GeoLocation,
+				SnBsUuid:    tt.fields.SnBsUuid,
+				SnBsOpId:    tt.fields.SnBsOpId,
+				SnScOpId:    tt.fields.SnScOpId,
+			}
+			if got := m.GetEui(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Con.GetEui() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
+func TestNewConRsp(t *testing.T) {
+	vendor := "SplitStack"
+	name := "SplitStack"
+	model := "mioty BSSCI Adapter"
+	swVersion := "1.0"
+
+	type args struct {
+		opId     int64
+		version  string
+		snScUuid uuid.UUID
+	}
+	tests := []struct {
+		name string
+		args args
+		want ConRsp
+	}{
+		{
+			name: "conRsp",
+			args: args{
+				0,
+				"1.0.0",
+				uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+			},
+			want: ConRsp{
+				Command:   structs.MsgConRsp,
+				OpId:      0,
+				ScEui:     common.EUI64{1, 1, 1, 1, 1, 1, 1, 1},
+				Version:   "1.0.0",
+				SnScUuid:  structs.NewSessionUuid(uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}),
+				SnResume:  false,
+				Vendor:    &vendor,
+				Model:     &model,
+				Name:      &name,
+				SwVersion: &swVersion,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewConRsp(tt.args.opId, tt.args.version, tt.args.snScUuid); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewConRsp() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConRsp_ResumeConnection(t *testing.T) {
+
+	vendor := "SplitStack"
+	name := "SplitStack"
+	model := "mioty BSSCI Adapter"
+	swVersion := "1.0"
+
+	type fields struct {
+		Command   structs.Command
+		OpId      int64
+		Version   string
+		ScEui     common.EUI64
+		Vendor    *string
+		Model     *string
+		Name      *string
+		SwVersion *string
+		Info      map[string]interface{}
+		SnResume  bool
+		SnScUuid  structs.SessionUuid
+	}
+	type args struct {
+		snScUuid uuid.UUID
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   ConRsp
+	}{
+		{
+			name: "conRsp",
+			fields: fields{
+				Command:   structs.MsgConRsp,
+				OpId:      0,
+				Version:   "1.0.0",
+				ScEui:     common.EUI64{1, 1, 1, 1, 1, 1, 1, 1},
+				Vendor:    &vendor,
+				Model:     &model,
+				Name:      &name,
+				SwVersion: &swVersion,
+				SnResume:  false,
+				SnScUuid:  structs.NewSessionUuid(uuid.UUID{0, 1, 2, 3, 4, 5, 0, 0, 0, 0, 2, 3, 4, 5, 6, 7}),
+			},
+			args: args{
+				uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+			},
+			want: ConRsp{
+				Command:   structs.MsgConRsp,
+				OpId:      0,
+				ScEui:     common.EUI64{1, 1, 1, 1, 1, 1, 1, 1},
+				Version:   "1.0.0",
+				SnScUuid:  structs.NewSessionUuid(uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}),
+				SnResume:  true,
+				Vendor:    &vendor,
+				Model:     &model,
+				Name:      &name,
+				SwVersion: &swVersion,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &ConRsp{
+				Command:   tt.fields.Command,
+				OpId:      tt.fields.OpId,
+				Version:   tt.fields.Version,
+				ScEui:     tt.fields.ScEui,
+				Vendor:    tt.fields.Vendor,
+				Model:     tt.fields.Model,
+				Name:      tt.fields.Name,
+				SwVersion: tt.fields.SwVersion,
+				Info:      tt.fields.Info,
+				SnResume:  tt.fields.SnResume,
+				SnScUuid:  tt.fields.SnScUuid,
+			}
+			m.ResumeConnection(tt.args.snScUuid)
+
+			if !reflect.DeepEqual(*m, tt.want) {
+				t.Errorf("NewConRsp() = %v, want %v", m, tt.want)
+			}
+
+		})
+	}
+}
+
+func TestConRsp_GetOpId(t *testing.T) {
+	type fields struct {
+		Command   structs.Command
+		OpId      int64
+		Version   string
+		ScEui     common.EUI64
+		Vendor    *string
+		Model     *string
+		Name      *string
+		SwVersion *string
+		Info      map[string]interface{}
+		SnResume  bool
+		SnScUuid  structs.SessionUuid
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   int64
+	}{
+		{
+			name: "conRsp",
+			fields: fields{
+				Command: structs.MsgConRsp,
+				OpId:    0,
+				Version: "1.0.0",
+				ScEui:   common.EUI64{1, 1, 1, 1, 1, 1, 1, 1},
+			},
+			want: 0,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &ConRsp{
+				Command:   tt.fields.Command,
+				OpId:      tt.fields.OpId,
+				Version:   tt.fields.Version,
+				ScEui:     tt.fields.ScEui,
+				Vendor:    tt.fields.Vendor,
+				Model:     tt.fields.Model,
+				Name:      tt.fields.Name,
+				SwVersion: tt.fields.SwVersion,
+				Info:      tt.fields.Info,
+				SnResume:  tt.fields.SnResume,
+				SnScUuid:  tt.fields.SnScUuid,
+			}
+			if got := m.GetOpId(); got != tt.want {
+				t.Errorf("ConRsp.GetOpId() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConRsp_GetCommand(t *testing.T) {
+	type fields struct {
+		Command   structs.Command
+		OpId      int64
+		Version   string
+		ScEui     common.EUI64
+		Vendor    *string
+		Model     *string
+		Name      *string
+		SwVersion *string
+		Info      map[string]interface{}
+		SnResume  bool
+		SnScUuid  structs.SessionUuid
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   structs.Command
+	}{
+		{
+			name: "conRsp",
+			fields: fields{
+				Command: structs.MsgConRsp,
+				OpId:    0,
+				Version: "1.0.0",
+				ScEui:   common.EUI64{1, 1, 1, 1, 1, 1, 1, 1},
+			},
+			want: structs.MsgConRsp,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &ConRsp{
+				Command:   tt.fields.Command,
+				OpId:      tt.fields.OpId,
+				Version:   tt.fields.Version,
+				ScEui:     tt.fields.ScEui,
+				Vendor:    tt.fields.Vendor,
+				Model:     tt.fields.Model,
+				Name:      tt.fields.Name,
+				SwVersion: tt.fields.SwVersion,
+				Info:      tt.fields.Info,
+				SnResume:  tt.fields.SnResume,
+				SnScUuid:  tt.fields.SnScUuid,
+			}
+			if got := m.GetCommand(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ConRsp.GetCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewConCmp(t *testing.T) {
+	type args struct {
+		opId int64
+	}
+	tests := []struct {
+		name string
+		args args
+		want ConCmp
+	}{
+		{
+			name: "conCmp",
+			args: args{
+				1,
+			},
+			want: ConCmp{
+				Command: structs.MsgConCmp,
+				OpId:    1,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewConCmp(tt.args.opId); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewConCmp() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConCmp_GetOpId(t *testing.T) {
+	type fields struct {
+		Command structs.Command
+		OpId    int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   int64
+	}{
+		{
+			name: "conCmp",
+			fields: fields{
+				Command: structs.MsgConCmp,
+				OpId:    1,
+			},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &ConCmp{
+				Command: tt.fields.Command,
+				OpId:    tt.fields.OpId,
+			}
+			if got := m.GetOpId(); got != tt.want {
+				t.Errorf("ConCmp.GetOpId() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestConCmp_GetCommand(t *testing.T) {
+	type fields struct {
+		Command structs.Command
+		OpId    int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   structs.Command
+	}{
+		{
+			name: "conCmp",
+			fields: fields{
+				Command: structs.MsgConCmp,
+				OpId:    1,
+			},
+			want: structs.MsgConCmp,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &ConCmp{
+				Command: tt.fields.Command,
+				OpId:    tt.fields.OpId,
+			}
+			if got := m.GetCommand(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ConCmp.GetCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

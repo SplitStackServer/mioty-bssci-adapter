@@ -6,7 +6,7 @@ import (
 )
 
 //go:generate msgp
-//msgp:replace common.EUI64 with:[8]byte
+//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
 
 // Detach propagate
 //
@@ -62,7 +62,7 @@ func (m *DetPrpRsp) GetOpId() int64 {
 }
 
 func (m *DetPrpRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgDetPrpRsp
 }
 
 // Detach propagate complete
