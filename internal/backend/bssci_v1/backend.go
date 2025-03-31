@@ -10,14 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/patrickmn/go-cache"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
+	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 	"mioty-bssci-adapter/internal/backend/events"
@@ -43,13 +43,8 @@ type Backend struct {
 	readTimeout   time.Duration
 	writeTimeout  time.Duration
 
-	basestationStatusHandler func(*msg.BasestationStatus)
-	endnodeUplinkHandler     func(*msg.EndnodeUplink)
-
-	// downlinkTxAckFunc           func(*gw.DownlinkTxAck)
-	// uplinkFrameFunc             func(*gw.UplinkFrame)
-	// basestationStatsFunc        func(*gw.GatewayStats)
-	// rawPacketForwarderEventFunc func(*gw.RawPacketForwarderEvent)
+	basestationMessageHandler func(*msg.ProtoBasestationMessage)
+	endnodeMessageHandler     func(*msg.ProtoEndnodeMessage)
 
 	// Cache to store diid to UUIDs.
 	diidCache *cache.Cache
@@ -83,7 +78,7 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 	}
 
 	// if the CA and TLS cert is configured, setup client certificate verification.
-	if b.tlsCert == "" && b.tlsKey == "" && b.caCert == "" {
+	if b.tlsCert != "" && b.tlsKey != "" && b.caCert != "" {
 		rawCACert, err := os.ReadFile(b.caCert)
 		if err != nil {
 			return nil, errors.Wrap(err, "read ca cert error")
@@ -108,34 +103,151 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 	return
 }
 
+// BSSCI version used by the backend
+func (b *Backend) GetBssciVersion() string {
+	return "1.0.0"
+}
+
 // Handler for Subscribe events.
 func (b *Backend) SetSubscribeEventHandler(f func(events.Subscribe)) {
 	b.basestations.subscribeEventHandler = f
 }
 
-// Handler for basestation status messages
-func (b *Backend) SetBasestationStatusHandler(f func(*msg.BasestationStatus)) {
-	b.basestationStatusHandler = f
+// Handler for connection messages from basestations
+func (b *Backend) SetBasestationMessageHandler(f func(*msg.ProtoBasestationMessage)) {
+	b.basestationMessageHandler = f
 }
 
-// Handler for basestation status messages
-func (b *Backend) SetEndnodeUplinkHandler(f func(*msg.EndnodeUplink)) {
-	b.endnodeUplinkHandler = f
+// Handler for uplink messages from endnodes
+func (b *Backend) SetEndnodeMessageHandler(f func(*msg.ProtoEndnodeMessage)) {
+	b.endnodeMessageHandler = f
 }
 
-// Stop stops the backend.
-func (b *Backend) GetBssciVersion() string {
-	return "1.0"
+// Handler for server commands
+func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
+	if pb == nil {
+		return errors.New("empty protobuf command")
+	}
+
+	bsEui := common.Eui64FromUnsignedInt(pb.BsEui)
+
+	logger := log.With().Str("bs_eui", bsEui.String()).Logger()
+
+	var msg messages.ServerMessage
+
+	switch pb.Command.(type) {
+	case *cmd.ProtoCommand_DlDataQue:
+		command := pb.GetDlDataQue()
+		msgA, err := messages.NewDlDataQueFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_DlDataQue").Str("ep_eui", msgA.EpEui.String()).Uint64("que_id", msgA.QueId).Msg("queing downlink")
+
+	case *cmd.ProtoCommand_DlDataRev:
+		command := pb.GetDlDataRev()
+		msgA, err := messages.NewDlDataRevFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_DlDataRev").Str("ep_eui", msgA.EpEui.String()).Uint64("que_id", msgA.QueId).Msg("revoking downlink")
+
+	case *cmd.ProtoCommand_DlRxStatQry:
+		command := pb.GetDlRxStatQry()
+		msgA, err := messages.NewDlRxStatQryFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_DlRxStatQry").Str("ep_eui", msgA.EpEui.String()).Msg("requesting downlink status ")
+
+	case *cmd.ProtoCommand_AttPrp:
+		command := pb.GetAttPrp()
+		msgA, err := messages.NewAttPrpFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_AttPrp").Str("ep_eui", msgA.EpEui.String()).Msg("propagate attaching endnode")
+
+	case *cmd.ProtoCommand_DetPrp:
+		command := pb.GetDetPrp()
+		msgA, err := messages.NewDetPrpFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_DetPrp").Str("ep_eui", msgA.EpEui.String()).Msgf("propagate detaching endnode")
+
+	case *cmd.ProtoCommand_ReqStatus:
+		command := pb.GetReqStatus()
+		msgA, err := messages.NewStatusFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+	default:
+		return errors.New("empty protobuf command")
+	}
+
+	return b.sendServerMessageToBasestation(bsEui, msg)
 }
 
-// Stop stops the backend.
+// Handler for server response messages
+func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
+	if pb == nil {
+		return errors.New("empty protobuf command")
+	}
+
+	opId := pb.OpId
+	bsEui := common.Eui64FromUnsignedInt(pb.BsEui)
+
+	var msg messages.Message
+
+	switch pb.Command.(type) {
+	case *rsp.ProtoResponse_DetRsp:
+		command := pb.GetDetRsp()
+		msgA, err := messages.NewDetRspFromProto(opId, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+		log.Debug().Str("proto", "ProtoResponse_DetRsp").Msgf("detaching endnode %v from basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+	case *rsp.ProtoResponse_AttRsp:
+		command := pb.GetAttRsp()
+		msgA, err := messages.NewAttRspFromProto(opId, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+		log.Debug().Str("proto", "ProtoResponse_AttRsp").Msgf("attaching endnode %v to basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+	default:
+		return errors.New("empty protobuf command")
+	}
+
+	return b.sendServerResponseToBasestation(bsEui, msg)
+}
+
+// Stops the backend.
 func (b *Backend) Stop() error {
 	b.isClosed = true
 	return b.listener.Close()
 }
 
-// Start starts the backend.
+// Starts the backend.
 func (b *Backend) Start() error {
+
+	log.Info().Str("addr", b.listener.Addr().String()).Msg("STARTING SERVICE")
+
 	go func() {
 		for !b.isClosed {
 			// accept a new connection
@@ -144,6 +256,7 @@ func (b *Backend) Start() error {
 			if err != nil {
 				log.Error().Stack().Err(err).Msg("tls accept failed")
 			}
+			// defer conn.Close()
 
 			logger := log.With().Str("remote", conn.RemoteAddr().String()).Logger()
 			logger.Info().Msg("accepted new tls connection")
@@ -154,29 +267,24 @@ func (b *Backend) Start() error {
 
 			if err != nil {
 				logger.Error().Stack().Err(err).Msg("codec error")
-				conn.Close()
 			} else {
 				// first message after connecting should always be Con
 				cmd := cmdHeader.GetCommand()
 
 				if cmd == structs.MsgCon {
-
 					var con messages.Con
 					_, err = con.UnmarshalMsg(raw)
 					if err != nil {
 						logger.Error().Stack().Err(err).Str("command", string(cmd)).Msg("unmarshal msgp error")
-						conn.Close()
 					} else {
 						logger.Info().Str("command", string(cmd)).Msg("initializing basestation connection")
 						ctx := context.Background()
 						ctx = logger.WithContext(ctx)
-
-						b.initBasestation(ctx, con, conn, b.handleBasestation)
+						b.initBasestation(ctx, con, conn, b.handleBasestationMessages)
 					}
 				} else {
-					logger.Warn().Str("command", string(cmd)).Msg("expected con command")
+					logger.Error().Str("command", string(cmd)).Msg("expected con command")
 
-					conn.Close()
 				}
 			}
 		}
@@ -184,48 +292,22 @@ func (b *Backend) Start() error {
 	return nil
 }
 
-func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn net.Conn, handler func(ctx context.Context, eui common.EUI64, conn *connection)) {
+func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn net.Conn, handler func(ctx context.Context, eui common.EUI64, conn *connection) error) error {
 	defer conn.Close()
 
 	eui := con.GetEui()
 
 	logger := zerolog.Ctx(ctx)
 	logger.UpdateContext(func(c zerolog.Context) zerolog.Context {
-		return c.Str("gw_eui", eui.String())
+		return c.Str("bs_eui", eui.String())
 	})
 
-	newUuid := uuid.New()
-	bsConnection := connection{
-		conn: conn,
-		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
-		opId:       -1,
-		SnBsUuid:   con.SnBsUuid.ToUuid(),
-		SnScUuid:   newUuid,
-	}
+	// keep track of new connections
+	connectCounter(eui.String()).Inc()
+	b.forwardBasestationMessage(ctx, eui, &con)
 
-	conRsp := messages.NewConRsp(con.OpId, con.Version, newUuid)
-
-	// check for existing connection
-	oldConnection, err := b.basestations.get(eui)
-	if err == nil && oldConnection != nil {
-		// found existing connection for this basestation,
-		if oldConnection.SnBsUuid == con.SnBsUuid.ToUuid() {
-			// check if session uuid matched with con request
-			logger.Info().Msg("resuming previous basestation connection")
-			bsConnection.SnScUuid = oldConnection.SnScUuid
-
-			if con.SnScOpId != nil {
-				bsConnection.opId = *con.SnScOpId
-			}
-			conRsp.ResumeConnection(oldConnection.SnScUuid)
-
-		} else {
-			// remove old connection if session uuid does not match
-			logger.Warn().Msg("removing previous basestation connection")
-			_ = b.basestations.remove(eui)
-		}
-	}
+	bsConnection := newConnection(conn, con.SnBsUuid)
+	conRsp := messages.NewConRsp(con.OpId, con.Version, bsConnection.SnScUuid)
 
 	// set the gateway connection
 	if err := b.basestations.set(eui, &bsConnection); err != nil {
@@ -234,73 +316,85 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 
 	logger.Info().Msg("basestation connected")
 
+	// setup recurring tasks
 	done := make(chan struct{})
 
 	// remove the basestation on return
 	defer func() {
 		done <- struct{}{}
 		b.basestations.remove(eui)
+		bsConnection.conn.Close()
 		disconnectCounter(eui.String()).Inc()
 		logger.Info().Msg("basestation disconnected")
 	}()
 
+	// setup ping and status tickers
 	pingTicker := time.NewTicker(b.pingInterval)
 	defer pingTicker.Stop()
 	statusTicker := time.NewTicker(b.statsInterval)
-	defer pingTicker.Stop()
+	defer statusTicker.Stop()
 
 	go func() {
 		for {
 			select {
 			case <-pingTicker.C:
-				opId := bsConnection.DecrementOpId()
+				opId := bsConnection.GetAndDecrementOpId()
 				msg := messages.NewPing(opId)
 				err := bsConnection.Write(&msg, b.writeTimeout)
 
 				if err != nil {
-					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled ping message")
-					bsConnection.conn.Close()
+					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled ping request")
 					return
 				}
+
 				pingPongCounter("server", eui.String())
-				logger.Info().Msg("sent scheduled ping message")
+				logger.Debug().Msg("sent scheduled ping request")
 			case <-statusTicker.C:
-				opId := bsConnection.DecrementOpId()
+				opId := bsConnection.GetAndDecrementOpId()
 				msg := messages.NewStatus(opId)
 				err := bsConnection.Write(&msg, b.writeTimeout)
 
 				if err != nil {
-					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled status message")
-					bsConnection.conn.Close()
+					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled status request")
 					return
 				}
-				logger.Info().Msg("sent scheduled status message")
+
+				messageSendCounter(eui.String(), string(msg.GetCommand()))
+				logger.Debug().Msg("sent scheduled status request")
 			case <-done:
 				return
 			}
 		}
 	}()
 
-	connectCounter(eui.String()).Inc()
-	//send ConRsp
-	bsConnection.Write(&conRsp, b.writeTimeout)
+	// send ConRsp
+	err := bsConnection.Write(&conRsp, b.writeTimeout)
+	if err != nil {
+		logger.Error().Stack().Err(err).Str("command", string(conRsp.GetCommand())).Msg("failed to send message")
+		// terminate this connection on error
+		return err
+	}
+	messageSendCounter(eui.String(), string(conRsp.GetCommand()))
 
-	handler(ctx, eui, &bsConnection)
+	// start the message handler
+	err = handler(ctx, eui, &bsConnection)
+
+	// terminate this connection after handler returns
 	done <- struct{}{}
-
+	logger.Info().Msg("terminating connection")
+	return err
 }
 
 // handle all messages coming from a client
-func (b *Backend) handleBasestation(ctx context.Context, eui common.EUI64, conn *connection) {
+func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI64, connection *connection) error {
 	logger := zerolog.Ctx(ctx)
 	for {
-		var response messages.Message
-		cmdHeader, raw, err := conn.Read(b.readTimeout)
+		cmdHeader, raw, err := connection.Read(b.readTimeout)
 
 		if err != nil {
 			logger.Error().Stack().Err(err).Msg("failed to read message")
 			// terminate this connection
-			return
+			return err
 		}
 
 		opId := cmdHeader.GetOpId()
@@ -309,10 +403,11 @@ func (b *Backend) handleBasestation(ctx context.Context, eui common.EUI64, conn 
 		// update logging context
 		logger := log.With().Str("command", string(cmd)).Int64("op_id", opId).Logger()
 
-		logger.Debug().Bytes("msgp", raw).Msg("received message")
+		logger.Debug().Hex("raw", raw).Msg("received message")
 
 		messageReceiveCounter(eui.String(), string(cmd))
 
+		var response messages.Message
 		// only match ClientMsg... messages
 		switch cmd {
 		case structs.ClientMsgCon:
@@ -323,7 +418,7 @@ func (b *Backend) handleBasestation(ctx context.Context, eui common.EUI64, conn 
 				response = log_and_notify_msgp_error(logger, err, opId)
 				break
 			}
-			response = b.handleConMessage(ctx, conn, msg)
+			response = b.handleConMessage(ctx, connection, msg)
 		case structs.ClientMsgAtt:
 			// handle attach message
 			var msg messages.Att
@@ -359,7 +454,7 @@ func (b *Backend) handleBasestation(ctx context.Context, eui common.EUI64, conn 
 				response = log_and_notify_msgp_error(logger, err, opId)
 				break
 			}
-			response = b.handleDlDataResMessage(ctx, msg, eui)
+			response = b.handleDlDataResMessage(ctx, eui, &msg)
 		case structs.ClientMsgDlRxStat:
 			// handle downlink rx status data message
 			var msg messages.DlRxStat
@@ -368,7 +463,7 @@ func (b *Backend) handleBasestation(ctx context.Context, eui common.EUI64, conn 
 				response = log_and_notify_msgp_error(logger, err, opId)
 				break
 			}
-			response = b.handleDlRxStatMessage(ctx, eui, msg)
+			response = b.handleDlRxStatMessage(ctx, eui, &msg)
 		case structs.ClientMsgStatusRsp:
 			// handle status response message
 			var msg messages.StatusRsp
@@ -418,115 +513,99 @@ func (b *Backend) handleBasestation(ctx context.Context, eui common.EUI64, conn 
 			logger.Warn().Uint32("err_code", msg.Code).Str("err_msg", msg.Message).Msg("received bssci error message")
 			defaultResponse := messages.NewBssciErrorAck(opId)
 			response = &defaultResponse
-
 		case structs.ClientMsgErrorAck:
 			// Equivalent to ...Cmp message
 			continue
-		case structs.ClientMsgPingCmp:
+		case structs.ClientMsgUlDataCmp:
 			// ...Cmp messages need no further handling
 			continue
-		case structs.ClientMsgUlDataCmp:
+		case structs.ClientMsgPingCmp:
+			continue
+		case structs.ClientMsgConCmp:
 			continue
 		case structs.ClientMsgDlDataResCmp:
 			continue
 		case structs.ClientMsgAttCmp:
 			continue
-		case structs.ClientMsgConCmp:
+		case structs.ClientMsgDetCmp:
 			continue
 		case structs.ClientMsgDlRxStatCmp:
 			continue
-		case structs.ClientMsgDetCmp:
-			continue
 		default:
-			logger.Warn().Msg("received unsupported command")
-			// maybe send Error Message?
-			continue
+			logger.Warn().Msg("unsupported message type")
+			bssciError := messages.NewBssciError(opId, 5, "unsupported message type")
+			response = &bssciError
 		}
 
 		if response != nil {
-			err := conn.Write(response, b.writeTimeout)
+			err := connection.Write(response, b.writeTimeout)
 			if err != nil {
 				logger.Error().Stack().Err(err).Msg("failed to write message")
 				// terminate this connection
-				return
+				return err
 			}
-			messagSendCounter(eui.String(), string(response.GetCommand()))
-			logger.Info().Str("response", string(response.GetCommand())).Msg("sent response")
+			messageSendCounter(eui.String(), string(response.GetCommand()))
+			logger.Debug().Any("response", response).Msg("sent response")
 		}
 	}
+}
+
+// upstream messages from basestations
+func (b *Backend) forwardBasestationMessage(ctx context.Context, eui common.EUI64, msg messages.BasestationMessage) messages.Message {
+	logger := zerolog.Ctx(ctx)
+
+	if b.basestationMessageHandler != nil {
+		data := msg.IntoProto(&eui)
+		b.basestationMessageHandler(data)
+		return nil
+	}
+
+	logger.Warn().Msg("basestationConnectionMessageHandler not set")
+	response := messages.NewBssciError(msg.GetOpId(), 5, "server unable to handle message")
+	return &response
+
+}
+
+// upstream messages from endnodes
+func (b *Backend) forwardEndnodeMessage(ctx context.Context, eui common.EUI64, msg messages.EndnodeMessage) messages.Message {
+	logger := zerolog.Ctx(ctx)
+
+	if b.endnodeMessageHandler != nil {
+		data := msg.IntoProto(eui)
+		b.endnodeMessageHandler(data)
+		return nil
+	}
+
+	logger.Warn().Msg("endnodeMessageHandler not set")
+	response := messages.NewBssciError(msg.GetOpId(), 5, "server unable to handle message")
+	return &response
 }
 
 func (b *Backend) handleConMessage(ctx context.Context, conn *connection, msg messages.Con) messages.Message {
 	logger := zerolog.Ctx(ctx)
 
-	resume, snScUuid := conn.ResumeConnection(msg.SnBsUuid.ToUuid(), msg.SnScOpId)
-
-	conRsp := messages.NewConRsp(msg.GetOpId(), msg.Version, snScUuid)
-
-	// check if session uuid is identical to current session
-	if resume {
-		logger.Info().Msg("Resuming current session")
-		// set resume flag
-		conRsp.SnResume = true
-
-	} else {
-		logger.Warn().Msg("Failed to resume current session")
-	}
-	return &conRsp
-}
-
-func (b *Backend) handleEndnodeUplink(ctx context.Context, eui common.EUI64, msg messages.EndnodeUplinkMessage) messages.Message {
-	logger := zerolog.Ctx(ctx)
-
-	if b.endnodeUplinkHandler != nil {
-		data := msg.IntoProto(eui)
-		b.endnodeUplinkHandler(data)
-		return nil
-
-	}
-
-	logger.Warn().Msg("endnodeUplinkHandler not set")
-	response := messages.NewBssciError(msg.GetOpId(), 5, "internal server error")
-	return &response
-}
-
-func (b *Backend) handleAttMessage(ctx context.Context, eui common.EUI64, msg *messages.Att) messages.Message {
-	// Att has to be handled by downstream application
-	return b.handleEndnodeUplink(ctx, eui, msg)
-}
-
-func (b *Backend) handleDetMessage(ctx context.Context, eui common.EUI64, msg *messages.Det) messages.Message {
-	// Det has to be handled by downstream application
-	return b.handleEndnodeUplink(ctx, eui, msg)
-}
-
-func (b *Backend) handleUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.UlData) messages.Message {
-	error_response := b.handleEndnodeUplink(ctx, eui, msg)
+	error_response := b.forwardBasestationMessage(ctx, msg.BsEui, &msg)
 	if error_response == nil {
-		response := messages.NewUlDataRsp(msg.GetOpId())
-		return &response
+		resume, snScUuid := conn.ResumeConnection(msg.SnBsUuid.ToUuid(), msg.SnScOpId)
+
+		conRsp := messages.NewConRsp(msg.GetOpId(), msg.Version, snScUuid)
+
+		// check if session uuid is identical to current session
+		if resume {
+			logger.Info().Msg("Resuming current session")
+			// set resume flag
+			conRsp.SnResume = true
+		} else {
+			logger.Warn().Msg("Failed to resume current session")
+		}
+		return &conRsp
 	}
 	return error_response
-}
-
-func (b *Backend) handleBasestationStatus(ctx context.Context, eui common.EUI64, msg messages.BasestationStatusMessage) messages.Message {
-	logger := zerolog.Ctx(ctx)
-
-	if b.endnodeUplinkHandler != nil {
-		data := msg.IntoProto(eui)
-		b.basestationStatusHandler(data)
-		return nil
-
-	}
-
-	logger.Warn().Msg("basestationStatusHandler not set")
-	response := messages.NewBssciError(msg.GetOpId(), 5, "internal server error")
-	return &response
 
 }
 
 func (b *Backend) handleStatusRspMessage(ctx context.Context, eui common.EUI64, msg *messages.StatusRsp) messages.Message {
-	error_response := b.handleBasestationStatus(ctx, eui, msg)
+	error_response := b.forwardBasestationMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewStatusCmp(msg.GetOpId())
 		return &response
@@ -534,51 +613,96 @@ func (b *Backend) handleStatusRspMessage(ctx context.Context, eui common.EUI64, 
 	return error_response
 }
 
-func (b *Backend) handleDlRxStatMessage(ctx context.Context, eui common.EUI64, msg messages.DlRxStat) messages.Message {
-
-	// TODO do something with the data
-	// send to broker
-	defaultResponse := messages.NewDlRxStatRsp(msg.GetOpId())
-	return &defaultResponse
+func (b *Backend) handleAttMessage(ctx context.Context, eui common.EUI64, msg *messages.Att) messages.Message {
+	// Att has to be handled by downstream application
+	return b.forwardEndnodeMessage(ctx, eui, msg)
 }
 
-func (b *Backend) handleDlDataResMessage(ctx context.Context, msg messages.DlDataRes, eui common.EUI64) messages.Message {
-	b.RLock()
-	defer b.RUnlock()
+func (b *Backend) handleDetMessage(ctx context.Context, eui common.EUI64, msg *messages.Det) messages.Message {
+	// Det has to be handled by downstream application
+	return b.forwardEndnodeMessage(ctx, eui, msg)
+}
 
-	// txack, err := msg.IntoProto(eui)
-	// if err != nil {
-	// 	log.WithError(err).WithFields(log.Fields{
-	// 		"gateway_id": eui,
-	// 	}).Error("backend/bssci: error converting DlDataRes to protobuf message")
-	// 	return nil
-	// }
+func (b *Backend) handleUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.UlData) messages.Message {
+	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
+	if error_response == nil {
+		response := messages.NewUlDataRsp(msg.GetOpId())
+		return &response
+	}
+	return error_response
+}
 
-	// if v, ok := b.diidCache.Get(fmt.Sprintf("%d", txack.GetDownlinkId())); ok {
-	// 	pl := v.(*gw.DownlinkFrame)
-	// 	txack.DownlinkId = pl.DownlinkId
+func (b *Backend) handleDlRxStatMessage(ctx context.Context, eui common.EUI64, msg *messages.DlRxStat) messages.Message {
+	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
+	if error_response == nil {
+		response := messages.NewDlRxStatRsp(msg.GetOpId())
+		return &response
+	}
+	return error_response
+}
 
-	// 	if conn, err := b.basestations.get(eui); err == nil {
-	// 		conn.stats.CountDownlink(pl, &txack)
-	// 	}
-	// }
+func (b *Backend) handleDlDataResMessage(ctx context.Context, eui common.EUI64, msg *messages.DlDataRes) messages.Message {
+	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
+	if error_response == nil {
+		response := messages.NewDlDataResRsp(msg.GetOpId())
+		return &response
+	}
+	return error_response
+}
 
-	// log.WithFields(log.Fields{
-	// 	"gateway_id":  eui,
-	// 	"downlink_id": txack.GetDownlinkId(),
-	// }).Info("backend/bssci: DlDataRes message received")
+// sends a server response to a basestation
+func (b *Backend) sendServerResponseToBasestation(bsEui common.EUI64, msg messages.Message) error {
+	if msg != nil {
+		b.Lock()
+		defer b.Unlock()
+		logger := log.With().Str("bs_eui", bsEui.String()).Str("command", string(msg.GetCommand())).Int64("op_id", msg.GetOpId()).Logger()
 
-	// if b.downlinkTxAckFunc != nil {
-	// 	b.downlinkTxAckFunc(&txack)
-	// }
+		bsConnection, err := b.basestations.get(bsEui)
+		if err != nil {
+			logger.Error().Err(err).Msg("basestation does not exist")
+			return err
+		}
 
-	// handle with b.downlinkTxAckFunc
+		err = bsConnection.Write(msg, b.writeTimeout)
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to send to basestation")
+			return err
+		}
 
-	// TODO do something with the data
-	// clean up cache / queue
-	defaultResponse := messages.NewDlDataResCmp(msg.GetOpId())
-	return &defaultResponse
+		messageSendCounter(bsEui.String(), string(msg.GetCommand()))
+		logger.Info().Msg("sent response")
+	}
+	return nil
+}
 
+// sends a server message to a basestation
+func (b *Backend) sendServerMessageToBasestation(bsEui common.EUI64, msg messages.ServerMessage) error {
+	if msg != nil {
+		b.Lock()
+		defer b.Unlock()
+		logger := log.With().Str("bs_eui", bsEui.String()).Str("command", string(msg.GetCommand())).Logger()
+
+		bsConnection, err := b.basestations.get(bsEui)
+		if err != nil {
+			logger.Error().Err(err).Msg("basestation does not exist")
+			return err
+		}
+
+		// get a new opId
+		opId := bsConnection.GetAndDecrementOpId()
+		msg.SetOpId(opId)
+
+		err = bsConnection.Write(msg, b.writeTimeout)
+		if err != nil {
+			logger.Error().Err(err).Msg("failed to send to basestation")
+			return err
+		}
+		messageSendCounter(bsEui.String(), string(msg.GetCommand()))
+		logger.Info().Int64("op_id", msg.GetOpId()).Msg("sent message")
+		return nil
+
+	}
+	return nil
 }
 
 func log_and_notify_msgp_error(logger zerolog.Logger, err error, opId int64) messages.Message {

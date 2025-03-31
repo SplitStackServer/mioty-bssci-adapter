@@ -1,7 +1,6 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
@@ -22,20 +21,18 @@ type Message interface {
 	msgp.Decodable
 }
 
-type EndnodeUplinkMessage interface {
+type EndnodeMessage interface {
 	Message
 	GetEndpointEui() common.EUI64
-	GetUplinkMetadata() UplinkMetadata
-	IntoProto(bsEui common.EUI64) *msg.EndnodeUplink
+	IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage
 }
 
-type PropagateMessage interface {
+type BasestationMessage interface {
 	Message
-	GetEndpointEui() common.EUI64
-	IntoProto() cmd.PropagateEndnode
+	IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage
 }
 
-type BasestationStatusMessage interface {
+type ServerMessage interface {
 	Message
-	IntoProto(bsEui common.EUI64) *msg.BasestationStatus
+	SetOpId(opId int64)
 }

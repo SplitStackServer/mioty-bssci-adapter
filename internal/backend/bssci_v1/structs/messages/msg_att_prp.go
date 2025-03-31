@@ -1,6 +1,8 @@
 package messages
 
 import (
+	"errors"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -42,7 +44,44 @@ type AttPrp struct {
 
 func NewAttPrp(opId int64, epEui common.EUI64, bidi bool, nwkSessionKey [16]byte, shAddr uint16, lastPacketCount uint32, dualChan bool, repetition bool, wideCarrOff bool, longBlkDist bool,
 ) AttPrp {
-	return AttPrp{Command: structs.MsgAttPrp, OpId: opId, EpEui: epEui, Bidi: bidi, NwkSessionKey: nwkSessionKey, ShAddr: shAddr, LastPacketCount: lastPacketCount, DualChan: dualChan, Repetition: repetition, WideCarrOff: wideCarrOff, LongBlkDist: longBlkDist}
+	return AttPrp{
+		Command:         structs.MsgAttPrp,
+		OpId:            opId,
+		EpEui:           epEui,
+		Bidi:            bidi,
+		NwkSessionKey:   nwkSessionKey,
+		ShAddr:          shAddr,
+		LastPacketCount: lastPacketCount,
+		DualChan:        dualChan,
+		Repetition:      repetition,
+		WideCarrOff:     wideCarrOff,
+		LongBlkDist:     longBlkDist,
+	}
+}
+
+func NewAttPrpFromProto(opId int64, pb *cmd.AttachPropagate) (*AttPrp, error) {
+	if pb != nil {
+		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+
+		if len(pb.NwkSessionKey) != 16 {
+			return nil, errors.New("invalid NwkSessionKey")
+		}
+
+		m := NewAttPrp(
+			opId,
+			epEui,
+			pb.Bidi,
+			[16]byte(pb.NwkSessionKey),
+			uint16(pb.ShAddr),
+			uint32(pb.LastPacketCnt),
+			pb.DualChannel,
+			pb.Repetition,
+			pb.WideCarrOff,
+			pb.LongBlkDist,
+		)
+		return &m, nil
+	}
+	return nil, errors.New("invalid AttachPropagate command")
 }
 
 func (m *AttPrp) GetOpId() int64 {
@@ -51,6 +90,11 @@ func (m *AttPrp) GetOpId() int64 {
 
 func (m *AttPrp) GetCommand() structs.Command {
 	return structs.MsgAttPrp
+}
+
+// implements ServerMessage
+func (m *AttPrp) SetOpId(opId int64) {
+	m.OpId = opId
 }
 
 // Attach propagate response
@@ -71,7 +115,7 @@ func (m *AttPrpRsp) GetOpId() int64 {
 }
 
 func (m *AttPrpRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgAttPrpRsp
 }
 
 // Attach propagate complete

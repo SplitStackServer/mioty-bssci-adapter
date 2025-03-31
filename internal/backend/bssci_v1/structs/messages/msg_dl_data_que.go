@@ -1,6 +1,8 @@
 package messages
 
 import (
+	"errors"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -30,7 +32,7 @@ type DlDataQue struct {
 	EpEui common.EUI64 `msg:"epEui" json:"epEui"`
 	// Assigned queue ID for reference, 64 bit
 	QueId uint64 `msg:"queId" json:"queId"`
-	/// True if userData is counter dependent
+	// True if userData is counter dependent
 	CntDepend bool `msg:"cntDepend" json:"cntDepend"`
 	// End Point packet counter for which the according userData entry is valid, omitted if cntDepend is false
 	PacketCnt *[]uint32 `msg:"packetCnt,omitempty" json:"packetCnt,omitempty"`
@@ -46,7 +48,7 @@ type DlDataQue struct {
 	ResponsePrio *bool `msg:"responsePrio,omitempty" json:"responsePrio,omitempty"`
 	// True to request further End Point DL window, optional
 	DlWindReq *bool `msg:"dlWindReq,omitempty" json:"dlWindReq,omitempty"`
-	/// True to send downlink only if End Point expects a response, optional
+	// True to send downlink only if End Point expects a response, optional
 	ExpOnly *bool `msg:"expOnly,omitempty" json:"expOnly,omitempty"`
 }
 
@@ -114,12 +116,66 @@ func NewDlDataQueEnc(
 	}
 }
 
+func NewDlDataQueFromProto(opId int64, pb *cmd.EnqueDownlink) (*DlDataQue, error) {
+	if pb != nil {
+		var format byte
+
+		if pb.Format != nil {
+			format = uint8(0xff & *pb.Format)
+		}
+
+		msg := DlDataQue{
+			Command:      structs.MsgDlDataQue,
+			OpId:         opId,
+			EpEui:        common.Eui64FromUnsignedInt(pb.EndnodeEui),
+			QueId:        pb.DlQueId,
+			Format:       &format,
+			Prio:         pb.Priority,
+			ResponseExp:  pb.ResponseExp,
+			ResponsePrio: pb.ResponsePrio,
+			DlWindReq:    pb.ReqDlWindow,
+			ExpOnly:      pb.OnlyIfExpected,
+		}
+
+		switch pb.Payload.(type) {
+		case *cmd.EnqueDownlink_Ack:
+			return &msg, nil
+		case *cmd.EnqueDownlink_Data:
+			payload := pb.GetData()
+			if len(payload.Data) != 0 {
+				msg.UserData = [][]byte{payload.Data}
+				return &msg, nil
+			} else {
+				return nil, errors.New("EnqueDownlink_Data has no payload")
+			}
+		case *cmd.EnqueDownlink_DataEnc:
+			payload := pb.GetDataEnc()
+			if len(payload.Data) != 0 && len(payload.PacketCnt) != 0 {
+				msg.CntDepend = true
+				msg.UserData = payload.Data
+				msg.PacketCnt = &payload.PacketCnt
+				return &msg, nil
+			} else {
+				return nil, errors.New("EnqueDownlink_DataEnc has no payload or counter")
+			}
+		default:
+			return nil, errors.New("EnqueDownlink has no payload")
+		}
+	}
+	return nil, errors.New("invalid EnqueDownlink command")
+}
+
 func (m *DlDataQue) GetOpId() int64 {
 	return m.OpId
 }
 
 func (m *DlDataQue) GetCommand() structs.Command {
 	return structs.MsgDlDataQue
+}
+
+// implements ServerMessage
+func (m *DlDataQue) SetOpId(opId int64) {
+	m.OpId = opId
 }
 
 // Downlink data queue response
@@ -143,7 +199,7 @@ func (m *DlDataQueRsp) GetOpId() int64 {
 }
 
 func (m *DlDataQueRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgDlDataQueRsp
 }
 
 // Downlink data queue complete

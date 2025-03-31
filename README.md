@@ -1,7 +1,7 @@
 
 **WORK IN PROGRESS**
 
-> DISCLAIMER: This project is not endorsed by or associated with the mioty<sup>&reg;</sup> alliance or any other company. 
+> DISCLAIMER: This project is not endorsed by or associated with any company or the mioty<sup>&reg;</sup> alliance. 
 
 # mioty<sup>&reg;</sup> BSSCI Adapter
 

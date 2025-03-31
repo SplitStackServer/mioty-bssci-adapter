@@ -1,12 +1,15 @@
 package messages
 
 import (
+	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestCon_GetOpId(t *testing.T) {
@@ -42,7 +45,7 @@ func TestCon_GetOpId(t *testing.T) {
 				Model:       new(string),
 				Name:        new(string),
 				SwVersion:   new(string),
-				Info:        map[string]interface{}{},
+				Info:        map[string]any{},
 				Bidi:        false,
 				GeoLocation: &GeoLocation{},
 				SnBsUuid:    [16]int8{},
@@ -155,7 +158,7 @@ func TestCon_GetEui(t *testing.T) {
 		Model       *string
 		Name        *string
 		SwVersion   *string
-		Info        map[string]interface{}
+		Info        map[string]any
 		Bidi        bool
 		GeoLocation *GeoLocation
 		SnBsUuid    structs.SessionUuid
@@ -178,7 +181,7 @@ func TestCon_GetEui(t *testing.T) {
 				Model:       new(string),
 				Name:        new(string),
 				SwVersion:   new(string),
-				Info:        map[string]interface{}{},
+				Info:        map[string]any{},
 				Bidi:        false,
 				GeoLocation: &GeoLocation{},
 				SnBsUuid:    [16]int8{},
@@ -208,6 +211,140 @@ func TestCon_GetEui(t *testing.T) {
 			}
 			if got := m.GetEui(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Con.GetEui() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCon_IntoProto(t *testing.T) {
+
+	testVendor := "Test Vendor"
+	testModel := "Test Model"
+	testVersion := "1.0.0"
+	testBsName := "M0007327767F3"
+	testSwVersion := "1.2.3"
+
+	testBsEui := common.EUI64{0x00, 0x07, 0x32, 0x00, 0x00, 0x77, 0x67, 0xF3}
+	testBsSessionUuid := structs.SessionUuid{-8, -42, -98, -118, -87, -35, 70, -44, -71, 117, 17, -42, 84, 17, 74, 31}
+
+	//monkey patch time.now()
+
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+
+	getNow = func() time.Time { return fakeNow }
+
+	testTs := timestamppb.Timestamp{
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
+	}
+
+	type fields struct {
+		Command     structs.Command
+		OpId        int64
+		Version     string
+		BsEui       common.EUI64
+		Vendor      *string
+		Model       *string
+		Name        *string
+		SwVersion   *string
+		Info        map[string]any
+		Bidi        bool
+		GeoLocation *GeoLocation
+		SnBsUuid    structs.SessionUuid
+		SnBsOpId    *int64
+		SnScOpId    *int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   *msg.ProtoBasestationMessage
+	}{
+		{
+			name: "con1",
+			fields: fields{
+				Command:   structs.MsgCon,
+				OpId:      0,
+				Version:   testVersion,
+				BsEui:     testBsEui,
+				Vendor:    &testVendor,
+				Model:     &testModel,
+				Name:      &testBsName,
+				SwVersion: &testSwVersion,
+				SnBsUuid:  testBsSessionUuid,
+				Bidi:      true,
+			},
+			want: &msg.ProtoBasestationMessage{
+				BsEui: testBsEui.ToUnsignedInt(),
+				Message: &msg.ProtoBasestationMessage_Con{
+					Con: &msg.BasestationConnection{
+						Ts:          &testTs,
+						Version:     testVersion,
+						Bidi:        true,
+						Vendor:      &testVendor,
+						Model:       &testModel,
+						Name:        &testBsName,
+						SwVersion:   &testSwVersion,
+						GeoLocation: &msg.GeoLocation{},
+					},
+				},
+			},
+		},
+		{
+			name: "con2",
+			fields: fields{
+				Command:     structs.MsgCon,
+				OpId:        0,
+				Version:     testVersion,
+				BsEui:       testBsEui,
+				Vendor:      &testVendor,
+				Model:       &testModel,
+				Name:        &testBsName,
+				SwVersion:   &testSwVersion,
+				SnBsUuid:    testBsSessionUuid,
+				Bidi:        true,
+				GeoLocation: &GeoLocation{1, 2, 3},
+			},
+			want: &msg.ProtoBasestationMessage{
+				BsEui: testBsEui.ToUnsignedInt(),
+				Message: &msg.ProtoBasestationMessage_Con{
+					Con: &msg.BasestationConnection{
+						Ts:        &testTs,
+						Version:   testVersion,
+						Bidi:      true,
+						Vendor:    &testVendor,
+						Model:     &testModel,
+						Name:      &testBsName,
+						SwVersion: &testSwVersion,
+
+						GeoLocation: &msg.GeoLocation{Lat: 1, Lon: 2, Alt: 3},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Con{
+				Command:     tt.fields.Command,
+				OpId:        tt.fields.OpId,
+				Version:     tt.fields.Version,
+				BsEui:       tt.fields.BsEui,
+				Vendor:      tt.fields.Vendor,
+				Model:       tt.fields.Model,
+				Name:        tt.fields.Name,
+				SwVersion:   tt.fields.SwVersion,
+				Info:        tt.fields.Info,
+				Bidi:        tt.fields.Bidi,
+				GeoLocation: tt.fields.GeoLocation,
+				SnBsUuid:    tt.fields.SnBsUuid,
+				SnBsOpId:    tt.fields.SnBsOpId,
+				SnScOpId:    tt.fields.SnScOpId,
+			}
+			if got := m.IntoProto(&common.EUI64{}); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Con.IntoProto() = %v, want %v", got, tt.want)
 			}
 		})
 	}

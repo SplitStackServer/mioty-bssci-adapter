@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 
@@ -38,7 +39,7 @@ type Con struct {
 	// Software version, optional
 	SwVersion *string `msg:"swVersion,omitempty" json:"swVersion,omitempty"`
 	// Additional Base Station information object, might contain arbitrary key-value-pairs, optional
-	Info map[string]interface{} `msg:"info,omitempty" json:"info,omitempty"`
+	Info map[string]any `msg:"info,omitempty" json:"info,omitempty"`
 	// True if Base Station is bidirectional
 	Bidi bool `msg:"bidi" json:"bidi"`
 	// Geographic location [Latitude, Longitude, Altitude], optional
@@ -61,6 +62,37 @@ func (m *Con) GetCommand() structs.Command {
 
 func (m *Con) GetEui() common.EUI64 {
 	return m.BsEui
+}
+
+// implements BasestationMessage.IntoProto()
+func (m *Con) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
+	_ = bsEui
+	var message msg.ProtoBasestationMessage
+
+	if m != nil {
+		bsEuiB := m.BsEui.ToUnsignedInt()
+
+		now := getNow().UnixNano()
+		ts := TimestampNsToProto(now)
+
+		message = msg.ProtoBasestationMessage{
+			BsEui: bsEuiB,
+			Message: &msg.ProtoBasestationMessage_Con{
+				Con: &msg.BasestationConnection{
+					Ts:          ts,
+					Version:     m.Version,
+					Bidi:        m.Bidi,
+					Vendor:      m.Vendor,
+					Model:       m.Model,
+					Name:        m.Name,
+					SwVersion:   m.SwVersion,
+					GeoLocation: m.GeoLocation.IntoProto(),
+				},
+			},
+		}
+	}
+
+	return &message
 }
 
 // Connect response

@@ -29,6 +29,11 @@ func (m *Ping) GetCommand() structs.Command {
 	return structs.MsgPing
 }
 
+// implements ServerMessage
+func (m *Ping) SetOpId(opId int64) {
+	m.OpId = opId
+}
+
 // Ping response
 //
 // Basestation <-> Service Center

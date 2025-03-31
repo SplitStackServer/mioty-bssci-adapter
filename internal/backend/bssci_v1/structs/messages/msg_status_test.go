@@ -236,7 +236,7 @@ func TestStatusRsp_GetCommand(t *testing.T) {
 
 func TestStatusRsp_IntoProto(t *testing.T) {
 
-	var testTime uint64 = 1000000005
+	var testTime uint64 = 1000000000000005
 
 	var testUptime uint64 = 1000
 	var testTemp float64 = 45.5
@@ -268,7 +268,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.BasestationStatus
+		want   *msg.ProtoBasestationMessage
 	}{
 		{
 			name: "statusRsp1",
@@ -286,17 +286,21 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				MemLoad:     nil,
 			},
 			args: args{common.EUI64{1}},
-			want: &msg.BasestationStatus{
-				BsEui:       1,
-				StatusCode:  0,
-				StatusMsg:   "test",
-				Ts:          &testTs,
-				DutyCycle:   0.5,
-				GeoLocation: nil,
-				Uptime:      nil,
-				Temp:        nil,
-				Cpu:         nil,
-				Memory:      nil,
+			want: &msg.ProtoBasestationMessage{
+				BsEui: 1,
+				Message: &msg.ProtoBasestationMessage_Status{
+					Status: &msg.BasestationStatus{
+						StatusCode:  0,
+						StatusMsg:   "test",
+						Ts:          &testTs,
+						DutyCycle:   0.5,
+						GeoLocation: &msg.GeoLocation{},
+						Uptime:      nil,
+						Temp:        nil,
+						Cpu:         nil,
+						Memory:      nil,
+					},
+				},
 			},
 		},
 		{
@@ -315,20 +319,23 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				MemLoad:     nil,
 			},
 			args: args{common.EUI64{1}},
-			want: &msg.BasestationStatus{
-				BsEui:       1,
-				StatusCode:  0,
-				StatusMsg:   "test",
-				Ts:          &testTs,
-				DutyCycle:   0.5,
-				GeoLocation: &msg.GeoLocation{},
-				Uptime:      nil,
-				Temp:        nil,
-				Cpu:         nil,
-				Memory:      nil,
+			want: &msg.ProtoBasestationMessage{
+				BsEui: 1,
+				Message: &msg.ProtoBasestationMessage_Status{
+					Status: &msg.BasestationStatus{
+						StatusCode:  0,
+						StatusMsg:   "test",
+						Ts:          &testTs,
+						DutyCycle:   0.5,
+						GeoLocation: &msg.GeoLocation{},
+						Uptime:      nil,
+						Temp:        nil,
+						Cpu:         nil,
+						Memory:      nil,
+					},
+				},
 			},
 		},
-
 		{
 			name: "statusRsp3",
 			fields: fields{
@@ -345,17 +352,21 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				MemLoad:     &testMemory,
 			},
 			args: args{common.EUI64{1}},
-			want: &msg.BasestationStatus{
-				BsEui:       1,
-				StatusCode:  0,
-				StatusMsg:   "test",
-				Ts:          &testTs,
-				DutyCycle:   0.5,
-				GeoLocation: &msg.GeoLocation{},
-				Uptime:      &testUptime,
-				Temp:        &testTemp,
-				Cpu:         &testCpu,
-				Memory:      &testMemory,
+			want: &msg.ProtoBasestationMessage{
+				BsEui: 1,
+				Message: &msg.ProtoBasestationMessage_Status{
+					Status: &msg.BasestationStatus{
+						StatusCode:  0,
+						StatusMsg:   "test",
+						Ts:          &testTs,
+						DutyCycle:   0.5,
+						GeoLocation: &msg.GeoLocation{},
+						Uptime:      &testUptime,
+						Temp:        &testTemp,
+						Cpu:         &testCpu,
+						Memory:      &testMemory,
+					},
+				},
 			},
 		},
 	}
@@ -374,7 +385,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				CpuLoad:     tt.fields.CpuLoad,
 				MemLoad:     tt.fields.MemLoad,
 			}
-			got := m.IntoProto(tt.args.bsEui)
+			got := m.IntoProto(&tt.args.bsEui)
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("StatusRsp.IntoProto() = %v, want %v", got, tt.want)

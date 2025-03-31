@@ -24,25 +24,27 @@ func (subpackets *Subpackets) IntoProto() []*msg.EndnodeUplinkSubpacket {
 		pb = make([]*msg.EndnodeUplinkSubpacket, 0, len(subpackets.RSSI))
 
 		if subpackets.Phase == nil {
-			for i := 0; i < len(subpackets.RSSI); i++ {
+			for i, v := range subpackets.RSSI {
 				proto := msg.EndnodeUplinkSubpacket{
 					Snr:       subpackets.SNR[i],
-					Rssi:      subpackets.RSSI[i],
+					Rssi:      v,
 					Frequency: subpackets.Frequency[i],
 				}
 				pb = append(pb, &proto)
+
 			}
+
 		} else {
 			phase := *subpackets.Phase
-			for i := 0; i < len(subpackets.RSSI); i++ {
-
+			for i, v := range subpackets.RSSI {
 				proto := msg.EndnodeUplinkSubpacket{
 					Snr:       subpackets.SNR[i],
-					Rssi:      subpackets.RSSI[i],
+					Rssi:      v,
 					Frequency: subpackets.Frequency[i],
 					Phase:     &phase[i],
 				}
 				pb = append(pb, &proto)
+
 			}
 		}
 	}

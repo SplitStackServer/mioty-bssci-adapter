@@ -1,6 +1,8 @@
 package messages
 
 import (
+	"errors"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -33,12 +35,26 @@ func NewDetPrp(
 	}
 }
 
+func NewDetPrpFromProto(opId int64, pb *cmd.DetachPropagate) (*DetPrp, error) {
+	if pb != nil {
+		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		m := NewDetPrp(opId, epEui)
+		return &m, nil
+	}
+	return nil, errors.New("invalid DetachPropagate command")
+}
+
 func (m *DetPrp) GetOpId() int64 {
 	return m.OpId
 }
 
 func (m *DetPrp) GetCommand() structs.Command {
 	return structs.MsgDetPrp
+}
+
+// implements ServerMessage
+func (m *DetPrp) SetOpId(opId int64) {
+	m.OpId = opId
 }
 
 // Detach propagate response

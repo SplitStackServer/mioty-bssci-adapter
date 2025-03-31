@@ -32,7 +32,7 @@ type Config struct {
 
 	Integration struct {
 		Marshaler string `mapstructure:"marshaler"`
-		MQTTV3 struct {
+		MQTTV3    struct {
 			EventTopicTemplate      string        `mapstructure:"event_topic_template"`
 			CommandTopicTemplate    string        `mapstructure:"command_topic_template"`
 			StateTopicTemplate      string        `mapstructure:"state_topic_template"`
@@ -43,7 +43,7 @@ type Config struct {
 			MaxTokenWait            time.Duration `mapstructure:"max_token_wait"`
 
 			Auth struct {
-				Type string `mapstructure:"type"`
+				Type         string   `mapstructure:"type"`
 				Server       string   `mapstructure:"server"`
 				Servers      []string `mapstructure:"servers"`
 				Username     string   `mapstructure:"username"`

@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
@@ -36,6 +37,56 @@ func TestNewDetPrp(t *testing.T) {
 	}
 }
 
+func TestNewDetPrpFromProto(t *testing.T) {
+	type args struct {
+		opId int64
+		pb   *cmd.DetachPropagate
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *DetPrp
+		wantErr bool
+	}{
+		{
+			name: "attRsp",
+			args: args{
+				opId: 10,
+				pb: &cmd.DetachPropagate{
+					EndnodeEui: 0x0001020304050607,
+				},
+			},
+			want: &DetPrp{
+				Command: structs.MsgDetPrp,
+				OpId:    10,
+				EpEui:   common.EUI64{7, 6, 5, 4, 3, 2, 1, 0},
+			},
+			wantErr: false,
+		},
+		{
+			name: "nil",
+			args: args{
+				opId: 10,
+				pb:   nil,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewDetPrpFromProto(tt.args.opId, tt.args.pb)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewDetPrpFromProto() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewDetPrpFromProto() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestDetPrp_GetOpId(t *testing.T) {
 	type fields struct {
 		Command structs.Command
@@ -58,6 +109,42 @@ func TestDetPrp_GetOpId(t *testing.T) {
 			}
 			if got := m.GetOpId(); got != tt.want {
 				t.Errorf("DetPrp.GetOpId() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDetPrp_SetOpId(t *testing.T) {
+	type fields struct {
+		Command structs.Command
+		OpId    int64
+		EpEui   common.EUI64
+	}
+	type args struct {
+		opId int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{
+			name:   "detPrp",
+			fields: fields{structs.MsgDetPrp, 1, common.EUI64{1}},
+			args:   args{2},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &DetPrp{
+				Command: tt.fields.Command,
+				OpId:    tt.fields.OpId,
+				EpEui:   tt.fields.EpEui,
+			}
+			m.SetOpId(tt.args.opId)
+
+			if m.OpId != tt.args.opId {
+				t.Errorf("DetPrp.SetOpId() = %v, want %v", m.OpId, tt.args.opId)
 			}
 		})
 	}

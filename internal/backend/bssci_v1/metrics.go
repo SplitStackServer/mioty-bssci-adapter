@@ -32,7 +32,7 @@ var (
 	}, []string{"bs"})
 )
 
-func pingPongCounter(src string, bs string,) prometheus.Counter {
+func pingPongCounter(src string, bs string) prometheus.Counter {
 	return ppc.With(prometheus.Labels{"bs": bs, "src": src})
 }
 
@@ -40,7 +40,7 @@ func messageReceiveCounter(bs string, msgtype string) prometheus.Counter {
 	return rec.With(prometheus.Labels{"bs": bs, "msgtype": msgtype})
 }
 
-func messagSendCounter(bs string, msgtype string) prometheus.Counter {
+func messageSendCounter(bs string, msgtype string) prometheus.Counter {
 	return sent.With(prometheus.Labels{"bs": bs, "msgtype": msgtype})
 }
 

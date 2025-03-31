@@ -1,7 +1,6 @@
 package messages
 
 import (
-	"encoding/binary"
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
@@ -68,7 +67,7 @@ func NewUlData(
 	format *byte,
 	dlOpen bool,
 	responseExp bool,
-	DlAck bool,
+	dlAck bool,
 
 ) UlData {
 	return UlData{
@@ -88,7 +87,7 @@ func NewUlData(
 		Format:      format,
 		DlOpen:      dlOpen,
 		ResponseExp: responseExp,
-		DlAck:       DlAck,
+		DlAck:       dlAck,
 	}
 }
 
@@ -100,14 +99,24 @@ func (m *UlData) GetCommand() structs.Command {
 	return structs.MsgUlData
 }
 
-// implements UplinkMessage.GetEndpointEui()
+// implements EndnodeMessage.GetEndpointEui()
 func (m *UlData) GetEndpointEui() common.EUI64 {
 	return m.EpEui
 }
 
-// implements UplinkMessage.GetUplinkMetadata()
-func (m *UlData) GetUplinkMetadata() UplinkMetadata {
-	return UplinkMetadata{
+// implements EndnodeMessage.IntoProto()
+func (m *UlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+	bsEuiB := bsEui.ToUnsignedInt()
+	epEuiB := m.EpEui.ToUnsignedInt()
+
+	var format uint32
+	if m.Format == nil {
+		format = 0
+	} else {
+		format = uint32(*m.Format)
+	}
+
+	metadata := UplinkMetadata{
 		RxTime:     m.RxTime,
 		RxDuration: m.RxDuration,
 		PacketCnt:  m.PacketCnt,
@@ -117,34 +126,19 @@ func (m *UlData) GetUplinkMetadata() UplinkMetadata {
 		EqSnr:      m.EqSnr,
 		Subpackets: m.Subpackets,
 	}
-}
 
-// implements UplinkMessage.IntoProto()
-func (m *UlData) IntoProto(bsEui common.EUI64) *msg.EndnodeUplink {
-
-	var message msg.EndnodeUplink
-
-	bsEuiB := binary.LittleEndian.Uint64(bsEui[:])
-	epEuiB := binary.LittleEndian.Uint64(m.EpEui[:])
-
-	var format uint32
-	if m.Format == nil {
-		format = 0
-	} else {
-		format = uint32(*m.Format)
-	}
-
-	metadata := m.GetUplinkMetadata()
-
-	message = msg.EndnodeUplink{
+	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Meta:       metadata.IntoProto(),
-		Message: &msg.EndnodeUplink_UlData{
+
+		Message: &msg.ProtoEndnodeMessage_UlData{
 			UlData: &msg.EndnodeUlDataMessage{
 				Data:   m.UserData,
 				Format: format,
 				Mode:   m.Mode,
+				Meta:   metadata.IntoProto(),
+				DlAck:  m.DlAck,
+				DlOpen: m.DlOpen,
 			},
 		},
 	}
@@ -172,7 +166,7 @@ func (m *UlDataRsp) GetOpId() int64 {
 }
 
 func (m *UlDataRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgUlDataRsp
 }
 
 // UlDataach complete

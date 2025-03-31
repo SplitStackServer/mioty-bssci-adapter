@@ -2,7 +2,9 @@ package messages
 
 import (
 	"encoding/binary"
+	"errors"
 	"mioty-bssci-adapter/internal/api/msg"
+	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -102,14 +104,28 @@ func (m *Att) GetCommand() structs.Command {
 	return structs.MsgAtt
 }
 
-// implements UplinkMessage.GetEndpointEui()
+// implements EndnodeMessage.GetEndpointEui()
 func (m *Att) GetEndpointEui() common.EUI64 {
 	return m.EpEui
 }
 
-// implements UplinkMessage.GetUplinkMetadata()
-func (m *Att) GetUplinkMetadata() UplinkMetadata {
-	return UplinkMetadata{
+// implements EndnodeMessage.IntoProto()
+func (m *Att) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+	bsEuiB := bsEui.ToUnsignedInt()
+	epEuiB := m.EpEui.ToUnsignedInt()
+
+	nonce := binary.LittleEndian.Uint32(m.Nonce[:])
+
+	sign := binary.LittleEndian.Uint32(m.Sign[:])
+
+	var shAddr *uint32
+
+	if m.ShAddr != nil {
+		shAddrT := uint32(*m.ShAddr)
+		shAddr = &shAddrT
+	}
+
+	metadata := UplinkMetadata{
 		RxTime:     m.RxTime,
 		RxDuration: m.RxDuration,
 		PacketCnt:  0,
@@ -119,35 +135,18 @@ func (m *Att) GetUplinkMetadata() UplinkMetadata {
 		EqSnr:      m.EqSnr,
 		Subpackets: m.Subpackets,
 	}
-}
 
-// implements UplinkMessage.IntoProto()
-func (m *Att) IntoProto(bsEui common.EUI64) *msg.EndnodeUplink {
-
-	var message msg.EndnodeUplink
-
-	bsEuiB := binary.LittleEndian.Uint64(bsEui[:])
-	epEuiB := binary.LittleEndian.Uint64(m.EpEui[:])
-
-	nonce := binary.LittleEndian.Uint32(m.Nonce[:])
-
-	sign := binary.LittleEndian.Uint32(m.Sign[:])
-
-	shAddr := uint32(*m.ShAddr)
-
-	metadata := m.GetUplinkMetadata()
-
-	message = msg.EndnodeUplink{
+	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Meta:       metadata.IntoProto(),
-		Message: &msg.EndnodeUplink_Att{
+		Message: &msg.ProtoEndnodeMessage_Att{
 			Att: &msg.EndnodeAttMessage{
 				OpId:          m.OpId,
 				AttachmentCnt: m.AttachCnt,
 				Nonce:         nonce,
 				Sign:          sign,
-				ShAddr:        &shAddr,
+				ShAddr:        shAddr,
+				Meta:          metadata.IntoProto(),
 				DualChannel:   m.DualChan,
 				Repetition:    m.Repetition,
 				WideCarrOff:   m.WideCarrOff,
@@ -172,7 +171,6 @@ type AttRsp struct {
 }
 
 func NewAttRsp(opId int64, nwkSessionKey [16]byte, shAddr *uint16) AttRsp {
-
 	return AttRsp{
 		Command:       structs.MsgAttRsp,
 		OpId:          opId,
@@ -181,12 +179,30 @@ func NewAttRsp(opId int64, nwkSessionKey [16]byte, shAddr *uint16) AttRsp {
 	}
 }
 
+func NewAttRspFromProto(opId int64, pb *rsp.EndnodeAttachResponse) (*AttRsp, error) {
+	if pb != nil {
+		var shAddr *uint16
+		if shAddrPb := pb.ShAddr; shAddrPb != nil {
+			shAddrA := uint16(0xffff & *shAddrPb)
+			shAddr = &shAddrA
+		}
+
+		if len(pb.NwkSessionKey) != 16 {
+			return nil, errors.New("invalid NwkSessionKey")
+		}
+
+		msg := NewAttRsp(opId, [16]byte(pb.NwkSessionKey), shAddr)
+		return &msg, nil
+	}
+	return nil, errors.New("invalid EndnodeAttachResponse command")
+}
+
 func (m *AttRsp) GetOpId() int64 {
 	return m.OpId
 }
 
 func (m *AttRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgAttRsp
 }
 
 // Attach complete

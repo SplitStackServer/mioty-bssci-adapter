@@ -1,6 +1,8 @@
 package messages
 
 import (
+	"errors"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -23,8 +25,17 @@ type DlRxStatQry struct {
 	EpEui common.EUI64 `msg:"epEui" json:"epEui"`
 }
 
-func NewDlRxStatQry(opId int64) DlRxStatQry {
-	return DlRxStatQry{OpId: opId, Command: structs.MsgDlRxStatQry}
+func NewDlRxStatQry(opId int64, epEui common.EUI64) DlRxStatQry {
+	return DlRxStatQry{Command: structs.MsgDlRxStatQry, OpId: opId, EpEui: epEui}
+}
+
+func NewDlRxStatQryFromProto(opId int64, pb *cmd.DownlinkRxStatusQuery) (*DlRxStatQry, error) {
+	if pb != nil {
+		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		m := NewDlRxStatQry(opId, epEui)
+		return &m, nil
+	}
+	return nil, errors.New("invalid DownlinkRxStatusQuery command")
 }
 
 func (m *DlRxStatQry) GetOpId() int64 {
@@ -33,6 +44,11 @@ func (m *DlRxStatQry) GetOpId() int64 {
 
 func (m *DlRxStatQry) GetCommand() structs.Command {
 	return structs.MsgDlRxStatQry
+}
+
+// implements ServerMessage
+func (m *DlRxStatQry) SetOpId(opId int64) {
+	m.OpId = opId
 }
 
 // Downlink rx status query response

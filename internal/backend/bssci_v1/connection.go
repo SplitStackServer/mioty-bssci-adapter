@@ -14,8 +14,7 @@ import (
 
 type connection struct {
 	sync.RWMutex
-	conn       net.Conn
-	// stats      *stats.Collector
+	conn net.Conn
 	lastActive time.Time
 	opId       int64
 	// Base Station session UUID, used to resume session
@@ -24,12 +23,26 @@ type connection struct {
 	SnScUuid uuid.UUID
 }
 
+func newConnection(conn net.Conn, snBsUuid structs.SessionUuid) connection {
+	snScUuid := uuid.New()
+
+	return connection{
+		conn: conn,
+		// stats:      stats.NewCollector(),
+		lastActive: time.Now(),
+		opId:       -1,
+		SnBsUuid:   snBsUuid.ToUuid(),
+		SnScUuid:   snScUuid,
+	}
+}
+
 // Send the message to this connection
 func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err error) {
 	conn.Lock()
 	defer conn.Unlock()
 
-	bb, err := msg.MarshalMsg(nil)
+	bb, err := MarshalBssciMessage(msg)
+
 	if err != nil {
 		return errors.Wrap(err, "marshal msgp error")
 	}
@@ -38,7 +51,7 @@ func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err 
 	_, err = conn.conn.Write(bb)
 	if err != nil {
 		conn.conn.Close()
-		return
+		return errors.Wrap(err, "write error")
 	}
 	conn.lastActive = time.Now()
 
@@ -64,7 +77,7 @@ func (conn *connection) Read(timeout time.Duration) (cmd structs.CommandHeader, 
 // Should be called when a message chain is initialized by the server.
 //
 // returns the current opId before decrement by 1
-func (conn *connection) DecrementOpId() (opId int64) {
+func (conn *connection) GetAndDecrementOpId() (opId int64) {
 	conn.Lock()
 	defer conn.Unlock()
 
@@ -82,7 +95,7 @@ func (conn *connection) GetLastActive() time.Time {
 
 // Check if this connection is resumed after a Con message
 //
-// returns true and the current snScUuid if the conenction is resumable, else false and a new snScUuid
+// returns true and the current snScUuid if the connection is resumable, else false and a new snScUuid
 func (conn *connection) ResumeConnection(snBsUuid uuid.UUID, snScOpId *int64) (resume bool, snScUuid uuid.UUID) {
 	conn.Lock()
 	defer conn.Unlock()
@@ -97,7 +110,7 @@ func (conn *connection) ResumeConnection(snBsUuid uuid.UUID, snScOpId *int64) (r
 	}
 	snScUuid = uuid.New()
 	conn.SnScUuid = snScUuid
-	
+
 	return false, snScUuid
 
 }

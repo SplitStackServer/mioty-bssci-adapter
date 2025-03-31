@@ -46,4 +46,3 @@ func (s *SessionUuid) UnmarshalText(text []byte) error {
 
 	return nil
 }
-

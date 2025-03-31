@@ -8,48 +8,43 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	errGatewayDoesNotExist = errors.New("gateway does not exist")
-)
-
 type basestations struct {
 	sync.RWMutex
 	basestations          map[common.EUI64]*connection
 	subscribeEventHandler func(events.Subscribe)
 }
 
-func (g *basestations) get(eui common.EUI64) (*connection, error) {
-	g.RLock()
-	defer g.RUnlock()
+func (b *basestations) get(eui common.EUI64) (*connection, error) {
+	b.RLock()
+	defer b.RUnlock()
 
-	gw, ok := g.basestations[eui]
+	gw, ok := b.basestations[eui]
 	if !ok {
-		return gw, errGatewayDoesNotExist
+		return gw, errors.New("basestation does not exist")
 	}
 	return gw, nil
 }
 
-func (g *basestations) set(eui common.EUI64, c *connection) error {
-	g.Lock()
-	defer g.Unlock()
+func (b *basestations) set(eui common.EUI64, c *connection) error {
+	b.Lock()
+	defer b.Unlock()
 
-	g.basestations[eui] = c
+	b.basestations[eui] = c
 
-	if g.subscribeEventHandler != nil {
-		g.subscribeEventHandler(events.Subscribe{Subscribe: true, GatewayEui: eui})
+	if b.subscribeEventHandler != nil {
+		b.subscribeEventHandler(events.Subscribe{Subscribe: true, BasestationEui: eui})
 	}
-
 	return nil
 }
 
-func (g *basestations) remove(eui common.EUI64) error {
-	g.Lock()
-	defer g.Unlock()
+func (b *basestations) remove(eui common.EUI64) error {
+	b.Lock()
+	defer b.Unlock()
 
-	if g.subscribeEventHandler != nil {
-		g.subscribeEventHandler(events.Subscribe{Subscribe: false, GatewayEui: eui})
+	if b.subscribeEventHandler != nil {
+		b.subscribeEventHandler(events.Subscribe{Subscribe: false, BasestationEui: eui})
 	}
 
-	delete(g.basestations, eui)
+	delete(b.basestations, eui)
 	return nil
 }

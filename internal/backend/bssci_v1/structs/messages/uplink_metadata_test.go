@@ -11,18 +11,18 @@ import (
 
 func TestUplinkMetadata_IntoProto(t *testing.T) {
 
-	var testRxTime uint64 = 1000000005
+	var testRxTime uint64 = 1000000000000005
 
 	testRxTimePb := timestamppb.Timestamp{
 		Seconds: int64(1000000),
 		Nanos:   int32(5),
 	}
 
-	var testRxDuration uint64 = 1005
+	var testRxDuration uint64 = 1000001005
 
 	testRxDurationPb := durationpb.Duration{
 		Seconds: int64(1),
-		Nanos:   int32(5),
+		Nanos:   int32(1005),
 	}
 
 	testProfile := "testProfile"

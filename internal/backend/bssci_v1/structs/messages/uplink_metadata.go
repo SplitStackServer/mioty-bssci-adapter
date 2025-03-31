@@ -2,9 +2,6 @@ package messages
 
 import (
 	"mioty-bssci-adapter/internal/api/msg"
-
-	"google.golang.org/protobuf/types/known/durationpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UplinkMetadata struct {
@@ -21,12 +18,11 @@ type UplinkMetadata struct {
 func (m *UplinkMetadata) IntoProto() *msg.EndnodeUplinkMetadata {
 	var message msg.EndnodeUplinkMetadata
 	if m != nil {
-		rxTime := timestamppb.Timestamp{
-			Seconds: int64(m.RxTime / 1000),
-			Nanos:   int32(m.RxTime % 1000),
-		}
+
+		rxTime := TimestampNsToProto(int64(m.RxTime))
+
 		message = msg.EndnodeUplinkMetadata{
-			RxTime:    &rxTime,
+			RxTime:    rxTime,
 			PacketCnt: m.PacketCnt,
 			Profile:   m.Profile,
 			Rssi:      m.RSSI,
@@ -37,11 +33,7 @@ func (m *UplinkMetadata) IntoProto() *msg.EndnodeUplinkMetadata {
 			message.SubpacketInfo = m.Subpackets.IntoProto()
 		}
 		if m.RxDuration != nil {
-			rxDuration := durationpb.Duration{
-				Seconds: int64(*m.RxDuration / 1000),
-				Nanos:   int32(*m.RxDuration % 1000),
-			}
-			message.RxDuration = &rxDuration
+			message.RxDuration = DurationNsToProto(int64(*m.RxDuration))
 		}
 	}
 	return &message

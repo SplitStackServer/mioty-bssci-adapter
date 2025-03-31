@@ -1,12 +1,12 @@
 package bssci_v1
 
 import (
-	"bytes"
-	"encoding/binary"
+	// "encoding/binary"
 	"io"
 
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
+
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
 )
@@ -49,16 +49,12 @@ func ReadBssciMessage(r io.Reader) (cmd structs.CommandHeader, raw msgp.Raw, err
 	// parse out command
 	_, err = cmd.UnmarshalMsg(buf)
 	if err != nil {
-		err = errors.Wrap(err, "message error")
+		err = errors.Wrap(err, "command error")
 		return
 	}
 
 	// get raw message
-	_, err = raw.UnmarshalMsg(buf)
-	if err != nil {
-		err = errors.Wrap(err, "message error")
-		return
-	}
+	raw.UnmarshalMsg(buf)
 
 	return
 }
@@ -81,35 +77,32 @@ func WriteBssciMessage(w io.Writer, msg messages.Message) (err error) {
 	return
 }
 
-
 // convert msg to message pack and attach bssci header
-func MarshalBssciMessage(msg messages.Message) (buf []byte, err error) {
+func MarshalBssciMessage(msg messages.Message) ([]byte, error) {
 	msgBuf, err := msg.MarshalMsg(nil)
 	if err != nil {
-		err = errors.Wrap(err, "bssci message marshal error")
-		return
+		err = errors.Wrap(err, "message marshal error")
+		return nil, err
 	}
 
 	msgLength := len(msgBuf)
 
-	buf, err = prepareBssciMessage(msgLength)
+	buf := prepareBssciMessage(msgLength)
 
-	if err != nil {
-		err = errors.Wrap(err, "message header error")
-		return
-	}
 	// add message pack data
 	buf = append(buf, msgBuf...)
-	return
+	return buf, err
 }
 
 // read the bssci header and extract the raw message pack data
-func UnmarshalBssciMessage(buf []byte) (cmd structs.Command, raw msgp.Raw, err error) {
+func UnmarshalBssciMessage(buf []byte) (cmd structs.CommandHeader, raw msgp.Raw, err error) {
 
 	// get length
-	length, err := getBssciMessageLengthFromHeader(buf)
+	header_buf := buf[:bssciHeaderSize]
+
+	length, err := getBssciMessageLengthFromHeader(header_buf)
 	if err != nil {
-		err = errors.Wrap(err, "message error")
+		err = errors.Wrap(err, "header error")
 		return
 	}
 
@@ -117,55 +110,51 @@ func UnmarshalBssciMessage(buf []byte) (cmd structs.Command, raw msgp.Raw, err e
 	buf = buf[bssciHeaderSize : bssciHeaderSize+length]
 
 	// parse out command
-	var commandHeader structs.CommandHeader
-	_, err = commandHeader.UnmarshalMsg(buf)
+	_, err = cmd.UnmarshalMsg(buf)
 	if err != nil {
-		err = errors.Wrap(err, "message error")
+		err = errors.Wrap(err, "command error")
 		return
 	}
-	cmd = commandHeader.GetCommand()
 
-	_, err = raw.UnmarshalMsg(buf)
-	if err != nil {
-		err = errors.Wrap(err, "message error")
-		return
-	}
+	// read rest of the message
+	raw.UnmarshalMsg(buf)
+
 	return
 }
 
 // build header and allocate buffer
-func prepareBssciMessage(length int) (buf []byte, err error) {
+func prepareBssciMessage(length int) []byte {
 	// allocate buf
-	buf = make([]byte, 0, bssciHeaderSize+length)
-	// add identifier to header
+	buf := make([]byte, 0, bssciHeaderSize+length)
+	// add identifier and length to header
 	buf = append(buf, bssciIdentifier[:]...)
 	// add length to header
-	buf, err = binary.Append(buf, binary.LittleEndian, uint32(length))
-	if err != nil {
-		err = errors.Wrap(err, "message header error")
-		return
+	length_buf := []byte{
+		byte(0xff & length),
+		byte(0xff & (length >> 8)),
+		byte(0xff & (length >> 16)),
+		byte(0xff & (length >> 24)),
 	}
-	return
+	buf = append(buf, length_buf...)
+
+	return buf
 }
 
 func getBssciMessageLengthFromHeader(buf []byte) (l int32, err error) {
 
-	if len(buf) < bssciHeaderSize {
-		err = errors.New("message header error: invalid header size")
+	if len(buf) != bssciHeaderSize {
+		err = errors.New("invalid header size")
 		return
 	}
 
 	identifier := [8]byte(buf[bssciHeaderIdentifierOffset : bssciHeaderIdentifierOffset+bssciHeaderIdentifierSize])
 	if identifier != bssciIdentifier {
-		err = errors.New("message header error: invalid identifier: " + string(bssciIdentifier[:]))
+		err = errors.New("invalid identifier: " + string(identifier[:]))
 		return
 	}
 
-	length := [4]byte(buf[bssciHeaderLengthOffset : bssciHeaderLengthOffset+bssciHeaderLengthSize])
-	err = binary.Read(bytes.NewReader(length[:]), binary.LittleEndian, &l)
-	if err != nil {
-		err = errors.Wrap(err, "message header error")
-		return
-	}
+	length_buf := [4]byte(buf[bssciHeaderLengthOffset : bssciHeaderLengthOffset+bssciHeaderLengthSize])
+	l = int32(length_buf[0]) | int32(length_buf[1])<<8 | int32(length_buf[2])<<16 | int32(length_buf[3])<<24
+
 	return
 }

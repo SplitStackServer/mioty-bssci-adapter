@@ -7,10 +7,40 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "mioty-bssci-adapter/internal/api/msg";
 
-
-message BasestationStatus {
+message ProtoBasestationMessage {
     // Basestation EUI, 8 bytes little endian
     uint64 bs_eui = 1;
+    // Message.
+    oneof message {
+        // Connect
+        BasestationConnection con = 4;
+        // Status
+        BasestationStatus status = 5;
+    }
+}
+
+// Connect
+message BasestationConnection {
+    // Unix UTC system time
+    google.protobuf.Timestamp ts = 2;
+    // Requested protocol version, major.minor.patch
+    string version = 3;
+    // True if Base Station is bidirectional
+    bool bidi = 4;
+    // Vendor of the Base Station, optional
+    optional string vendor = 5;
+    // Model of the Base Station, optional
+    optional string model = 6;
+    // Name of the Base Station, optional
+    optional string name = 7;
+    // Software version, optional
+    optional string sw_version = 8;
+    // Geographic location [Latitude, Longitude, Altitude], optional
+    optional GeoLocation geo_location = 9;
+}
+
+// Status
+message BasestationStatus {
     // Status code, using POSIX error numbers, 0 for ok
     uint32 status_code = 2;
     // Status message
@@ -30,7 +60,6 @@ message BasestationStatus {
     // Memory utilization, normalized to 1.0, optional
     optional double memory = 10;
 }
-
 
 message GeoLocation {
     float lat = 1;

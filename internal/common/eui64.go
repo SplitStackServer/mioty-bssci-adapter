@@ -41,29 +41,22 @@ func Eui64FromUnsignedInt(in uint64) EUI64 {
 	return b
 }
 
-// helper function to parse eui64 into a int64 
+// helper function to parse eui64 into a int64
 func (e *EUI64) ToInt() int64 {
 	return int64(e[0]) | int64(e[1])<<8 | int64(e[2])<<16 | int64(e[3])<<24 |
 		int64(e[4])<<32 | int64(e[5])<<40 | int64(e[6])<<48 | int64(e[7])<<56
 }
 
-// helper function to parse eui64 into a uint64 
+// helper function to parse eui64 into a uint64
 func (e *EUI64) ToUnsignedInt() uint64 {
 	return uint64(e[0]) | uint64(e[1])<<8 | uint64(e[2])<<16 | uint64(e[3])<<24 |
 		uint64(e[4])<<32 | uint64(e[5])<<40 | uint64(e[6])<<48 | uint64(e[7])<<56
 }
 
-
-// helper function to parse eui64 into a int64 
-func Eui64toInt(e EUI64) int64 {
-	return e.ToInt()
+// String implement fmt.Stringer.
+func (e EUI64) String() string {
+	return hex.EncodeToString(e[:])
 }
-
-// helper function to parse eui64 into a int64 
-func Eui64toUnsignedInt(e EUI64) uint64 {
-	return e.ToUnsignedInt()
-}
-
 
 // MarshalText implements encoding.TextMarshaler.
 func (e EUI64) MarshalText() ([]byte, error) {
@@ -83,11 +76,6 @@ func (e *EUI64) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// String implement fmt.Stringer.
-func (e EUI64) String() string {
-	return hex.EncodeToString(e[:])
-}
-
 // MarshalBinary implements encoding.BinaryMarshaler.
 func (e EUI64) MarshalBinary() ([]byte, error) {
 	out := make([]byte, len(e))
@@ -101,11 +89,21 @@ func (e EUI64) MarshalBinary() ([]byte, error) {
 // UnmarshalBinary implements encoding.BinaryUnmarshaler.
 func (e *EUI64) UnmarshalBinary(data []byte) error {
 	if len(data) != len(e) {
-		return fmt.Errorf("eui64: %d bytes of data are expected", len(e))
+		return fmt.Errorf("eui64: exactly %d bytes are expected", len(e))
 	}
 	for i, v := range data {
 		// little endian
 		e[len(e)-i-1] = v
 	}
 	return nil
+}
+
+// helper function to parse eui64 into a int64
+func Eui64toInt(e EUI64) int64 {
+	return e.ToInt()
+}
+
+// helper function to parse eui64 into a int64
+func Eui64toUnsignedInt(e EUI64) uint64 {
+	return e.ToUnsignedInt()
 }

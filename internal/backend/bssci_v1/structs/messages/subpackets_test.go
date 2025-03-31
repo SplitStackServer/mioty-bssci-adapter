@@ -9,7 +9,7 @@ import (
 func TestSubpackets_IntoProto(t *testing.T) {
 
 	testPhase := int32(4)
-	
+
 	type fields struct {
 		SNR       []int32
 		RSSI      []int32

@@ -2,7 +2,10 @@ package backend
 
 import (
 	"fmt"
+	// "mioty-bssci-adapter/internal/api/cmd"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
+	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/config"
@@ -46,12 +49,18 @@ type Backend interface {
 	// BSSCI version used by the backend
 	GetBssciVersion() string
 
-	// Handler for Subscribe events.
+	// Set handler for Subscribe events.
 	SetSubscribeEventHandler(func(events.Subscribe))
 
-	// Handler for basestation status messages
-	SetBasestationStatusHandler(func(*msg.BasestationStatus))
+	// Set handler messages from basestations
+	SetBasestationMessageHandler(func(*msg.ProtoBasestationMessage))
 
-	// Handler for uplink messages from endnodes
-	SetEndnodeUplinkHandler(func(*msg.EndnodeUplink))
+	// Set handler for messages from endnodes
+	SetEndnodeMessageHandler(func(*msg.ProtoEndnodeMessage))
+
+	// Handler for server command messages
+	HandleServerCommand(*cmd.ProtoCommand) error
+
+	// Handler for server response messages
+	HandleServerResponse(*rsp.ProtoResponse) error
 }

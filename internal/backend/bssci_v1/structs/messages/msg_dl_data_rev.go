@@ -1,6 +1,8 @@
 package messages
 
 import (
+	"errors"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -37,12 +39,27 @@ func NewDlDataRev(
 	}
 }
 
+func NewDlDataRevFromProto(opId int64, pb *cmd.RevokeDownlink) (*DlDataRev, error) {
+	if pb != nil {
+		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		queId := pb.DlQueId
+		m := NewDlDataRev(opId, epEui, queId)
+		return &m, nil
+	}
+	return nil, errors.New("invalid RevokeDownlink command")
+}
+
 func (m *DlDataRev) GetOpId() int64 {
 	return m.OpId
 }
 
 func (m *DlDataRev) GetCommand() structs.Command {
 	return structs.MsgDlDataRev
+}
+
+// implements ServerMessage
+func (m *DlDataRev) SetOpId(opId int64) {
+	m.OpId = opId
 }
 
 // Downlink data revoke response
@@ -66,7 +83,7 @@ func (m *DlDataRevRsp) GetOpId() int64 {
 }
 
 func (m *DlDataRevRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgDlDataRevRsp
 }
 
 // Downlink data revoke complete

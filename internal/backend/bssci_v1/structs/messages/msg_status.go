@@ -1,12 +1,11 @@
 package messages
 
 import (
-	"encoding/binary"
+	"errors"
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 //go:generate msgp
@@ -28,12 +27,25 @@ func NewStatus(opId int64) Status {
 	return Status{OpId: opId, Command: structs.MsgStatus}
 }
 
+func NewStatusFromProto(opId int64, pb *cmd.RequestStatus) (*Status, error) {
+	if pb != nil {
+		m := NewStatus(opId)
+		return &m, nil
+	}
+	return nil, errors.New("invalid Status command")
+}
+
 func (m *Status) GetOpId() int64 {
 	return m.OpId
 }
 
 func (m *Status) GetCommand() structs.Command {
 	return structs.MsgStatus
+}
+
+// implements ServerMessage
+func (m *Status) SetOpId(opId int64) {
+	m.OpId = opId
 }
 
 // Status response
@@ -87,33 +99,31 @@ func (m *StatusRsp) GetCommand() structs.Command {
 	return structs.MsgStatusRsp
 }
 
-// implements BasestationStatusMessage.IntoProto()
-func (m *StatusRsp) IntoProto(bsEui common.EUI64) *msg.BasestationStatus {
+// implements BasestationMessage.IntoProto()
+func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
 
-	var message msg.BasestationStatus
+	var message msg.ProtoBasestationMessage
 
-	bsEuiB := binary.LittleEndian.Uint64(bsEui[:])
+	if m != nil && bsEui != nil {
+		bsEuiB := bsEui.ToUnsignedInt()
+		ts := TimestampNsToProto(int64(m.Time))
 
-	ts := timestamppb.Timestamp{
-		Seconds: int64(m.Time / 1000),
-		Nanos:   int32(m.Time % 1000),
-	}
-
-	message = msg.BasestationStatus{
-		BsEui:      bsEuiB,
-		StatusCode: m.Code,
-		StatusMsg:  m.Message,
-		Ts:         &ts,
-		DutyCycle:  m.DutyCycle,
-
-		Uptime: m.Uptime,
-		Temp:   m.Temp,
-		Cpu:    m.CpuLoad,
-		Memory: m.MemLoad,
-	}
-
-	if m.GeoLocation != nil {
-		message.GeoLocation = m.GeoLocation.IntoProto()
+		message = msg.ProtoBasestationMessage{
+			BsEui: bsEuiB,
+			Message: &msg.ProtoBasestationMessage_Status{
+				Status: &msg.BasestationStatus{
+					StatusCode:  m.Code,
+					StatusMsg:   m.Message,
+					Ts:          ts,
+					DutyCycle:   m.DutyCycle,
+					Uptime:      m.Uptime,
+					Temp:        m.Temp,
+					Cpu:         m.CpuLoad,
+					Memory:      m.MemLoad,
+					GeoLocation: m.GeoLocation.IntoProto(),
+				},
+			},
+		}
 	}
 
 	return &message

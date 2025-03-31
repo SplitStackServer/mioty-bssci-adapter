@@ -1,0 +1,44 @@
+
+syntax = "proto3";
+// edition = "2023";
+
+package rsp;
+
+option go_package = "mioty-bssci-adapter/internal/api/rsp";
+// option features.(pb.go).api_level = API_OPAQUE;
+
+
+message ProtoResponse{
+    // ID of the current operation
+    int64 op_id = 1;
+    // Basestation EUI, 8 bytes little endian
+    uint64 bs_eui = 2;
+
+    // Command.
+    oneof command {
+        // Server attachment
+        EndnodeAttachResponse att_rsp = 4;
+        // Server detachment
+        EndnodeDetachResponse det_rsp = 5;
+    };
+}
+
+message EndnodeAttachResponse{
+    // Endnode EUI, 8 bytes little endian
+    uint64 endnode_eui = 1;
+
+    // End Point short address, only if not assigned by the Base Station
+    optional uint32 sh_addr = 2;
+
+    // 16 Byte End Point network session key
+    bytes nwk_session_key = 3;
+}
+
+message EndnodeDetachResponse{
+    // Endnode EUI, 8 bytes little endian
+    uint64 endnode_eui = 1;
+
+    // End Point signature, 4 bytes little endian
+    uint32 sign = 2;
+}
+

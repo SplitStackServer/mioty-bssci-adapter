@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -22,8 +23,8 @@ type DlRxStat struct {
 	EpEui common.EUI64 `msg:"epEui" json:"epEui"`
 	// Unix UTC time of reception, center of last subpacket, 64 bit, ns resolution
 	RxTime uint64 `msg:"rxTime" json:"rxTime"`
-	// End Point packet counter, only if result is “sent”
-	PacketCnt *uint32 `msg:"packetCnt" json:"packetCnt"`
+	// End Point packet counter
+	PacketCnt uint32 `msg:"packetCnt" json:"packetCnt"`
 	// End Point DL reception signal to noise ratio in dB
 	DlRxSnr float64 `msg:"dlRxSnr" json:"dlRxSnr"`
 	// End Point DL reception signal strength in dBm
@@ -33,10 +34,9 @@ type DlRxStat struct {
 func NewDlRxStat(
 	opId int64,
 	epEui common.EUI64,
-	queId int64,
 	result string,
 	rxTime uint64,
-	packetCnt *uint32,
+	packetCnt uint32,
 	dlRxSnr float64,
 	dlRxRssi float64,
 ) DlRxStat {
@@ -57,6 +57,32 @@ func (m *DlRxStat) GetOpId() int64 {
 
 func (m *DlRxStat) GetCommand() structs.Command {
 	return structs.MsgDlRxStat
+}
+
+// implements EndnodeMessage.GetEndpointEui()
+func (m *DlRxStat) GetEndpointEui() common.EUI64 {
+	return m.EpEui
+}
+
+// implements EndnodeMessage.IntoProto()
+func (m *DlRxStat) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+	bsEuiB := bsEui.ToUnsignedInt()
+	epEuiB := m.EpEui.ToUnsignedInt()
+
+	message := msg.ProtoEndnodeMessage{
+		BsEui:      bsEuiB,
+		EndnodeEui: epEuiB,
+
+		Message: &msg.ProtoEndnodeMessage_DlRxStat{
+			DlRxStat: &msg.EndnodeDownlinkRxStatus{
+				RxTime:    TimestampNsToProto(int64(m.RxTime)),
+				PacketCnt: m.PacketCnt,
+				DlRxRssi:  m.DlRxRssi,
+				DlRxSnr:   m.DlRxSnr,
+			},
+		},
+	}
+	return &message
 }
 
 // Downlink RX Status response
@@ -80,7 +106,7 @@ func (m *DlRxStatRsp) GetOpId() int64 {
 }
 
 func (m *DlRxStatRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgDlRxStatRsp
 }
 
 // Downlink RX Status complete

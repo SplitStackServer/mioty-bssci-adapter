@@ -2,7 +2,9 @@ package messages
 
 import (
 	"encoding/binary"
+	"errors"
 	"mioty-bssci-adapter/internal/api/msg"
+	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 )
@@ -78,20 +80,19 @@ func (m *Det) GetCommand() structs.Command {
 	return structs.MsgDet
 }
 
-// respond to Det with DetRsp
-func (m *Det) Respond() Message {
-	msg := NewDetRsp(m.OpId, m.Sign)
-	return &msg
-}
-
-// implements UplinkMessage.GetEndpointEui()
+// implements EndnodeMessage.GetEndpointEui()
 func (m *Det) GetEndpointEui() common.EUI64 {
 	return m.EpEui
 }
 
-// implements UplinkMessage.GetUplinkMetadata()
-func (m *Det) GetUplinkMetadata() UplinkMetadata {
-	return UplinkMetadata{
+// implements EndnodeMessage.IntoProto()
+func (m *Det) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+	bsEuiB := bsEui.ToUnsignedInt()
+	epEuiB := m.EpEui.ToUnsignedInt()
+
+	sign := binary.LittleEndian.Uint32(m.Sign[:])
+
+	metadata := UplinkMetadata{
 		RxTime:     m.RxTime,
 		RxDuration: m.RxDuration,
 		PacketCnt:  m.PacketCnt,
@@ -101,28 +102,15 @@ func (m *Det) GetUplinkMetadata() UplinkMetadata {
 		EqSnr:      m.EqSnr,
 		Subpackets: m.Subpackets,
 	}
-}
 
-// implements UplinkMessage.IntoProto()
-func (m *Det) IntoProto(bsEui common.EUI64) *msg.EndnodeUplink {
-
-	var message msg.EndnodeUplink
-
-	bsEuiB := binary.LittleEndian.Uint64(bsEui[:])
-	epEuiB := binary.LittleEndian.Uint64(m.EpEui[:])
-
-	sign := binary.LittleEndian.Uint32(m.Sign[:])
-
-	metadata := m.GetUplinkMetadata()
-
-	message = msg.EndnodeUplink{
+	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Meta:       metadata.IntoProto(),
-		Message: &msg.EndnodeUplink_Det{
+		Message: &msg.ProtoEndnodeMessage_Det{
 			Det: &msg.EndnodeDetMessage{
 				OpId: m.OpId,
 				Sign: sign,
+				Meta: metadata.IntoProto(),
 			},
 		},
 	}
@@ -148,12 +136,28 @@ func NewDetRsp(opId int64, sign [4]byte) DetRsp {
 	}
 }
 
+func NewDetRspFromProto(opId int64, pb *rsp.EndnodeDetachResponse) (*DetRsp, error) {
+	if pb != nil {
+		sign := pb.Sign
+		signB := [4]byte{
+			byte(0xff & sign),
+			byte(0xff & (sign >> 8)),
+			byte(0xff & (sign >> 16)),
+			byte(0xff & (sign >> 24)),
+		}
+
+		msg := NewDetRsp(opId, signB)
+		return &msg, nil
+	}
+	return nil, errors.New("invalid EndnodeDetachResponse command")
+}
+
 func (m *DetRsp) GetOpId() int64 {
 	return m.OpId
 }
 
 func (m *DetRsp) GetCommand() structs.Command {
-	return structs.MsgPing
+	return structs.MsgDetRsp
 }
 
 // Detach complete
