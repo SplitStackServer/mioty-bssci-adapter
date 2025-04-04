@@ -212,6 +212,36 @@ func (ts *TestBackendSuite) SetupSuite() {
 			expectResponse:          false,
 			expectedResponseCommand: structs.MsgDlRxStatCmp,
 		},
+		{
+			name:                    "vmUlData",
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 207, 0, 0, 0, 143, 167, 99, 111, 109, 109, 97, 110, 100, 169, 118, 109, 46, 117, 108, 68, 97, 116, 97, 164, 111, 112, 73, 100, 10, 167, 109, 97, 99, 84, 121, 112, 101, 0, 168, 117, 115, 101, 114, 68, 97, 116, 97, 196, 3, 1, 2, 3, 167, 116, 114, 120, 84, 105, 109, 101, 1, 167, 115, 121, 115, 84, 105, 109, 101, 1, 167, 102, 114, 101, 113, 79, 102, 102, 60, 163, 115, 110, 114, 203, 64, 8, 0, 0, 0, 0, 0, 0, 164, 114, 115, 115, 105, 203, 192, 89, 0, 0, 0, 0, 0, 0, 165, 101, 113, 83, 110, 114, 203, 64, 16, 0, 0, 0, 0, 0, 0, 170, 115, 117, 98, 112, 97, 99, 107, 101, 116, 115, 132, 163, 115, 110, 114, 147, 1, 2, 3, 164, 114, 115, 115, 105, 147, 4, 5, 6, 169, 102, 114, 101, 113, 117, 101, 110, 99, 121, 147, 7, 8, 9, 165, 112, 104, 97, 115, 101, 147, 10, 11, 12, 169, 99, 97, 114, 114, 83, 112, 97, 99, 101, 2, 167, 112, 97, 116, 116, 71, 114, 112, 3, 167, 112, 97, 116, 116, 78, 117, 109, 5, 163, 99, 114, 99, 196, 2, 6, 7},
+			expectResponse:          true,
+			expectedResponseCommand: structs.MsgVmUlDataRsp,
+		},
+		{
+			name:                    "vmUlDataCmp",
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 28, 0, 0, 0, 130, 167, 99, 111, 109, 109, 97, 110, 100, 172, 118, 109, 46, 117, 108, 68, 97, 116, 97, 67, 109, 112, 164, 111, 112, 73, 100, 0},
+			expectResponse:          false,
+			expectedResponseCommand: structs.MsgVmUlDataCmp,
+		},
+		{
+			name:                    "vmStatusRsp",
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 41, 0, 0, 0, 131, 167, 99, 111, 109, 109, 97, 110, 100, 172, 118, 109, 46, 115, 116, 97, 116, 117, 115, 82, 115, 112, 164, 111, 112, 73, 100, 0, 168, 109, 97, 99, 84, 121, 112, 101, 115, 147, 1, 2, 3},
+			expectResponse:          true,
+			expectedResponseCommand: structs.MsgVmStatusCmp,
+		},
+		{
+			name:                    "vmActivateRsp",
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 30, 0, 0, 0, 130, 167, 99, 111, 109, 109, 97, 110, 100, 174, 118, 109, 46, 97, 99, 116, 105, 118, 97, 116, 101, 82, 115, 112, 164, 111, 112, 73, 100, 0},
+			expectResponse:          true,
+			expectedResponseCommand: structs.MsgVmActivateCmp,
+		},
+		{
+			name:                    "vmDeactivateRsp",
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 32, 0, 0, 0, 130, 167, 99, 111, 109, 109, 97, 110, 100, 176, 118, 109, 46, 100, 101, 97, 99, 116, 105, 118, 97, 116, 101, 82, 115, 112, 164, 111, 112, 73, 100, 0},
+			expectResponse:          true,
+			expectedResponseCommand: structs.MsgVmDeactivateCmp,
+		},
 	}
 
 	ts.handleServerCommandTestCases = []testCaseHandleServerCommand{
@@ -361,6 +391,66 @@ func (ts *TestBackendSuite) SetupSuite() {
 				BsEui: ts.bs_eui.ToUnsignedInt(),
 				Command: &cmd.ProtoCommand_ReqStatus{
 					ReqStatus: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ProtoCommand_VmActivate",
+			cmd: &cmd.ProtoCommand{
+				BsEui: ts.bs_eui.ToUnsignedInt(),
+				Command: &cmd.ProtoCommand_VmActivate{
+					VmActivate: &cmd.EnableVariableMac{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ProtoCommand_VmActivate_Err",
+			cmd: &cmd.ProtoCommand{
+				BsEui: ts.bs_eui.ToUnsignedInt(),
+				Command: &cmd.ProtoCommand_VmActivate{
+					VmActivate: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ProtoCommand_VmDeactivate",
+			cmd: &cmd.ProtoCommand{
+				BsEui: ts.bs_eui.ToUnsignedInt(),
+				Command: &cmd.ProtoCommand_VmDeactivate{
+					VmDeactivate: &cmd.DisableVariableMac{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ProtoCommand_VmDeactivate_Err",
+			cmd: &cmd.ProtoCommand{
+				BsEui: ts.bs_eui.ToUnsignedInt(),
+				Command: &cmd.ProtoCommand_VmDeactivate{
+					VmDeactivate: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ProtoCommand_VmStatus",
+			cmd: &cmd.ProtoCommand{
+				BsEui: ts.bs_eui.ToUnsignedInt(),
+				Command: &cmd.ProtoCommand_VmStatus{
+					VmStatus: &cmd.RequestVariableMacStatus{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ProtoCommand_VmStatus_Err",
+			cmd: &cmd.ProtoCommand{
+				BsEui: ts.bs_eui.ToUnsignedInt(),
+				Command: &cmd.ProtoCommand_VmStatus{
+					VmStatus: nil,
 				},
 			},
 			wantErr: true,

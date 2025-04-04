@@ -195,6 +195,37 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		msg = msgA
 
 		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+
+	case *cmd.ProtoCommand_VmActivate:
+		command := pb.GetVmActivate()
+		msgA, err := messages.NewVmActivateFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+
+	case *cmd.ProtoCommand_VmDeactivate:
+		command := pb.GetVmDeactivate()
+		msgA, err := messages.NewVmDeactivateFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+
+	case *cmd.ProtoCommand_VmStatus:
+		command := pb.GetVmStatus()
+		msgA, err := messages.NewVmStatusFromProto(0, command)
+		if err != nil {
+			return err
+		}
+		msg = msgA
+
+		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+
 	default:
 		return errors.New("empty protobuf command")
 	}
@@ -446,6 +477,15 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 				break
 			}
 			response = b.handleUlDataMessage(ctx, eui, &msg)
+		case structs.ClientMsgVmUlData:
+			// handle variable mac uplink data message
+			var msg messages.VmUlData
+			_, err = msg.UnmarshalMsg(raw)
+			if err != nil {
+				response = log_and_notify_msgp_error(logger, err, opId)
+				break
+			}
+			response = b.handleVmUlDataMessage(ctx, eui, &msg)
 		case structs.ClientMsgDlDataRes:
 			// handle downlink data result response
 			var msg messages.DlDataRes
@@ -502,6 +542,23 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 			// handle detach propagate response message
 			defaultResponse := messages.NewDetPrpCmp(opId)
 			response = &defaultResponse
+		case structs.ClientMsgVmActivateRsp:
+			// handle variable mac activate response message
+			defaultResponse := messages.NewVmActivateCmp(opId)
+			response = &defaultResponse
+		case structs.ClientMsgVmDeactivateRsp:
+			// handle variable mac deactivate response message
+			defaultResponse := messages.NewVmDeactivateCmp(opId)
+			response = &defaultResponse
+		case structs.ClientMsgVmStatusRsp:
+			// handle variable mac status response message
+			var msg messages.VmStatusRsp
+			_, err = msg.UnmarshalMsg(raw)
+			if err != nil {
+				response = log_and_notify_msgp_error(logger, err, opId)
+				break
+			}
+			response = b.handleVmStatusRspMessage(ctx, eui, &msg)
 		case structs.ClientMsgError:
 			// handle error message
 			var msg messages.BssciError
@@ -529,8 +586,11 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 			continue
 		case structs.ClientMsgDetCmp:
 			continue
+		case structs.ClientMsgVmUlDataCmp:
+			continue
 		case structs.ClientMsgDlRxStatCmp:
 			continue
+
 		default:
 			logger.Warn().Msg("unsupported message type")
 			bssciError := messages.NewBssciError(opId, 5, "unsupported message type")
@@ -613,6 +673,15 @@ func (b *Backend) handleStatusRspMessage(ctx context.Context, eui common.EUI64, 
 	return error_response
 }
 
+func (b *Backend) handleVmStatusRspMessage(ctx context.Context, eui common.EUI64, msg *messages.VmStatusRsp) messages.Message {
+	error_response := b.forwardBasestationMessage(ctx, eui, msg)
+	if error_response == nil {
+		response := messages.NewVmStatusCmp(msg.GetOpId())
+		return &response
+	}
+	return error_response
+}
+
 func (b *Backend) handleAttMessage(ctx context.Context, eui common.EUI64, msg *messages.Att) messages.Message {
 	// Att has to be handled by downstream application
 	return b.forwardEndnodeMessage(ctx, eui, msg)
@@ -627,6 +696,15 @@ func (b *Backend) handleUlDataMessage(ctx context.Context, eui common.EUI64, msg
 	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewUlDataRsp(msg.GetOpId())
+		return &response
+	}
+	return error_response
+}
+
+func (b *Backend) handleVmUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.VmUlData) messages.Message {
+	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
+	if error_response == nil {
+		response := messages.NewVmUlDataRsp(msg.GetOpId())
 		return &response
 	}
 	return error_response

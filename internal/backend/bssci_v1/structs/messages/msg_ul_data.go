@@ -68,7 +68,6 @@ func NewUlData(
 	dlOpen bool,
 	responseExp bool,
 	dlAck bool,
-
 ) UlData {
 	return UlData{
 		Command:     structs.MsgUlData,
@@ -130,7 +129,6 @@ func (m *UlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-
 		Message: &msg.ProtoEndnodeMessage_UlData{
 			UlData: &msg.EndnodeUlDataMessage{
 				Data:   m.UserData,

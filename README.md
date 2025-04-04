@@ -12,6 +12,7 @@ The mioty<sup>&reg;</sup> BSSCI Adapter is a service which converts mioty<sup>&r
 The following backends are provided:
 
 * [BSSCI V1.0.0](https://developers.mioty-alliance.com/wp-content/uploads/2025/01/BSSCI_specification_v1.0.0_rev1.pdf)
+    * Variable MAC sub channel is mostly implemented except for vm.downlink
 
 ## Integrations
 

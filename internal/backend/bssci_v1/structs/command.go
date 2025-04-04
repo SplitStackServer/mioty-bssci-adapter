@@ -62,6 +62,19 @@ const (
 	MsgUlDataCmp      Command = "ulDataCmp"
 	MsgError          Command = "error"
 	MsgErrorAck       Command = "errorAck"
+	// Variable MAC
+	MsgVmActivate      Command = "vm.activate"
+	MsgVmActivateRsp   Command = "vm.activateRsp"
+	MsgVmActivateCmp   Command = "vm.activateCmp"
+	MsgVmDeactivate    Command = "vm.deactivate"
+	MsgVmDeactivateRsp Command = "vm.deactivateRsp"
+	MsgVmDeactivateCmp Command = "vm.deactivateCmp"
+	MsgVmStatus        Command = "vm.status"
+	MsgVmStatusRsp     Command = "vm.statusRsp"
+	MsgVmStatusCmp     Command = "vm.statusCmp"
+	MsgVmUlData        Command = "vm.ulData"
+	MsgVmUlDataRsp     Command = "vm.ulDataRsp"
+	MsgVmUlDataCmp     Command = "vm.ulDataCmp"
 )
 
 // A message send by the server
@@ -89,6 +102,14 @@ const (
 	ServerMsgPing           Command = MsgPing
 	ServerMsgPingRsp        Command = MsgPingRsp
 	ServerMsgPingCmp        Command = MsgPingCmp
+	// Variable MAC
+	ServerMsgVmActivate      Command = MsgVmActivate
+	ServerMsgVmActivateCmp   Command = MsgVmActivateCmp
+	ServerMsgVmDeactivate    Command = MsgVmDeactivate
+	ServerMsgVmDeactivateCmp Command = MsgVmDeactivateCmp
+	ServerMsgVmStatus        Command = MsgVmStatus
+	ServerMsgVmStatusCmp     Command = MsgVmStatusCmp
+	ServerMsgVmUlDataRsp     Command = MsgVmUlDataRsp
 )
 
 // A message send by the client
@@ -116,4 +137,11 @@ const (
 	ClientMsgPing           Command = MsgPing
 	ClientMsgPingRsp        Command = MsgPingRsp
 	ClientMsgPingCmp        Command = MsgPingCmp
+	// Variable MAC
+	ClientMsgVmActivateRsp   Command = MsgVmActivateRsp
+	ClientMsgVmDeactivateRsp Command = MsgVmDeactivateRsp
+	ClientMsgVmStatusRsp     Command = MsgVmStatusRsp
+	ClientMsgVmUlData        Command = MsgVmUlData
+	ClientMsgVmUlDataCmp     Command = MsgVmUlDataCmp
+
 )

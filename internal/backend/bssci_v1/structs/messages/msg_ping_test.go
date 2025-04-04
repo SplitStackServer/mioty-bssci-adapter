@@ -90,6 +90,37 @@ func TestPing_GetCommand(t *testing.T) {
 	}
 }
 
+func TestPing_SetOpId(t *testing.T) {
+	type fields struct {
+		Command structs.Command
+		OpId    int64
+	}
+	type args struct {
+		opId int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{name: "ping", fields: fields{structs.MsgPing, 1}, args: args{opId: 2}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Ping{
+				Command: tt.fields.Command,
+				OpId:    tt.fields.OpId,
+			}
+			m.SetOpId(tt.args.opId)
+			
+			if m.OpId != tt.args.opId {
+				t.Errorf("Ping.SetOpId() = %v, want %v", m.OpId, tt.args.opId)
+			}
+		})
+	}
+}
+
+
 func TestNewPingRsp(t *testing.T) {
 	type args struct {
 		opId int64
@@ -245,3 +276,4 @@ func TestPingCmp_GetCommand(t *testing.T) {
 		})
 	}
 }
+

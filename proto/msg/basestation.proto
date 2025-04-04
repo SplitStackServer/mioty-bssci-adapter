@@ -13,9 +13,11 @@ message ProtoBasestationMessage {
     // Message.
     oneof message {
         // Connect
-        BasestationConnection con = 4;
+        BasestationConnection con = 3;
         // Status
-        BasestationStatus status = 5;
+        BasestationStatus status = 4;
+        // VM Status
+        BasestationVariableMacStatus vm_status = 5;
     }
 }
 
@@ -65,4 +67,10 @@ message GeoLocation {
     float lat = 1;
     float lon = 2;
     float alt = 3;
+}
+
+// The VM Status represents a list of the activated MAC-Types.
+message BasestationVariableMacStatus{
+    // List of activated macTypes
+    repeated int64 mac_types = 2;
 }

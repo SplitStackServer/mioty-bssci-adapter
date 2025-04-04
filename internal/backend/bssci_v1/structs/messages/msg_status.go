@@ -32,7 +32,7 @@ func NewStatusFromProto(opId int64, pb *cmd.RequestStatus) (*Status, error) {
 		m := NewStatus(opId)
 		return &m, nil
 	}
-	return nil, errors.New("invalid Status command")
+	return nil, errors.New("invalid RequestStatus command")
 }
 
 func (m *Status) GetOpId() int64 {

@@ -969,6 +969,234 @@ func (ts *TestMessageSuite) SetupSuite() {
 	"opId": 0
 }`,
 		},
+		{
+			name:    "msgVmActivate",
+			msgType: &VmActivate{},
+			raw:     []byte{131, 167, 99, 111, 109, 109, 97, 110, 100, 171, 118, 109, 46, 97, 99, 116, 105, 118, 97, 116, 101, 164, 111, 112, 73, 100, 0, 167, 109, 97, 99, 84, 121, 112, 101, 1},
+			msg: &VmActivate{
+				Command: structs.MsgVmActivate,
+				OpId:    0,
+				MacType: 1,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.activate",
+	"opId": 0,
+	"macType": 1
+}`,
+		},
+		{
+			name:    "msgVmActivateRsp",
+			msgType: &VmActivateRsp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 174, 118, 109, 46, 97, 99, 116, 105, 118, 97, 116, 101, 82, 115, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmActivateRsp{
+				Command: structs.MsgVmActivateRsp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.activateRsp",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmActivateCmp",
+			msgType: &VmActivateCmp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 174, 118, 109, 46, 97, 99, 116, 105, 118, 97, 116, 101, 67, 109, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmActivateCmp{
+				Command: structs.MsgVmActivateCmp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.activateCmp",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmDeactivate",
+			msgType: &VmDeactivate{},
+			raw:     []byte{131, 167, 99, 111, 109, 109, 97, 110, 100, 173, 118, 109, 46, 100, 101, 97, 99, 116, 105, 118, 97, 116, 101, 164, 111, 112, 73, 100, 0, 167, 109, 97, 99, 84, 121, 112, 101, 1},
+			msg: &VmDeactivate{
+				Command: structs.MsgVmDeactivate,
+				OpId:    0,
+				MacType: 1,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.deactivate",
+	"opId": 0,
+	"macType": 1
+}`,
+		},
+		{
+			name:    "msgVmDeactivateRsp",
+			msgType: &VmDeactivateRsp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 176, 118, 109, 46, 100, 101, 97, 99, 116, 105, 118, 97, 116, 101, 82, 115, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmDeactivateRsp{
+				Command: structs.MsgVmDeactivateRsp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.deactivateRsp",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmDeactivateCmp",
+			msgType: &VmDeactivateCmp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 176, 118, 109, 46, 100, 101, 97, 99, 116, 105, 118, 97, 116, 101, 67, 109, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmDeactivateCmp{
+				Command: structs.MsgVmDeactivateCmp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.deactivateCmp",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmStatus",
+			msgType: &VmStatus{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 169, 118, 109, 46, 115, 116, 97, 116, 117, 115, 164, 111, 112, 73, 100, 0},
+			msg: &VmStatus{
+				Command: structs.MsgVmStatus,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.status",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmStatusRsp",
+			msgType: &VmStatusRsp{},
+			raw:     []byte{131, 167, 99, 111, 109, 109, 97, 110, 100, 172, 118, 109, 46, 115, 116, 97, 116, 117, 115, 82, 115, 112, 164, 111, 112, 73, 100, 0, 168, 109, 97, 99, 84, 121, 112, 101, 115, 147, 1, 2, 3},
+			msg: &VmStatusRsp{
+				Command:  structs.MsgVmStatusRsp,
+				OpId:     0,
+				MacTypes: []int64{1, 2, 3},
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.statusRsp",
+	"opId": 0,
+	"macTypes": [
+		1,
+		2,
+		3
+	]
+}`,
+		},
+		{
+			name:    "msgVmStatusCmp",
+			msgType: &VmStatusCmp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 172, 118, 109, 46, 115, 116, 97, 116, 117, 115, 67, 109, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmStatusCmp{
+				Command: structs.MsgVmStatusCmp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.statusCmp",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmUlData",
+			msgType: &VmUlData{},
+			raw:     []byte{143, 167, 99, 111, 109, 109, 97, 110, 100, 169, 118, 109, 46, 117, 108, 68, 97, 116, 97, 164, 111, 112, 73, 100, 10, 167, 109, 97, 99, 84, 121, 112, 101, 0, 168, 117, 115, 101, 114, 68, 97, 116, 97, 196, 3, 1, 2, 3, 167, 116, 114, 120, 84, 105, 109, 101, 1, 167, 115, 121, 115, 84, 105, 109, 101, 1, 167, 102, 114, 101, 113, 79, 102, 102, 60, 163, 115, 110, 114, 203, 64, 8, 0, 0, 0, 0, 0, 0, 164, 114, 115, 115, 105, 203, 192, 89, 0, 0, 0, 0, 0, 0, 165, 101, 113, 83, 110, 114, 203, 64, 16, 0, 0, 0, 0, 0, 0, 170, 115, 117, 98, 112, 97, 99, 107, 101, 116, 115, 132, 163, 115, 110, 114, 147, 1, 2, 3, 164, 114, 115, 115, 105, 147, 4, 5, 6, 169, 102, 114, 101, 113, 117, 101, 110, 99, 121, 147, 7, 8, 9, 165, 112, 104, 97, 115, 101, 147, 10, 11, 12, 169, 99, 97, 114, 114, 83, 112, 97, 99, 101, 2, 167, 112, 97, 116, 116, 71, 114, 112, 3, 167, 112, 97, 116, 116, 78, 117, 109, 5, 163, 99, 114, 99, 196, 2, 6, 7},
+			msg: &VmUlData{
+				Command:    structs.MsgVmUlData,
+				OpId:       10,
+				MacType:    0,
+				UserData:   []byte{1, 2, 3},
+				TrxTime:    1,
+				SysTime:    1,
+				FreqOff:    60,
+				SNR:        3.0,
+				RSSI:       -100.0,
+				EqSnr:      &testEqSnr,
+				Subpackets: &testSubpackets,
+				CarrSpace:  2,
+				PattGrp:    3,
+				PattNum:    5,
+				CRC:        [2]byte{6, 7},
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.ulData",
+	"opId": 10,
+	"macType": 0,
+	"userData": "AQID",
+	"trxTime": 1,
+	"sysTime": 1,
+	"freqOff": 60,
+	"snr": 3,
+	"rssi": -100,
+	"eqSnr": 4,
+	"subpackets": {
+		"snr": [
+			1,
+			2,
+			3
+		],
+		"rssi": [
+			4,
+			5,
+			6
+		],
+		"frequency": [
+			7,
+			8,
+			9
+		],
+		"phase": [
+			10,
+			11,
+			12
+		]
+	},
+	"carrSpace": 2,
+	"pattGrp": 3,
+	"pattNum": 5,
+	"crc": [
+		6,
+		7
+	]
+}`,
+		},
+		{
+			name:    "msgVmUlDataRsp",
+			msgType: &VmUlDataRsp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 172, 118, 109, 46, 117, 108, 68, 97, 116, 97, 82, 115, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmUlDataRsp{
+				Command: structs.MsgVmUlDataRsp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.ulDataRsp",
+	"opId": 0
+}`,
+		},
+		{
+			name:    "msgVmUlDataCmp",
+			msgType: &VmUlDataCmp{},
+			raw:     []byte{130, 167, 99, 111, 109, 109, 97, 110, 100, 172, 118, 109, 46, 117, 108, 68, 97, 116, 97, 67, 109, 112, 164, 111, 112, 73, 100, 0},
+			msg: &VmUlDataCmp{
+				Command: structs.MsgVmUlDataCmp,
+				OpId:    0,
+			},
+			wantErr: false,
+			json: `{
+	"command": "vm.ulDataCmp",
+	"opId": 0
+}`,
+		},
 	}
 }
 

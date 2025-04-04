@@ -25,6 +25,12 @@ message ProtoCommand {
         DetachPropagate det_prp = 7;
         // Status
         RequestStatus req_status = 8;
+        // VM Activate
+        EnableVariableMac vm_activate = 9;
+        // VM Deactivate
+        DisableVariableMac vm_deactivate = 10;
+        // VM Status
+        RequestVariableMacStatus vm_status = 11;
     };
 }
 
@@ -123,3 +129,16 @@ message DetachPropagate{
 }
 
 message RequestStatus{}
+
+
+message EnableVariableMac{
+    // MAC-Type of the intended Variable MAC
+    int64 mac_type = 2;
+}
+
+message DisableVariableMac{
+    // MAC-Type of the intended Variable MAC
+    int64 mac_type = 2;
+}
+
+message RequestVariableMacStatus{}

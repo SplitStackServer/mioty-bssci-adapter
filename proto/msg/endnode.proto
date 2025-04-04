@@ -28,6 +28,8 @@ message ProtoEndnodeMessage {
         EndnodeDownlinkRxStatus dl_rx_stat = 7;
         // Downlink result
         EndnodeDownlinkResult dl_res = 8;
+        // Variable Mac Uplink Payload
+        EndnodeVariableMacUlDataMessage vm_ul_data = 9;
     }
 }
 
@@ -146,4 +148,36 @@ message EndnodeDownlinkResult {
     google.protobuf.Timestamp tx_time = 5;
     // End Point packet counter, only if result is “sent”
     uint32 ep_packet_cnt = 6;
+}
+
+enum CarrierSpacingEnum {
+    NARROW = 0;
+    STANDARD = 1;
+    WIDE = 2;
+}
+
+enum TsmaPatternGroupEnum {
+    NORMAL = 0;
+    REPETITION = 1;
+    LOW_DELAY = 2;
+}
+
+
+message EndnodeVariableMacUlDataMessage {
+    // n Byte End Point user data U-MPDU; starting with first byte after MAC-Type
+    bytes data = 1;
+    // MAC-Type of Variable MAC, 1 byte
+    int64 macType = 2;
+    // Metadata.
+    EndnodeUplinkMetadata meta = 4;
+    // Frequency offset from center between primary and secondary channel in Hz 
+    uint64 freq_off = 5;
+    // Carrier spacing step size Bc, 0 = narrow, 1 = standard, 2 = wide
+    CarrierSpacingEnum carr_space = 6;
+    // Uplink TSMA Pattern group, 0 = normal, 1 = repetition, 2 = low delay
+    TsmaPatternGroupEnum patt_grp = 7;
+    // Uplink TSMA Pattern number p
+    uint32 patt_num = 8;
+    // Header and payload CRC, crc[0] = header CRC, crc[1] = payload CRC
+    uint64 crc = 9;
 }

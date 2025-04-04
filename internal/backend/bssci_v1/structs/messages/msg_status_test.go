@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
@@ -28,6 +29,53 @@ func TestNewStatus(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewStatus(tt.args.opId); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewStatus() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewStatusFromProto(t *testing.T) {
+	type args struct {
+		opId int64
+		pb   *cmd.RequestStatus
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *Status
+		wantErr bool
+	}{
+		{
+			name: "valid",
+			args: args{
+				opId: 10,
+				pb:   &cmd.RequestStatus{},
+			},
+			want: &Status{
+				Command: structs.MsgStatus,
+				OpId:    10,
+			},
+			wantErr: false,
+		},
+		{
+			name: "nil",
+			args: args{
+				opId: 10,
+				pb:   nil,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewStatusFromProto(tt.args.opId, tt.args.pb)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewStatusFromProto() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewStatusFromProto() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -78,6 +126,36 @@ func TestStatus_GetCommand(t *testing.T) {
 			}
 			if got := m.GetCommand(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Status.GetCommand() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStatus_SetOpId(t *testing.T) {
+	type fields struct {
+		Command structs.Command
+		OpId    int64
+	}
+	type args struct {
+		opId int64
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{name: "status", fields: fields{structs.MsgStatus, 1}, args: args{opId: 2}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &Status{
+				Command: tt.fields.Command,
+				OpId:    tt.fields.OpId,
+			}
+			m.SetOpId(tt.args.opId)
+
+			if m.OpId != tt.args.opId {
+				t.Errorf("Status.SetOpId() = %v, want %v", m.OpId, tt.args.opId)
 			}
 		})
 	}
