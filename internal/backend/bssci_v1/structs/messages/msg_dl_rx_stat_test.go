@@ -229,7 +229,7 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      2,
 				EndnodeEui: 1,
-				Message: &msg.ProtoEndnodeMessage_DlRxStat{
+				V1: &msg.ProtoEndnodeMessage_DlRxStat{
 					DlRxStat: &msg.EndnodeDownlinkRxStatus{
 						RxTime:    &testRxTimePb,
 						PacketCnt: 10,

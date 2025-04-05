@@ -366,7 +366,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			args: args{common.EUI64{1}},
 			want: &msg.ProtoBasestationMessage{
 				BsEui: 1,
-				Message: &msg.ProtoBasestationMessage_Status{
+				V1: &msg.ProtoBasestationMessage_Status{
 					Status: &msg.BasestationStatus{
 						StatusCode:  0,
 						StatusMsg:   "test",
@@ -399,7 +399,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			args: args{common.EUI64{1}},
 			want: &msg.ProtoBasestationMessage{
 				BsEui: 1,
-				Message: &msg.ProtoBasestationMessage_Status{
+				V1: &msg.ProtoBasestationMessage_Status{
 					Status: &msg.BasestationStatus{
 						StatusCode:  0,
 						StatusMsg:   "test",
@@ -432,7 +432,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			args: args{common.EUI64{1}},
 			want: &msg.ProtoBasestationMessage{
 				BsEui: 1,
-				Message: &msg.ProtoBasestationMessage_Status{
+				V1: &msg.ProtoBasestationMessage_Status{
 					Status: &msg.BasestationStatus{
 						StatusCode:  0,
 						StatusMsg:   "test",

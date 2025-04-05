@@ -77,9 +77,9 @@ func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessag
 
 		message = msg.ProtoBasestationMessage{
 			BsEui: bsEuiB,
-			Message: &msg.ProtoBasestationMessage_VmStatus{
+			V1: &msg.ProtoBasestationMessage_VmStatus{
 				VmStatus: &msg.BasestationVariableMacStatus{
-					MacTypes:  m.MacTypes,
+					MacTypes: m.MacTypes,
 				},
 			},
 		}
@@ -87,7 +87,6 @@ func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessag
 
 	return &message
 }
-
 
 // VmStatus complete
 //

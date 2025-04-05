@@ -77,7 +77,7 @@ func (m *Con) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
 
 		message = msg.ProtoBasestationMessage{
 			BsEui: bsEuiB,
-			Message: &msg.ProtoBasestationMessage_Con{
+			V1: &msg.ProtoBasestationMessage_Con{
 				Con: &msg.BasestationConnection{
 					Ts:          ts,
 					Version:     m.Version,
@@ -86,7 +86,6 @@ func (m *Con) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
 					Model:       m.Model,
 					Name:        m.Name,
 					SwVersion:   m.SwVersion,
-					GeoLocation: m.GeoLocation.IntoProto(),
 				},
 			},
 		}

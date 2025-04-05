@@ -73,7 +73,7 @@ func (m *DlRxStat) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
 
-		Message: &msg.ProtoEndnodeMessage_DlRxStat{
+		V1: &msg.ProtoEndnodeMessage_DlRxStat{
 			DlRxStat: &msg.EndnodeDownlinkRxStatus{
 				RxTime:    TimestampNsToProto(int64(m.RxTime)),
 				PacketCnt: m.PacketCnt,

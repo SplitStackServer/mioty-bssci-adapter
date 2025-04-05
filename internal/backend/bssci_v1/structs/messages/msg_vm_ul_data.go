@@ -112,7 +112,7 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: 0,
-		Message: &msg.ProtoEndnodeMessage_VmUlData{
+		V1: &msg.ProtoEndnodeMessage_VmUlData{
 			VmUlData: &msg.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,
 				Meta:      metadata.IntoProto(),

@@ -110,7 +110,7 @@ func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage 
 
 		message = msg.ProtoBasestationMessage{
 			BsEui: bsEuiB,
-			Message: &msg.ProtoBasestationMessage_Status{
+			V1: &msg.ProtoBasestationMessage_Status{
 				Status: &msg.BasestationStatus{
 					StatusCode:  m.Code,
 					StatusMsg:   m.Message,

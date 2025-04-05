@@ -289,7 +289,6 @@ func TestVmUlData_GetEndpointEui(t *testing.T) {
 	}
 }
 
-
 func TestVmUlData_IntoProto(t *testing.T) {
 
 	var testTRxTime uint64 = 1000000000000005
@@ -348,7 +347,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      1,
 				EndnodeEui: 0,
-				Message: &msg.ProtoEndnodeMessage_VmUlData{
+				V1: &msg.ProtoEndnodeMessage_VmUlData{
 					VmUlData: &msg.EndnodeVariableMacUlDataMessage{
 						Data:    []byte{},
 						MacType: 0,
@@ -579,4 +578,3 @@ func TestVmUlDataCmp_GetCommand(t *testing.T) {
 		})
 	}
 }
-

@@ -17,7 +17,7 @@ message ProtoEndnodeMessage {
     uint64 endnode_eui = 2;
 
     // Message.
-    oneof message {
+    oneof v1 {
         // Over the air attachment
         EndnodeAttMessage att = 4;
         // Over the air detachment

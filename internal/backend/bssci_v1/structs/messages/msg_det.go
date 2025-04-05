@@ -106,7 +106,7 @@ func (m *Det) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Message: &msg.ProtoEndnodeMessage_Det{
+		V1: &msg.ProtoEndnodeMessage_Det{
 			Det: &msg.EndnodeDetMessage{
 				OpId: m.OpId,
 				Sign: sign,

@@ -129,7 +129,7 @@ func (m *UlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Message: &msg.ProtoEndnodeMessage_UlData{
+		V1: &msg.ProtoEndnodeMessage_UlData{
 			UlData: &msg.EndnodeUlDataMessage{
 				Data:   m.UserData,
 				Format: format,

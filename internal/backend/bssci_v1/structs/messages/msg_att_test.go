@@ -350,7 +350,7 @@ func TestAtt_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      0,
 				EndnodeEui: 0x0706050403020100,
-				Message: &msg.ProtoEndnodeMessage_Att{
+				V1: &msg.ProtoEndnodeMessage_Att{
 					Att: &msg.EndnodeAttMessage{
 						OpId:          10,
 						Sign:          0x00010203,
@@ -391,7 +391,7 @@ func TestAtt_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      0,
 				EndnodeEui: 0x0706050403020100,
-				Message: &msg.ProtoEndnodeMessage_Att{
+				V1: &msg.ProtoEndnodeMessage_Att{
 					Att: &msg.EndnodeAttMessage{
 						OpId:          10,
 						Sign:          0x00010203,

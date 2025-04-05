@@ -315,7 +315,7 @@ func TestDet_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      1,
 				EndnodeEui: 0x0706050403020100,
-				Message: &msg.ProtoEndnodeMessage_Det{
+				V1: &msg.ProtoEndnodeMessage_Det{
 					Det: &msg.EndnodeDetMessage{
 						OpId: 10,
 						Sign: 0x00010203,

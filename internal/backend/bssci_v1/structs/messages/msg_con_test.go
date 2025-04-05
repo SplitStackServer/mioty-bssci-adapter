@@ -278,7 +278,7 @@ func TestCon_IntoProto(t *testing.T) {
 			},
 			want: &msg.ProtoBasestationMessage{
 				BsEui: testBsEui.ToUnsignedInt(),
-				Message: &msg.ProtoBasestationMessage_Con{
+				V1: &msg.ProtoBasestationMessage_Con{
 					Con: &msg.BasestationConnection{
 						Ts:          &testTs,
 						Version:     testVersion,
@@ -287,7 +287,6 @@ func TestCon_IntoProto(t *testing.T) {
 						Model:       &testModel,
 						Name:        &testBsName,
 						SwVersion:   &testSwVersion,
-						GeoLocation: &msg.GeoLocation{},
 					},
 				},
 			},
@@ -309,7 +308,7 @@ func TestCon_IntoProto(t *testing.T) {
 			},
 			want: &msg.ProtoBasestationMessage{
 				BsEui: testBsEui.ToUnsignedInt(),
-				Message: &msg.ProtoBasestationMessage_Con{
+				V1: &msg.ProtoBasestationMessage_Con{
 					Con: &msg.BasestationConnection{
 						Ts:        &testTs,
 						Version:   testVersion,
@@ -318,8 +317,6 @@ func TestCon_IntoProto(t *testing.T) {
 						Model:     &testModel,
 						Name:      &testBsName,
 						SwVersion: &testSwVersion,
-
-						GeoLocation: &msg.GeoLocation{Lat: 1, Lon: 2, Alt: 3},
 					},
 				},
 			},

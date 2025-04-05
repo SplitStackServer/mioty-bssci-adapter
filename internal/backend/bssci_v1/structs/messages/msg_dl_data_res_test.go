@@ -227,7 +227,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      2,
 				EndnodeEui: 1,
-				Message: &msg.ProtoEndnodeMessage_DlRes{
+				V1: &msg.ProtoEndnodeMessage_DlRes{
 					DlRes: &msg.EndnodeDownlinkResult{
 						DlQueId:     20,
 						Result:      msg.DownlinkResultEnum_SENT,
@@ -252,7 +252,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      2,
 				EndnodeEui: 1,
-				Message: &msg.ProtoEndnodeMessage_DlRes{
+				V1: &msg.ProtoEndnodeMessage_DlRes{
 					DlRes: &msg.EndnodeDownlinkResult{
 						DlQueId: 20,
 						Result:  msg.DownlinkResultEnum_EXPIRED,
@@ -275,7 +275,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      2,
 				EndnodeEui: 1,
-				Message: &msg.ProtoEndnodeMessage_DlRes{
+				V1: &msg.ProtoEndnodeMessage_DlRes{
 					DlRes: &msg.EndnodeDownlinkResult{
 						DlQueId: 20,
 						Result:  msg.DownlinkResultEnum_INVALID,

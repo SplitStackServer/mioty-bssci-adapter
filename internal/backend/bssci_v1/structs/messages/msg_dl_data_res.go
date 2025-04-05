@@ -115,7 +115,7 @@ func (m *DlDataRes) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Message: &msg.ProtoEndnodeMessage_DlRes{
+		V1: &msg.ProtoEndnodeMessage_DlRes{
 			DlRes: &result,
 		},
 	}

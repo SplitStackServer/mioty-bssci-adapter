@@ -362,7 +362,7 @@ func TestUlData_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      0,
 				EndnodeEui: 0x0706050403020100,
-				Message: &msg.ProtoEndnodeMessage_UlData{
+				V1: &msg.ProtoEndnodeMessage_UlData{
 					UlData: &msg.EndnodeUlDataMessage{
 						Data:   []byte{0, 1, 2, 3},
 						Format: 0x83,
@@ -403,7 +403,7 @@ func TestUlData_IntoProto(t *testing.T) {
 			want: &msg.ProtoEndnodeMessage{
 				BsEui:      0,
 				EndnodeEui: 0x0706050403020100,
-				Message: &msg.ProtoEndnodeMessage_UlData{
+				V1: &msg.ProtoEndnodeMessage_UlData{
 					UlData: &msg.EndnodeUlDataMessage{
 						Data:   []byte{0, 1, 2, 3},
 						Format: 0,

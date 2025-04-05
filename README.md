@@ -19,6 +19,15 @@ The following backends are provided:
 The following integrations are provided:
 
 * MQTT 3.1/3.11
+    * Topic layout: "basestation/{{ .BsEui }}/#"
+        * /state
+        * /command
+        * /response
+        * /event
+            * /bs/{{ .EventType }}
+            * /ep/{{ .EventType }}
+
+
 
 
 

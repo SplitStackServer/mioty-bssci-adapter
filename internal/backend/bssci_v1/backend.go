@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/patrickmn/go-cache"
+
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -33,7 +33,6 @@ type Backend struct {
 	tlsKey  string
 
 	listener net.Listener
-	scheme   string
 	isClosed bool
 
 	basestations basestations
@@ -45,16 +44,11 @@ type Backend struct {
 
 	basestationMessageHandler func(*msg.ProtoBasestationMessage)
 	endnodeMessageHandler     func(*msg.ProtoEndnodeMessage)
-
-	// Cache to store diid to UUIDs.
-	diidCache *cache.Cache
 }
 
 // NewBackend creates a new Backend.
 func NewBackend(conf config.Config) (backend *Backend, err error) {
 	b := Backend{
-		scheme: "ssl",
-
 		basestations: basestations{
 			basestations: make(map[common.EUI64]*connection),
 		},
@@ -67,8 +61,6 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 		pingInterval:  conf.Backend.BssciV1.PingInterval,
 		readTimeout:   conf.Backend.BssciV1.ReadTimeout,
 		writeTimeout:  conf.Backend.BssciV1.WriteTimeout,
-
-		diidCache: cache.New(time.Minute, time.Minute),
 	}
 
 	// create the listener
@@ -135,7 +127,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 	var msg messages.ServerMessage
 
-	switch pb.Command.(type) {
+	switch pb.V1.(type) {
 	case *cmd.ProtoCommand_DlDataQue:
 		command := pb.GetDlDataQue()
 		msgA, err := messages.NewDlDataQueFromProto(0, command)
@@ -244,7 +236,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 
 	var msg messages.Message
 
-	switch pb.Command.(type) {
+	switch pb.V1.(type) {
 	case *rsp.ProtoResponse_DetRsp:
 		command := pb.GetDetRsp()
 		msgA, err := messages.NewDetRspFromProto(opId, command)
@@ -252,7 +244,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 			return err
 		}
 		msg = msgA
-		log.Debug().Str("proto", "ProtoResponse_DetRsp").Msgf("detaching endnode %v from basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+		log.Debug().Str("proto", "ProtoResponse_DetRsp").Int64("op_id", opId).Msgf("detaching endnode %v from basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
 	case *rsp.ProtoResponse_AttRsp:
 		command := pb.GetAttRsp()
 		msgA, err := messages.NewAttRspFromProto(opId, command)
@@ -260,7 +252,15 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 			return err
 		}
 		msg = msgA
-		log.Debug().Str("proto", "ProtoResponse_AttRsp").Msgf("attaching endnode %v to basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+		log.Debug().Str("proto", "ProtoResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+	
+	case *rsp.ProtoResponse_Err:
+		command := pb.GetErr()
+		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
+
+		msg = &msgA
+		log.Warn().Str("proto", "ProtoResponse_Err").Int64("op_id", opId).Msgf("server responded with error: %s", command.GetMessage())
+	
 	default:
 		return errors.New("empty protobuf command")
 	}

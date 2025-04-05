@@ -12,7 +12,7 @@ message ProtoCommand {
     // Basestation EUI, 8 bytes little endian
     uint64 bs_eui = 1;
 
-    oneof command {
+    oneof v1 {
         // Enque downlink
         EnqueDownlink dl_data_que = 3;
         // Revoke downlink

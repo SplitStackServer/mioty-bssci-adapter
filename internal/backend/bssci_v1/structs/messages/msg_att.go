@@ -139,7 +139,7 @@ func (m *Att) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		Message: &msg.ProtoEndnodeMessage_Att{
+		V1: &msg.ProtoEndnodeMessage_Att{
 			Att: &msg.EndnodeAttMessage{
 				OpId:          m.OpId,
 				AttachmentCnt: m.AttachCnt,

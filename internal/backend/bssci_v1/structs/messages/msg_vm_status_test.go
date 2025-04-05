@@ -301,7 +301,7 @@ func TestVmStatusRsp_IntoProto(t *testing.T) {
 			args: args{bsEui: &common.EUI64{1}},
 			want: &msg.ProtoBasestationMessage{
 				BsEui: 1,
-				Message: &msg.ProtoBasestationMessage_VmStatus{
+				V1: &msg.ProtoBasestationMessage_VmStatus{
 					VmStatus: &msg.BasestationVariableMacStatus{
 						MacTypes: []int64{10, 20},
 					},

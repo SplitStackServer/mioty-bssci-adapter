@@ -15,11 +15,12 @@ message ProtoResponse{
     uint64 bs_eui = 2;
 
     // Command.
-    oneof command {
+    oneof v1 {
         // Server attachment
         EndnodeAttachResponse att_rsp = 4;
         // Server detachment
         EndnodeDetachResponse det_rsp = 5;
+        ErrorResponse err = 6;
     };
 }
 
@@ -42,3 +43,7 @@ message EndnodeDetachResponse{
     uint32 sign = 2;
 }
 
+message ErrorResponse{
+    // Error message
+    string message = 2;
+}
