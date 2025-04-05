@@ -551,9 +551,8 @@ func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
 		log.Error().Err(err).Msg("unmarshal server command error")
 		return
 	}
-	mqttCommandCounter(common.Eui64FromUnsignedInt(pb.BsEui).String())
-	integ.serverCommandHandler(&pb)
 
+	integ.serverCommandHandler( &pb)
 }
 
 func (integ *Integration) handleServerResponse(c paho.Client, msg paho.Message) {
@@ -563,9 +562,8 @@ func (integ *Integration) handleServerResponse(c paho.Client, msg paho.Message) 
 		log.Error().Err(err).Msg("unmarshal server response error")
 		return
 	}
-	mqttResponseCounter(common.Eui64FromUnsignedInt(pb.BsEui).String())
-	integ.serverResponseHandler(&pb)
 
+	integ.serverResponseHandler(&pb)
 }
 
 func (b *Integration) unsubscribeBasestation(ctx context.Context, bsEui common.EUI64) error {

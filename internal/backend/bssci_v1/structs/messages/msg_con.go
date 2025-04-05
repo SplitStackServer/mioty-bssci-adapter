@@ -3,6 +3,7 @@ package messages
 import (
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 
 	"github.com/google/uuid"
@@ -62,6 +63,11 @@ func (m *Con) GetCommand() structs.Command {
 
 func (m *Con) GetEui() common.EUI64 {
 	return m.BsEui
+}
+
+// implements BasestationMessage.GetEventType()
+func (m *Con) GetEventType() events.EventType {
+	return events.EventTypeBsCon
 }
 
 // implements BasestationMessage.IntoProto()

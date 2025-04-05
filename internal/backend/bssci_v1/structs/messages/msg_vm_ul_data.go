@@ -3,6 +3,7 @@ package messages
 import (
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 )
 
@@ -87,9 +88,9 @@ func (m *VmUlData) GetCommand() structs.Command {
 	return structs.MsgVmUlData
 }
 
-// implements EndnodeMessage.GetEndpointEui()
-func (m *VmUlData) GetEndpointEui() common.EUI64 {
-	return common.EUI64{0}
+// implements EndnodeMessage.GetEventType()
+func (m *VmUlData) GetEventType() events.EventType {
+	return events.EventTypeEpUl
 }
 
 // implements EndnodeMessage.IntoProto()

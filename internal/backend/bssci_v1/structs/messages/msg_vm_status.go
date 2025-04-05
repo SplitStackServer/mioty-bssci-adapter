@@ -5,6 +5,7 @@ import (
 	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 )
 
@@ -65,6 +66,11 @@ func (m *VmStatusRsp) GetOpId() int64 {
 
 func (m *VmStatusRsp) GetCommand() structs.Command {
 	return structs.MsgVmStatusRsp
+}
+
+// implements BasestationMessage.GetEventType()
+func (m *VmStatusRsp) GetEventType() events.EventType {
+	return events.EventTypeBsVmStatus
 }
 
 // implements BasestationMessage.IntoProto()

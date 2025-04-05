@@ -3,6 +3,7 @@ package messages
 import (
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
@@ -221,7 +222,7 @@ func TestUlData_GetCommand(t *testing.T) {
 	}
 }
 
-func TestUlData_GetEndpointEui(t *testing.T) {
+func TestUlData_GetEventType(t *testing.T) {
 	type fields struct {
 		Command     structs.Command
 		OpId        int64
@@ -244,7 +245,7 @@ func TestUlData_GetEndpointEui(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   common.EUI64
+		want   events.EventType
 	}{
 		{
 			name: "ulData",
@@ -261,7 +262,7 @@ func TestUlData_GetEndpointEui(t *testing.T) {
 				ResponseExp: false,
 				DlAck:       false,
 			},
-			want: common.EUI64{0, 1, 2, 3, 4, 5, 6, 7},
+			want: events.EventTypeEpUl,
 		},
 	}
 	for _, tt := range tests {
@@ -285,8 +286,8 @@ func TestUlData_GetEndpointEui(t *testing.T) {
 				ResponseExp: tt.fields.ResponseExp,
 				DlAck:       tt.fields.DlAck,
 			}
-			if got := m.GetEndpointEui(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UlData.GetEndpointEui() = %v, want %v", got, tt.want)
+			if got := m.GetEventType(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("UlData.GetEventType() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -42,8 +42,8 @@ type Backend struct {
 	readTimeout   time.Duration
 	writeTimeout  time.Duration
 
-	basestationMessageHandler func(*msg.ProtoBasestationMessage)
-	endnodeMessageHandler     func(*msg.ProtoEndnodeMessage)
+	basestationMessageHandler func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage)
+	endnodeMessageHandler     func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage)
 }
 
 // NewBackend creates a new Backend.
@@ -95,23 +95,18 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 	return
 }
 
-// BSSCI version used by the backend
-func (b *Backend) GetBssciVersion() string {
-	return "1.0.0"
-}
-
 // Handler for Subscribe events.
 func (b *Backend) SetSubscribeEventHandler(f func(events.Subscribe)) {
 	b.basestations.subscribeEventHandler = f
 }
 
 // Handler for connection messages from basestations
-func (b *Backend) SetBasestationMessageHandler(f func(*msg.ProtoBasestationMessage)) {
+func (b *Backend) SetBasestationMessageHandler(f func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage)) {
 	b.basestationMessageHandler = f
 }
 
 // Handler for uplink messages from endnodes
-func (b *Backend) SetEndnodeMessageHandler(f func(*msg.ProtoEndnodeMessage)) {
+func (b *Backend) SetEndnodeMessageHandler(f func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage)) {
 	b.endnodeMessageHandler = f
 }
 
@@ -616,7 +611,7 @@ func (b *Backend) forwardBasestationMessage(ctx context.Context, eui common.EUI6
 
 	if b.basestationMessageHandler != nil {
 		data := msg.IntoProto(&eui)
-		b.basestationMessageHandler(data)
+		b.basestationMessageHandler(eui, msg.GetEventType(), data)
 		return nil
 	}
 
@@ -632,7 +627,7 @@ func (b *Backend) forwardEndnodeMessage(ctx context.Context, eui common.EUI64, m
 
 	if b.endnodeMessageHandler != nil {
 		data := msg.IntoProto(eui)
-		b.endnodeMessageHandler(data)
+		b.endnodeMessageHandler(eui, msg.GetEventType(), data)
 		return nil
 	}
 

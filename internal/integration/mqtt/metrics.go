@@ -16,15 +16,15 @@ var (
 		Help: "The number of gateway states published by the MQTT integration",
 	})
 
-	cc = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "integration_mqtt_command_count",
-		Help: "The number of commands received by the MQTT integration (per subscriber).",
-	}, []string{"basestation"})
+	// cc = promauto.NewCounterVec(prometheus.CounterOpts{
+	// 	Name: "integration_mqtt_command_count",
+	// 	Help: "The number of commands received by the MQTT integration (per subscriber).",
+	// }, []string{"basestation"})
 
-	rr = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "integration_mqtt_response_count",
-		Help: "The number of responsess received by the MQTT integration (per subscriber).",
-	}, []string{"basestation"})
+	// rr = promauto.NewCounterVec(prometheus.CounterOpts{
+	// 	Name: "integration_mqtt_response_count",
+	// 	Help: "The number of responsess received by the MQTT integration (per subscriber).",
+	// }, []string{"basestation"})
 
 	mqttc = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "integration_mqtt_connect_count",
@@ -50,13 +50,13 @@ func mqttStateCounter() prometheus.Counter {
 	return sc
 }
 
-func mqttCommandCounter(c string) prometheus.Counter {
-	return cc.With(prometheus.Labels{"basestation": c})
-}
+// func mqttCommandCounter(c string) prometheus.Counter {
+// 	return cc.With(prometheus.Labels{"basestation": c})
+// }
 
-func mqttResponseCounter(c string) prometheus.Counter {
-	return rr.With(prometheus.Labels{"basestation": c})
-}
+// func mqttResponseCounter(c string) prometheus.Counter {
+// 	return rr.With(prometheus.Labels{"basestation": c})
+// }
 
 func mqttConnectCounter() prometheus.Counter {
 	return mqttc

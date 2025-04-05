@@ -6,6 +6,7 @@ import (
 	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 )
 
@@ -104,9 +105,9 @@ func (m *Att) GetCommand() structs.Command {
 	return structs.MsgAtt
 }
 
-// implements EndnodeMessage.GetEndpointEui()
-func (m *Att) GetEndpointEui() common.EUI64 {
-	return m.EpEui
+// implements EndnodeMessage.GetEventType()
+func (m *Att) GetEventType() events.EventType {
+	return events.EventTypeEpOtaa
 }
 
 // implements EndnodeMessage.IntoProto()

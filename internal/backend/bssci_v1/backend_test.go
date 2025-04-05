@@ -573,8 +573,8 @@ func (ts *TestBackendSuite) SetupTest() {
 	backend.SetSubscribeEventHandler(func(pl events.Subscribe) {
 		subscribeChan <- pl
 	})
-	backend.SetBasestationMessageHandler(func(*msg.ProtoBasestationMessage) {})
-	backend.SetEndnodeMessageHandler(func(*msg.ProtoEndnodeMessage) {})
+	backend.SetBasestationMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage) {})
+	backend.SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage) {})
 
 	ts.backend = backend
 }
@@ -584,14 +584,6 @@ func (ts *TestBackendSuite) TearDownTest() {
 	assert := require.New(ts.T())
 
 	assert.NoError(ts.backend.Stop())
-}
-
-func (ts *TestBackendSuite) TestBackend_GetBssciVersion() {
-	assert := require.New(ts.T())
-
-	version := ts.backend.GetBssciVersion()
-
-	assert.Equal("1.0.0", version)
 }
 
 func (ts *TestBackendSuite) TestBackend_HandleBasestationMessages() {
