@@ -181,6 +181,55 @@ func TestEUI64_String(t *testing.T) {
 	}
 }
 
+func TestEui64FromHexString(t *testing.T) {
+	type args struct {
+		in string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    EUI64
+		wantErr bool
+	}{
+		{
+			name: "zero",
+			args: args{in: "0000000000000000"},
+			want: EUI64{},
+			wantErr: false,
+		},
+		{
+			name: "one",
+			args: args{in: "0100000000000000"},
+			want: EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			wantErr: false,
+		},
+		{
+			name: "max",
+			args: args{in: "ffffffffffffffff"},
+			want: EUI64{255, 255, 255, 255, 255, 255, 255, 255},
+			wantErr: false,
+		},
+		{
+			name: "invalid",
+			args: args{in: "0xfffffffff"},
+			want: EUI64{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Eui64FromHexString(tt.args.in)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Eui64FromHexString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Eui64FromHexString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestEUI64_MarshalText(t *testing.T) {
 	tests := []struct {
 		name    string

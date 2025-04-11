@@ -79,7 +79,7 @@ func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessag
 	var message msg.ProtoBasestationMessage
 
 	if m != nil && bsEui != nil {
-		bsEuiB := bsEui.ToUnsignedInt()
+		bsEuiB := bsEui.String()
 
 		message = msg.ProtoBasestationMessage{
 			BsEui: bsEuiB,

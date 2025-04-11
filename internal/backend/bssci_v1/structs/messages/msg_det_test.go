@@ -314,8 +314,8 @@ func TestDet_IntoProto(t *testing.T) {
 			},
 			args: args{bsEui: common.EUI64{1}},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      1,
-				EndnodeEui: 0x0706050403020100,
+				BsEui:      "1",
+				EndnodeEui: "0x0706050403020100",
 				V1: &msg.ProtoEndnodeMessage_Det{
 					Det: &msg.EndnodeDetMessage{
 						OpId: 10,

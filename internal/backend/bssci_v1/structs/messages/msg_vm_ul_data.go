@@ -95,7 +95,7 @@ func (m *VmUlData) GetEventType() events.EventType {
 
 // implements EndnodeMessage.IntoProto()
 func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
-	bsEuiB := bsEui.ToUnsignedInt()
+	bsEuiB := bsEui.String()
 
 	crc := uint64(m.CRC[0]) | uint64(m.CRC[0])<<32
 
@@ -112,7 +112,6 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
-		EndnodeEui: 0,
 		V1: &msg.ProtoEndnodeMessage_VmUlData{
 			VmUlData: &msg.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,

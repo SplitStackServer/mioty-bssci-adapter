@@ -76,7 +76,7 @@ func (m *Con) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
 	var message msg.ProtoBasestationMessage
 
 	if m != nil {
-		bsEuiB := m.BsEui.ToUnsignedInt()
+		bsEuiB := m.BsEui.String()
 
 		now := getNow().UnixNano()
 		ts := TimestampNsToProto(now)

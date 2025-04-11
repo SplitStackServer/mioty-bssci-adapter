@@ -53,7 +53,7 @@ func TestNewDetPrpFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.DetachPropagate{
-					EndnodeEui: 0x0001020304050607,
+					EndnodeEui: "0x0001020304050607",
 				},
 			},
 			want: &DetPrp{

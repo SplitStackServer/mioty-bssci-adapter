@@ -95,8 +95,8 @@ func (m *DlDataRes) GetEventType() events.EventType {
 
 // implements EndnodeMessage.IntoProto()
 func (m *DlDataRes) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
-	bsEuiB := bsEui.ToUnsignedInt()
-	epEuiB := m.EpEui.ToUnsignedInt()
+	bsEuiB := bsEui.String()
+	epEuiB := m.EpEui.String()
 
 	result := msg.EndnodeDownlinkResult{
 		DlQueId: m.QueId,

@@ -124,10 +124,15 @@ func NewDlDataQueFromProto(opId int64, pb *cmd.EnqueDownlink) (*DlDataQue, error
 			format = uint8(0xff & *pb.Format)
 		}
 
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
+
 		msg := DlDataQue{
 			Command:      structs.MsgDlDataQue,
 			OpId:         opId,
-			EpEui:        common.Eui64FromUnsignedInt(pb.EndnodeEui),
+			EpEui:        epEui,
 			QueId:        pb.DlQueId,
 			Format:       &format,
 			Prio:         pb.Priority,

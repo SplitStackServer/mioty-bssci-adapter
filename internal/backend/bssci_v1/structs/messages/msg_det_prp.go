@@ -37,7 +37,10 @@ func NewDetPrp(
 
 func NewDetPrpFromProto(opId int64, pb *cmd.DetachPropagate) (*DetPrp, error) {
 	if pb != nil {
-		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
 		m := NewDetPrp(opId, epEui)
 		return &m, nil
 	}

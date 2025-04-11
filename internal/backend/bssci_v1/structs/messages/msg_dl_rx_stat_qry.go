@@ -31,7 +31,10 @@ func NewDlRxStatQry(opId int64, epEui common.EUI64) DlRxStatQry {
 
 func NewDlRxStatQryFromProto(opId int64, pb *cmd.DownlinkRxStatusQuery) (*DlRxStatQry, error) {
 	if pb != nil {
-		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
 		m := NewDlRxStatQry(opId, epEui)
 		return &m, nil
 	}

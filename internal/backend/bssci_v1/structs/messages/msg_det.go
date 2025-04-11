@@ -88,8 +88,8 @@ func (m *Det) GetEventType() events.EventType {
 
 // implements EndnodeMessage.IntoProto()
 func (m *Det) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
-	bsEuiB := bsEui.ToUnsignedInt()
-	epEuiB := m.EpEui.ToUnsignedInt()
+	bsEuiB := bsEui.String()
+	epEuiB := m.EpEui.String()
 
 	sign := binary.LittleEndian.Uint32(m.Sign[:])
 

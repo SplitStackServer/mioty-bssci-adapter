@@ -41,6 +41,21 @@ func Eui64FromUnsignedInt(in uint64) EUI64 {
 	return b
 }
 
+// helper function to parse a int64 formatted eui64
+func Eui64FromHexString(in string) (EUI64, error) {
+	var eui EUI64
+
+	b, err := hex.DecodeString(strings.TrimPrefix(in, "0x"))
+	if err != nil {
+		return eui, err
+	}
+
+	copy(eui[:], b)
+	return eui, nil
+
+}
+
+
 // helper function to parse eui64 into a int64
 func (e *EUI64) ToInt() int64 {
 	return int64(e[7]) |

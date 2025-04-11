@@ -59,7 +59,7 @@ func TestNewDlDataRevFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.RevokeDownlink{
-					EndnodeEui: 1,
+					EndnodeEui: "1",
 					DlQueId:    20,
 				},
 			},

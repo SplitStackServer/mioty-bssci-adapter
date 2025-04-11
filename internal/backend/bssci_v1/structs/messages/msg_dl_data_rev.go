@@ -41,7 +41,10 @@ func NewDlDataRev(
 
 func NewDlDataRevFromProto(opId int64, pb *cmd.RevokeDownlink) (*DlDataRev, error) {
 	if pb != nil {
-		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
 		queId := pb.DlQueId
 		m := NewDlDataRev(opId, epEui, queId)
 		return &m, nil

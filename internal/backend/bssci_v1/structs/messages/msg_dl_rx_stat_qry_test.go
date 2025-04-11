@@ -54,7 +54,7 @@ func TestNewDlRxStatQryFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.DownlinkRxStatusQuery{
-					EndnodeEui: 1,
+					EndnodeEui: "1",
 				},
 			},
 			want: &DlRxStatQry{

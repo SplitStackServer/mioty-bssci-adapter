@@ -349,8 +349,8 @@ func TestAtt_IntoProto(t *testing.T) {
 				Nonce:      [4]byte{7, 6, 5, 4},
 			},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      0,
-				EndnodeEui: 0x0706050403020100,
+				BsEui:      "0",
+				EndnodeEui: "0x0706050403020100",
 				V1: &msg.ProtoEndnodeMessage_Att{
 					Att: &msg.EndnodeAttMessage{
 						OpId:          10,
@@ -390,8 +390,8 @@ func TestAtt_IntoProto(t *testing.T) {
 				Nonce:      [4]byte{7, 6, 5, 4},
 			},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      0,
-				EndnodeEui: 0x0706050403020100,
+				BsEui:      "0",
+				EndnodeEui: "0x0706050403020100",
 				V1: &msg.ProtoEndnodeMessage_Att{
 					Att: &msg.EndnodeAttMessage{
 						OpId:          10,
@@ -494,7 +494,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &rsp.EndnodeAttachResponse{
-					EndnodeEui:    0x0001020304050607,
+					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        nil,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
 				},
@@ -512,7 +512,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &rsp.EndnodeAttachResponse{
-					EndnodeEui:    0x0001020304050607,
+					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        &testShAddr32,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
 				},
@@ -530,7 +530,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &rsp.EndnodeAttachResponse{
-					EndnodeEui:    0x0001020304050607,
+					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        &testShAddr32,
 					NwkSessionKey: []byte{},
 				},

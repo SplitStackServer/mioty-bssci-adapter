@@ -346,8 +346,8 @@ func TestVmUlData_IntoProto(t *testing.T) {
 			},
 			args: args{bsEui: common.EUI64{1}},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      1,
-				EndnodeEui: 0,
+				BsEui:      "1",
+				EndnodeEui: "0",
 				V1: &msg.ProtoEndnodeMessage_VmUlData{
 					VmUlData: &msg.EndnodeVariableMacUlDataMessage{
 						Data:    []byte{},

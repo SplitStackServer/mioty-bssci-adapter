@@ -106,8 +106,8 @@ func (m *UlData) GetEventType() events.EventType {
 
 // implements EndnodeMessage.IntoProto()
 func (m *UlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
-	bsEuiB := bsEui.ToUnsignedInt()
-	epEuiB := m.EpEui.ToUnsignedInt()
+	bsEuiB := bsEui.String()
+	epEuiB := m.EpEui.String()
 
 	var format uint32
 	if m.Format == nil {

@@ -11,10 +11,10 @@ option go_package = "mioty-bssci-adapter/internal/api/msg";
 // option features.(pb.go).api_level = API_OPAQUE;
 
 message ProtoEndnodeMessage {
-    // Basestation EUI, 8 bytes little endian
-    uint64 bs_eui = 1;
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Basestation EUI, hex string
+    string bs_eui = 1;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
 
     // Message.
     oneof v1 {

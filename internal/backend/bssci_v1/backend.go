@@ -36,10 +36,10 @@ type Backend struct {
 
 	basestations basestations
 
-	statsInterval time.Duration
-	pingInterval  time.Duration
-	keepAlivePeriod   time.Duration
-	writeTimeout  time.Duration
+	statsInterval   time.Duration
+	pingInterval    time.Duration
+	keepAlivePeriod time.Duration
+	writeTimeout    time.Duration
 
 	basestationMessageHandler func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage)
 	endnodeMessageHandler     func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage)
@@ -56,10 +56,10 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 		tlsCert: conf.Backend.BssciV1.TLSCert,
 		tlsKey:  conf.Backend.BssciV1.TLSKey,
 
-		statsInterval: conf.Backend.BssciV1.StatsInterval,
-		pingInterval:  conf.Backend.BssciV1.PingInterval,
-		keepAlivePeriod:   conf.Backend.BssciV1.KeepAlivePeriod,
-		writeTimeout: time.Second,
+		statsInterval:   conf.Backend.BssciV1.StatsInterval,
+		pingInterval:    conf.Backend.BssciV1.PingInterval,
+		keepAlivePeriod: conf.Backend.BssciV1.KeepAlivePeriod,
+		writeTimeout:    time.Second,
 	}
 
 	// create the listener
@@ -126,7 +126,10 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		return errors.New("empty protobuf command")
 	}
 
-	bsEui := common.Eui64FromUnsignedInt(pb.BsEui)
+	bsEui, err := common.Eui64FromHexString(pb.BsEui)
+	if err != nil {
+		return errors.New("invalid eui64 hex string")
+	}
 
 	logger := log.With().Str("bs_eui", bsEui.String()).Logger()
 
@@ -237,7 +240,10 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 	}
 
 	opId := pb.OpId
-	bsEui := common.Eui64FromUnsignedInt(pb.BsEui)
+	bsEui, err := common.Eui64FromHexString(pb.BsEui)
+	if err != nil {
+		return err
+	}
 
 	var msg messages.Message
 
@@ -249,7 +255,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 			return err
 		}
 		msg = msgA
-		log.Debug().Str("proto", "ProtoResponse_DetRsp").Int64("op_id", opId).Msgf("detaching endnode %v from basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+		log.Debug().Str("proto", "ProtoResponse_DetRsp").Int64("op_id", opId).Msgf("detaching endnode %v from basestation %v", command.EndnodeEui, bsEui.String())
 	case *rsp.ProtoResponse_AttRsp:
 		command := pb.GetAttRsp()
 		msgA, err := messages.NewAttRspFromProto(opId, command)
@@ -257,7 +263,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 			return err
 		}
 		msg = msgA
-		log.Debug().Str("proto", "ProtoResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
+		log.Debug().Str("proto", "ProtoResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", command.EndnodeEui, bsEui.String())
 
 	case *rsp.ProtoResponse_Err:
 		command := pb.GetErr()
@@ -387,7 +393,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 
 				logger.Debug().Msg("sent scheduled ping request")
 				pingPongCounter("server", eui.String())
-				
+
 			case <-statusTicker.C:
 				opId := bsConnection.GetAndDecrementOpId()
 				msg := messages.NewStatus(opId)
@@ -425,7 +431,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI64, connection *connection) error {
 	logger := zerolog.Ctx(ctx)
 	for {
-		
+
 		cmdHeader, raw, err := connection.Read()
 
 		if err != nil {

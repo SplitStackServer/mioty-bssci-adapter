@@ -159,7 +159,7 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 
 		// set last will and testament.
 		pl := msg.ProtoBasestationState{
-			BsEui: bsEui.ToUnsignedInt(),
+			BsEui: bsEui.String(),
 			State: msg.ConnectionState_OFFLINE,
 		}
 		bb, err := integ.marshal(&pl)
@@ -211,7 +211,7 @@ func (integ *Integration) Stop() error {
 		})
 
 		pl := msg.ProtoBasestationState{
-			BsEui: bsEui.ToUnsignedInt(),
+			BsEui: bsEui.String(),
 			State: msg.ConnectionState_OFFLINE,
 		}
 		if err := integ.PublishState(ctx, bsEui, &pl); err != nil {
@@ -471,7 +471,7 @@ func (integ *Integration) subscribeLoop() {
 			})
 
 			pl := msg.ProtoBasestationState{
-				BsEui: bsEui.ToUnsignedInt(),
+				BsEui: bsEui.String(),
 				State: msg.ConnectionState_ONLINE,
 			}
 
@@ -493,7 +493,7 @@ func (integ *Integration) subscribeLoop() {
 			})
 
 			pl := msg.ProtoBasestationState{
-				BsEui: bsEui.ToUnsignedInt(),
+				BsEui: bsEui.String(),
 				State: msg.ConnectionState_OFFLINE,
 			}
 
