@@ -37,7 +37,7 @@ type DlDataQue struct {
 	// End Point packet counter for which the according userData entry is valid, omitted if cntDepend is false
 	PacketCnt *[]uint32 `msg:"packetCnt,omitempty" json:"packetCnt,omitempty"`
 	// End Point user data for each of the m packet counters, single user data entry if cntDepend is false
-	UserData [][]byte `msg:"userData" json:"userData"`
+	UserData [][]uint8 `msg:"userData" json:"userData"`
 	// User data format identifier, 8 bit, optional, default 0
 	Format *byte `msg:"format,omitempty" json:"format,omitempty"`
 	// Priority, higher values are prioritized, single precision floating point, optional, default 0

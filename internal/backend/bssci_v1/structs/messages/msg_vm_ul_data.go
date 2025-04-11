@@ -7,7 +7,10 @@ import (
 	"mioty-bssci-adapter/internal/common"
 )
 
+
+
 //go:generate msgp
+
 
 // The VM UL data operation is initiated by the Base Station after receiving uplink data from
 // an End Point using a variable MAC (VM)
@@ -20,7 +23,7 @@ type VmUlData struct {
 	// MAC-Type of the Variable MAC
 	MacType int64 `msg:"macType" json:"macType"`
 	// n Byte End Point user data U-MPDU; starting with first byte after MAC-Type
-	UserData []byte `msg:"userData" json:"userData"`
+	UserData []uint8 `msg:"userData" json:"userData"`
 	// Transceiver time of reception, center of last subpacket, 64 bit, ns resolution
 	TrxTime uint64 `msg:"trxTime" json:"trxTime"`
 	// Unix UTC time of reception, center of last subpacket, 64 bit, ns resolution

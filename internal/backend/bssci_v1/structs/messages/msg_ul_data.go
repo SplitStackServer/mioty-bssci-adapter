@@ -41,7 +41,7 @@ type UlData struct {
 	// Subpackets object with reception info for every subpacket, optional
 	Subpackets *Subpackets `msg:"subpackets,omitempty" json:"subpackets,omitempty"`
 	// End Point user data, might be empty
-	UserData []byte `msg:"userData" json:"userData"`
+	UserData []uint8 `msg:"userData" json:"userData"`
 	// User data format identifier, 8 bit, optional, default 0
 	Format *byte `msg:"format,omitempty" json:"format,omitempty"`
 	// True if End Point downlink window is opened
