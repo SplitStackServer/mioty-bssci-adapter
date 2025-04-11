@@ -26,6 +26,8 @@ type connection struct {
 func newConnection(conn net.Conn, snBsUuid structs.SessionUuid) connection {
 	snScUuid := uuid.New()
 
+	conn.SetReadDeadline(time.Time{})
+
 	return connection{
 		conn: conn,
 		// stats:      stats.NewCollector(),
@@ -50,7 +52,7 @@ func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err 
 	conn.conn.SetWriteDeadline(time.Now().Add(timeout))
 	_, err = conn.conn.Write(bb)
 	if err != nil {
-		conn.conn.Close()
+		// conn.conn.Close()
 		return errors.Wrap(err, "write error")
 	}
 	conn.lastActive = time.Now()
@@ -59,14 +61,12 @@ func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err 
 }
 
 // Read a message from this connection
-func (conn *connection) Read(timeout time.Duration) (cmd structs.CommandHeader, raw msgp.Raw, err error) {
+func (conn *connection) Read() (cmd structs.CommandHeader, raw msgp.Raw, err error) {
 	conn.Lock()
 	defer conn.Unlock()
 
-	conn.conn.SetReadDeadline(time.Now().Add(timeout))
 	cmd, raw, err = ReadBssciMessage(conn.conn)
 	if err != nil {
-		conn.conn.Close()
 		return
 	}
 	conn.lastActive = time.Now()

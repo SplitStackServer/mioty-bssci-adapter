@@ -18,14 +18,13 @@ type Config struct {
 		Type string `mapstructure:"type"`
 
 		BssciV1 struct {
-			Bind          string        `mapstructure:"bind"`
-			TLSCert       string        `mapstructure:"tls_cert"`
-			TLSKey        string        `mapstructure:"tls_key"`
-			CACert        string        `mapstructure:"ca_cert"`
-			PingInterval  time.Duration `mapstructure:"ping_interval"`
-			StatsInterval time.Duration `mapstructure:"stats_interval"`
-			ReadTimeout   time.Duration `mapstructure:"read_timeout"`
-			WriteTimeout  time.Duration `mapstructure:"write_timeout"`
+			Bind            string        `mapstructure:"bind"`
+			TLSCert         string        `mapstructure:"tls_cert"`
+			TLSKey          string        `mapstructure:"tls_key"`
+			CACert          string        `mapstructure:"ca_cert"`
+			PingInterval    time.Duration `mapstructure:"ping_interval"`
+			StatsInterval   time.Duration `mapstructure:"stats_interval"`
+			KeepAlivePeriod time.Duration `mapstructure:"keep_alive_period"`
 		} `mapstructure:"bssci_v1"`
 	} `mapstructure:"backend"`
 

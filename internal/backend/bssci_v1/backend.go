@@ -38,7 +38,7 @@ type Backend struct {
 
 	statsInterval time.Duration
 	pingInterval  time.Duration
-	readTimeout   time.Duration
+	keepAlivePeriod   time.Duration
 	writeTimeout  time.Duration
 
 	basestationMessageHandler func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage)
@@ -58,12 +58,12 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 
 		statsInterval: conf.Backend.BssciV1.StatsInterval,
 		pingInterval:  conf.Backend.BssciV1.PingInterval,
-		readTimeout:   conf.Backend.BssciV1.ReadTimeout,
-		writeTimeout:  conf.Backend.BssciV1.WriteTimeout,
+		keepAlivePeriod:   conf.Backend.BssciV1.KeepAlivePeriod,
+		writeTimeout: time.Second,
 	}
 
 	// create the listener
-	b.listener, err = NewTcpKeepAliveListener(conf.Backend.BssciV1.Bind)
+	b.listener, err = NewTcpKeepAliveListener(conf.Backend.BssciV1.Bind, b.keepAlivePeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "create tcp keep alive error")
 	}
@@ -298,7 +298,7 @@ func (b *Backend) Start() error {
 			logger.Info().Msg("accepted new connection")
 
 			// try to read Con message
-			conn.SetReadDeadline(time.Now().Add(b.readTimeout))
+			conn.SetReadDeadline(time.Now().Add(time.Minute))
 			cmdHeader, raw, err := ReadBssciMessage(conn)
 
 			if err != nil {
@@ -316,7 +316,8 @@ func (b *Backend) Start() error {
 						logger.Info().Str("command", string(cmd)).Msg("initializing basestation connection")
 						ctx := context.Background()
 						ctx = logger.WithContext(ctx)
-						b.initBasestation(ctx, con, conn, b.handleBasestationMessages)
+						// handle the basestation in a new goroutine
+						go b.initBasestation(ctx, con, conn, b.handleBasestationMessages)
 					}
 				} else {
 					logger.Error().Str("command", string(cmd)).Msg("expected con command")
@@ -371,33 +372,36 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 	defer statusTicker.Stop()
 
 	go func() {
+		logger.Debug().Msg("scheduling status messages")
 		for {
 			select {
 			case <-pingTicker.C:
 				opId := bsConnection.GetAndDecrementOpId()
 				msg := messages.NewPing(opId)
-				err := bsConnection.Write(&msg, b.writeTimeout)
 
+				err := bsConnection.Write(&msg, b.writeTimeout)
 				if err != nil {
 					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled ping request")
 					return
 				}
 
-				pingPongCounter("server", eui.String())
 				logger.Debug().Msg("sent scheduled ping request")
+				pingPongCounter("server", eui.String())
+				
 			case <-statusTicker.C:
 				opId := bsConnection.GetAndDecrementOpId()
 				msg := messages.NewStatus(opId)
-				err := bsConnection.Write(&msg, b.writeTimeout)
 
+				err := bsConnection.Write(&msg, b.writeTimeout)
 				if err != nil {
 					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled status request")
 					return
 				}
 
-				messageSendCounter(eui.String(), string(msg.GetCommand()))
 				logger.Debug().Msg("sent scheduled status request")
+				messageSendCounter(eui.String(), string(msg.GetCommand()))
 			case <-done:
+				logger.Debug().Msg("stopping scheduled status messages")
 				return
 			}
 		}
@@ -414,10 +418,6 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 
 	// start the message handler
 	err = handler(ctx, eui, &bsConnection)
-
-	// terminate this connection after handler returns
-	done <- struct{}{}
-	logger.Info().Msg("terminating connection")
 	return err
 }
 
@@ -425,7 +425,8 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI64, connection *connection) error {
 	logger := zerolog.Ctx(ctx)
 	for {
-		cmdHeader, raw, err := connection.Read(b.readTimeout)
+		
+		cmdHeader, raw, err := connection.Read()
 
 		if err != nil {
 			logger.Error().Stack().Err(err).Msg("failed to read message")

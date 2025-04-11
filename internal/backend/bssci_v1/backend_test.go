@@ -561,8 +561,8 @@ func (ts *TestBackendSuite) SetupTest() {
 	conf.Backend.BssciV1.Bind = "127.0.0.1:0"
 	conf.Backend.BssciV1.StatsInterval = time.Minute
 	conf.Backend.BssciV1.PingInterval = 30 * time.Second
-	conf.Backend.BssciV1.ReadTimeout = 2 * time.Minute
-	conf.Backend.BssciV1.WriteTimeout = time.Second
+	conf.Backend.BssciV1.KeepAlivePeriod = time.Minute
+
 
 	backend, err := NewBackend(conf)
 	assert.NoError(err)

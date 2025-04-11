@@ -127,11 +127,11 @@ func (ts *TestConnectionSuite) Test_connection_Read() {
 
 			go func() {
 				defer ts.clientConn.Close()
-				ts.clientConn.SetWriteDeadline(time.Now().Add(time.Second))
+				ts.clientConn.SetWriteDeadline(time.Now().Add(tt.args.timeout))
 				ts.clientConn.Write(tt.data)
 			}()
 
-			gotCmd, gotRaw, err := ts.connection.Read(tt.args.timeout)
+			gotCmd, gotRaw, err := ts.connection.Read()
 
 			if tt.wantErr {
 				assert.Error(err)

@@ -24,6 +24,7 @@ var (
 	
 )
 
+
 func ReadBssciMessage(r io.Reader) (cmd structs.CommandHeader, raw msgp.Raw, err error) {
 	// reader the bssci header
 	buf := make([]byte, bssciHeaderSize)

@@ -9,9 +9,10 @@ import (
 
 type TcpKeepAliveListener struct {
 	*net.TCPListener
+	keepAlivePeriod time.Duration
 }
 
-func NewTcpKeepAliveListener(addr string) (*TcpKeepAliveListener, error) {
+func NewTcpKeepAliveListener(addr string, keepAlivePeriod   time.Duration) (*TcpKeepAliveListener, error) {
 	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid bind address")
@@ -22,15 +23,16 @@ func NewTcpKeepAliveListener(addr string) (*TcpKeepAliveListener, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "create tcp listener error")
 	}
-	return &TcpKeepAliveListener{ln}, nil
+	return &TcpKeepAliveListener{ln, keepAlivePeriod}, nil
 }
 
 func (ln TcpKeepAliveListener) Accept() (c net.Conn, err error) {
 	tc, err := ln.AcceptTCP()
+
 	if err != nil {
 		return
 	}
 	tc.SetKeepAlive(true)
-	tc.SetKeepAlivePeriod(3 * time.Minute)
+	tc.SetKeepAlivePeriod(ln.keepAlivePeriod)
 	return tc, nil
 }

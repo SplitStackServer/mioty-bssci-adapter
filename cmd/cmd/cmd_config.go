@@ -60,13 +60,10 @@ type="{{ .Backend.Type }}"
   ping_interval="{{ .Backend.BssciV1.PingInterval }}"
 
 
-  # Read timeout.
+  # Keep alive period .
   #
   # This interval must be greater than the configured ping interval.
-  read_timeout="{{ .Backend.BssciV1.ReadTimeout }}"
-
-  # Write timeout.
-  write_timeout="{{ .Backend.BssciV1.WriteTimeout }}"
+  keep_alive_period="{{ .Backend.BssciV1.KeepAlivePeriod }}"
 
 # Integration configuration.
 [integration]
