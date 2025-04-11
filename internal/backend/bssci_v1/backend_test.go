@@ -599,7 +599,6 @@ func (ts *TestBackendSuite) TestBackend_HandleBasestationMessages() {
 			bsConnection := connection{
 				conn: clientConn,
 				// stats:      stats.NewCollector(),
-				lastActive: time.Now(),
 				opId:       -1,
 				SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 				SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
@@ -641,7 +640,7 @@ func BenchmarkBackend_HandleBasestationMessages(b *testing.B) {
 			bsConnection := connection{
 				conn: clientConn,
 				// stats:      stats.NewCollector(),
-				lastActive: time.Now(),
+				
 				opId:       -1,
 				SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 				SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
@@ -674,7 +673,7 @@ func (ts *TestBackendSuite) TestBackend_HandleServerCommand() {
 	bsConnection := connection{
 		conn: clientConn,
 		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
+		
 		opId:       -1,
 		SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 		SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
@@ -714,7 +713,7 @@ func (ts *TestBackendSuite) TestBackend_HandleServerResponse() {
 	bsConnection := connection{
 		conn: clientConn,
 		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
+		
 		opId:       -1,
 		SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 		SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},

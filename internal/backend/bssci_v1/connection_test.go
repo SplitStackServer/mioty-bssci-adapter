@@ -172,29 +172,6 @@ func (ts *TestConnectionSuite) Test_connection_GetAndDecrementOpId() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_GetLastActive() {
-	t := ts.T()
-
-	tests := []struct {
-		name string
-		want time.Time
-	}{
-		{
-			name: "valid",
-			want: ts.connection.lastActive,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert := assert.New(t)
-
-			got := ts.connection.GetLastActive()
-			assert.Equal(tt.want, got)
-		})
-	}
-}
-
 func (ts *TestConnectionSuite) Test_connection_ResumeConnection() {
 	t := ts.T()
 

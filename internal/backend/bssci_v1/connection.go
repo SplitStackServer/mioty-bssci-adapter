@@ -15,7 +15,6 @@ import (
 type connection struct {
 	sync.RWMutex
 	conn net.Conn
-	lastActive time.Time
 	opId       int64
 	// Base Station session UUID, used to resume session
 	SnBsUuid uuid.UUID
@@ -31,7 +30,6 @@ func newConnection(conn net.Conn, snBsUuid structs.SessionUuid) connection {
 	return connection{
 		conn: conn,
 		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
 		opId:       -1,
 		SnBsUuid:   snBsUuid.ToUuid(),
 		SnScUuid:   snScUuid,
@@ -55,21 +53,19 @@ func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err 
 		// conn.conn.Close()
 		return errors.Wrap(err, "write error")
 	}
-	conn.lastActive = time.Now()
 
 	return
 }
 
 // Read a message from this connection
 func (conn *connection) Read() (cmd structs.CommandHeader, raw msgp.Raw, err error) {
-	conn.Lock()
-	defer conn.Unlock()
+	// conn.Lock()
+	// defer conn.Unlock()
 
 	cmd, raw, err = ReadBssciMessage(conn.conn)
 	if err != nil {
 		return
 	}
-	conn.lastActive = time.Now()
 
 	return
 }
@@ -86,12 +82,6 @@ func (conn *connection) GetAndDecrementOpId() (opId int64) {
 	return
 }
 
-func (conn *connection) GetLastActive() time.Time {
-	conn.RLock()
-	defer conn.RUnlock()
-
-	return conn.lastActive
-}
 
 // Check if this connection is resumed after a Con message
 //
