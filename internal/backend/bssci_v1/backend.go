@@ -65,7 +65,7 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 	// create the listener
 	b.listener, err = NewTcpKeepAliveListener(conf.Backend.BssciV1.Bind, b.keepAlivePeriod)
 	if err != nil {
-		return nil, errors.Wrap(err, "create tcp keep alive error")
+		return nil, errors.Wrap(err, "create tcp keep alive listener error")
 	}
 
 	// if the CA and TLS cert is configured, setup client certificate verification.
@@ -296,7 +296,7 @@ func (b *Backend) Start() error {
 			conn, err := b.listener.Accept()
 
 			if err != nil {
-				log.Error().Stack().Err(err).Msg("connection accept failed")
+				log.Error().Err(err).Msg("connection accept failed")
 			}
 			// defer conn.Close()
 
@@ -308,7 +308,7 @@ func (b *Backend) Start() error {
 			cmdHeader, raw, err := ReadBssciMessage(conn)
 
 			if err != nil {
-				logger.Error().Stack().Err(err).Msg("codec error")
+				logger.Error().Err(err).Msg("codec error")
 			} else {
 				// first message after connecting should always be Con
 				cmd := cmdHeader.GetCommand()
@@ -317,7 +317,7 @@ func (b *Backend) Start() error {
 					var con messages.Con
 					_, err = con.UnmarshalMsg(raw)
 					if err != nil {
-						logger.Error().Stack().Err(err).Str("command", string(cmd)).Msg("unmarshal msgp error")
+						logger.Error().Err(err).Str("command", string(cmd)).Msg("unmarshal msgp error")
 					} else {
 						logger.Info().Str("command", string(cmd)).Msg("initializing basestation connection")
 						ctx := context.Background()
@@ -354,7 +354,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 
 	// set the gateway connection
 	if err := b.basestations.set(eui, &bsConnection); err != nil {
-		logger.Error().Stack().Err(err).Msg("failed to set connection")
+		logger.Error().Err(err).Msg("failed to set connection")
 	}
 
 	logger.Info().Msg("basestation connected")
@@ -387,7 +387,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 
 				err := bsConnection.Write(&msg, b.writeTimeout)
 				if err != nil {
-					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled ping request")
+					logger.Error().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled ping request")
 					return
 				}
 
@@ -400,7 +400,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 
 				err := bsConnection.Write(&msg, b.writeTimeout)
 				if err != nil {
-					logger.Error().Stack().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled status request")
+					logger.Error().Err(err).Str("command", string(msg.GetCommand())).Msg("failed to send scheduled status request")
 					return
 				}
 
@@ -416,7 +416,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 	// send ConRsp
 	err := bsConnection.Write(&conRsp, b.writeTimeout)
 	if err != nil {
-		logger.Error().Stack().Err(err).Str("command", string(conRsp.GetCommand())).Msg("failed to send message")
+		logger.Error().Err(err).Str("command", string(conRsp.GetCommand())).Msg("failed to send message")
 		// terminate this connection on error
 		return err
 	}
@@ -435,7 +435,7 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 		cmdHeader, raw, err := connection.Read()
 
 		if err != nil {
-			logger.Error().Stack().Err(err).Msg("failed to read message")
+			logger.Error().Err(err).Msg("failed to read message")
 			// terminate this connection
 			return err
 		}
@@ -444,7 +444,7 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 		cmd := cmdHeader.GetCommand()
 
 		// update logging context
-		logger := log.With().Str("command", string(cmd)).Int64("op_id", opId).Logger()
+		logger := logger.With().Str("command", string(cmd)).Int64("op_id", opId).Logger()
 
 		logger.Debug().Hex("raw", raw).Msg("received message")
 
@@ -612,12 +612,12 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 		if response != nil {
 			err := connection.Write(response, b.writeTimeout)
 			if err != nil {
-				logger.Error().Stack().Err(err).Msg("failed to write message")
+				logger.Error().Err(err).Msg("failed to write message")
 				// terminate this connection
 				return err
 			}
 			messageSendCounter(eui.String(), string(response.GetCommand()))
-			logger.Debug().Any("response", response).Msg("sent response")
+			logger.Debug().Any("json", response).Msg("sent response")
 		}
 	}
 }
@@ -760,7 +760,8 @@ func (b *Backend) sendServerResponseToBasestation(bsEui common.EUI64, msg messag
 		}
 
 		messageSendCounter(bsEui.String(), string(msg.GetCommand()))
-		logger.Info().Msg("sent response")
+		logger.Debug().Int64("op_id", msg.GetOpId()).Any("json", msg).Msg("sent server response")
+
 	}
 	return nil
 }
@@ -788,7 +789,9 @@ func (b *Backend) sendServerMessageToBasestation(bsEui common.EUI64, msg message
 			return err
 		}
 		messageSendCounter(bsEui.String(), string(msg.GetCommand()))
-		logger.Info().Int64("op_id", msg.GetOpId()).Msg("sent message")
+
+		logger.Debug().Int64("op_id", msg.GetOpId()).Any("json", msg).Msg("sent server message")
+
 		return nil
 
 	}
@@ -796,7 +799,7 @@ func (b *Backend) sendServerMessageToBasestation(bsEui common.EUI64, msg message
 }
 
 func log_and_notify_msgp_error(logger zerolog.Logger, err error, opId int64) messages.Message {
-	logger.Error().Stack().Err(err).Msg("unmarshal msgp error")
+	logger.Error().Err(err).Msg("unmarshal msgp error")
 	response := messages.NewBssciError(opId, 5, "message pack error")
 	return &response
 }
