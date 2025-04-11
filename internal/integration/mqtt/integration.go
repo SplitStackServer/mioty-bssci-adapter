@@ -26,10 +26,10 @@ import (
 )
 
 const (
-	stateTopicTemplate    = "basestation/{{ .BsEui }}/state/"
-	eventTopicTemplate    = "basestation/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
-	commandTopicTemplate  = "basestation/{{ .BsEui }}/command/#"
-	responseTopicTemplate = "basestation/{{ .BsEui }}/response/#"
+	stateTopicTemplate    = "bssci/v1/{{ .BsEui }}/state/"
+	eventTopicTemplate    = "bssci/v1/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
+	commandTopicTemplate  = "bssci/v1/{{ .BsEui }}/command/#"
+	responseTopicTemplate = "bssci/v1/{{ .BsEui }}/response/#"
 )
 
 const (
