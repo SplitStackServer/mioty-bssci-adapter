@@ -184,7 +184,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		}
 		msg = msgA
 
-		logger.Debug().Str("proto", "ProtoCommand_DetPrp").Str("ep_eui", msgA.EpEui.String()).Msgf("propagate detaching endnode")
+		logger.Debug().Str("proto", "ProtoCommand_DetPrp").Str("ep_eui", msgA.EpEui.String()).Msg("propagate detaching endnode")
 
 	case *cmd.ProtoCommand_ReqStatus:
 		command := pb.GetReqStatus()
@@ -194,7 +194,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		}
 		msg = msgA
 
-		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msg("requesting basestation status")
 
 	case *cmd.ProtoCommand_VmActivate:
 		command := pb.GetVmActivate()
@@ -204,7 +204,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		}
 		msg = msgA
 
-		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+		logger.Debug().Str("proto", "ProtoCommand_VmActivate").Msgf("requesting variable mac activation: %v", msgA.MacType)
 
 	case *cmd.ProtoCommand_VmDeactivate:
 		command := pb.GetVmDeactivate()
@@ -214,7 +214,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		}
 		msg = msgA
 
-		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+		logger.Debug().Str("proto", "ProtoCommand_VmDeactivate").Msgf("requesting variable mac deactivation: %v", msgA.MacType)
 
 	case *cmd.ProtoCommand_VmStatus:
 		command := pb.GetVmStatus()
@@ -224,7 +224,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 		}
 		msg = msgA
 
-		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msgf("requesting basestation status")
+		logger.Debug().Str("proto", "ProtoCommand_VmStatus").Msg("requesting variable mac status")
 
 	default:
 		return errors.New("empty protobuf command")
