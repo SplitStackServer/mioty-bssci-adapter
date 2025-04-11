@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -69,6 +68,8 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 		return nil, errors.Wrap(err, "create listener error")
 	}
 
+	
+
 	// if the CA and TLS cert is configured, setup client certificate verification.
 	if b.tlsCert != "" && b.tlsKey != "" && b.caCert != "" {
 		rawCACert, err := os.ReadFile(b.caCert)
@@ -90,7 +91,18 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 			ClientAuth:   tls.RequireAndVerifyClientCert,
 		})
 
+	} else {
+		log.Warn().Msg("config does not provide a TLS certificate, generating one")
+		tlsCert, err := common.GenX509KeyPair()
+		if err != nil {
+			return nil, errors.Wrap(err, "generate tls cert error")
+		}
+
+		b.listener = tls.NewListener(b.listener, &tls.Config{
+			Certificates: []tls.Certificate{tlsCert},
+		})
 	}
+
 	backend = &b
 	return
 }
@@ -248,14 +260,14 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 		}
 		msg = msgA
 		log.Debug().Str("proto", "ProtoResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", common.Eui64FromUnsignedInt(command.EndnodeEui).String(), bsEui.String())
-	
+
 	case *rsp.ProtoResponse_Err:
 		command := pb.GetErr()
 		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
 
 		msg = &msgA
 		log.Warn().Str("proto", "ProtoResponse_Err").Int64("op_id", opId).Msgf("server responded with error: %s", command.GetMessage())
-	
+
 	default:
 		return errors.New("empty protobuf command")
 	}
@@ -280,12 +292,12 @@ func (b *Backend) Start() error {
 			conn, err := b.listener.Accept()
 
 			if err != nil {
-				log.Error().Stack().Err(err).Msg("tls accept failed")
+				log.Error().Stack().Err(err).Msg("connection accept failed")
 			}
 			// defer conn.Close()
 
 			logger := log.With().Str("remote", conn.RemoteAddr().String()).Logger()
-			logger.Info().Msg("accepted new tls connection")
+			logger.Info().Msg("accepted new connection")
 
 			// try to read Con message
 			conn.SetReadDeadline(time.Now().Add(b.readTimeout))

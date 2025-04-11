@@ -11,7 +11,7 @@ import (
 
 //go:generate msgp
 
-//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
+//msgp:shim common.EUI64 as:uint64 using:common.Eui64toUnsignedInt/common.Eui64FromUnsignedInt
 //msgp:shim uuid.UUID as:[16]int8 using:UuidFromInt8/UuidToInt8
 
 // Connect
