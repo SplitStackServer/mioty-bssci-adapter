@@ -1,0 +1,15 @@
+FROM golang:1.24.2-alpine
+
+ENV PROJECT_PATH=/mioty-bssci-adapter
+ENV PATH=$PATH:$PROJECT_PATH/build
+ENV CGO_ENABLED=0
+ENV GO_EXTRA_BUILD_ARGS="-a -installsuffix cgo"
+
+RUN apk add --no-cache ca-certificates make git bash upx rpm tar
+
+RUN mkdir -p $PROJECT_PATH
+COPY . $PROJECT_PATH
+WORKDIR $PROJECT_PATH
+
+RUN git config --global --add safe.directory /mioty-bssci-adapter
+RUN make dev-requirements

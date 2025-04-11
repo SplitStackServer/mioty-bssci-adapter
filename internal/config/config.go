@@ -10,7 +10,6 @@ var C Config
 // Config defines the configuration structure.
 type Config struct {
 	General struct {
-		LogJSON     bool `mapstructure:"log_json"`
 		LogLevel    int  `mapstructure:"log_level"`
 		LogToSyslog bool `mapstructure:"log_to_syslog"`
 	} `mapstructure:"general"`
@@ -23,8 +22,8 @@ type Config struct {
 			TLSCert       string        `mapstructure:"tls_cert"`
 			TLSKey        string        `mapstructure:"tls_key"`
 			CACert        string        `mapstructure:"ca_cert"`
-			StatsInterval time.Duration `mapstructure:"stats_interval"`
 			PingInterval  time.Duration `mapstructure:"ping_interval"`
+			StatsInterval time.Duration `mapstructure:"stats_interval"`
 			ReadTimeout   time.Duration `mapstructure:"read_timeout"`
 			WriteTimeout  time.Duration `mapstructure:"write_timeout"`
 		} `mapstructure:"bssci_v1"`
@@ -32,17 +31,16 @@ type Config struct {
 
 	Integration struct {
 		Marshaler string `mapstructure:"marshaler"`
-		MQTT_V3    struct {
+		MQTTV3    struct {
 			StateRetained           bool          `mapstructure:"state_retained"`
 			KeepAlive               time.Duration `mapstructure:"keep_alive"`
 			MaxReconnectInterval    time.Duration `mapstructure:"max_reconnect_interval"`
-			TerminateOnConnectError bool          `mapstructure:"terminate_on_connect_error"`
 			MaxTokenWait            time.Duration `mapstructure:"max_token_wait"`
+			TerminateOnConnectError bool          `mapstructure:"terminate_on_connect_error"`
 
 			Auth struct {
-				Type string `mapstructure:"type"`
+				Type    string `mapstructure:"type"`
 				Generic struct {
-					Server       string   `mapstructure:"server"`
 					Servers      []string `mapstructure:"servers"`
 					Username     string   `mapstructure:"username"`
 					Password     string   `mapstrucure:"password"`

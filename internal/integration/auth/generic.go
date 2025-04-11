@@ -27,9 +27,9 @@ type GenericAuthentication struct {
 // NewGenericAuthentication creates a GenericAuthentication.
 func NewGenericAuthentication(conf config.Config) (Authentication, error) {
 	tlsConfig, err := newTLSConfig(
-		conf.Integration.MQTT_V3.Auth.Generic.CACert,
-		conf.Integration.MQTT_V3.Auth.Generic.TLSCert,
-		conf.Integration.MQTT_V3.Auth.Generic.TLSKey,
+		conf.Integration.MQTTV3.Auth.Generic.CACert,
+		conf.Integration.MQTTV3.Auth.Generic.TLSCert,
+		conf.Integration.MQTTV3.Auth.Generic.TLSKey,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "mqtt/auth: new tls config error")
@@ -37,11 +37,11 @@ func NewGenericAuthentication(conf config.Config) (Authentication, error) {
 
 	return &GenericAuthentication{
 		tlsConfig:    tlsConfig,
-		servers:      conf.Integration.MQTT_V3.Auth.Generic.Servers,
-		username:     conf.Integration.MQTT_V3.Auth.Generic.Username,
-		password:     conf.Integration.MQTT_V3.Auth.Generic.Password,
-		cleanSession: conf.Integration.MQTT_V3.Auth.Generic.CleanSession,
-		clientID:     conf.Integration.MQTT_V3.Auth.Generic.ClientID,
+		servers:      conf.Integration.MQTTV3.Auth.Generic.Servers,
+		username:     conf.Integration.MQTTV3.Auth.Generic.Username,
+		password:     conf.Integration.MQTTV3.Auth.Generic.Password,
+		cleanSession: conf.Integration.MQTTV3.Auth.Generic.CleanSession,
+		clientID:     conf.Integration.MQTTV3.Auth.Generic.ClientID,
 	}, nil
 }
 

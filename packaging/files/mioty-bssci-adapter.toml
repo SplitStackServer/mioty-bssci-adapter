@@ -1,0 +1,46 @@
+# This configuration provides a mioty BSSCI Version 1.0.0 backend and
+# integrates with a MQTT broker. Many options and defaults have been omitted
+# for simplicity.
+
+
+# Gateway backend configuration.
+[backend]
+# Backend type.
+type="bssci_v1"
+
+  # BSSCI V1 backend.
+  [backend.bssci_v1]
+
+  # ip:port to bind the TCP listener to.
+  bind = "0.0.0.0:5005"
+
+# Integration configuration.
+[integration]
+# Payload marshaler.
+#
+# This defines how the MQTT payloads are encoded. Valid options are:
+# * protobuf:  Protobuf encoding
+# * json:      JSON encoding (easier for debugging, but less compact than 'protobuf')
+marshaler="protobuf"
+
+  # MQTT integration configuration.
+  [integration.mqtt_v3]
+
+  # MQTT authentication.
+  [integration.mqtt_v3.auth]
+  # Type defines the MQTT authentication type to use.
+  #
+  # Set this to the name of one of the sections below.
+  type="generic"
+
+    # Generic MQTT authentication.
+    [integration.mqtt_v3.auth.generic]
+    # MQTT server (e.g. scheme://host:port where scheme is tcp, ssl or ws)
+    server="tcp://mosquitto:1883"
+
+    # Connect with the given username (optional)
+    username=""
+
+    # Connect with the given password (optional)
+    password=""
+

@@ -1,0 +1,88 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: default
+    main: ./cmd/main.go
+    binary: mioty-bssci-adapter
+    env:
+      - CGO_ENABLED=0
+      - >-
+        {{- if eq .Os "darwin" }}
+          {{- if eq .Arch "amd64"}}CC=o64-clang{{- end }}
+          {{- if eq .Arch "arm64"}}CC=aarch64-apple-darwin20.2-clang{{- end }}
+        {{- end }}
+        {{- if eq .Os "windows" }}
+          {{- if eq .Arch "amd64" }}CC=x86_64-w64-mingw32-gcc{{- end }}
+        {{- end }}
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+
+
+release:
+  disable: true
+
+nfpms:
+  - id: bundle
+    vendor: SplitStack
+    homepage: TBD
+    maintainer: Alexander Doerner
+    description: mioty BSSCI Adapter
+    license: MIT
+    formats:
+      - deb
+    bindir: /usr/bin
+    contents:
+      - src: packaging/files/mioty-bssci-adapter.rotate
+        dst: /etc/logrotate.d/mioty-bssci-adapter
+      - src: packaging/files/mioty-bssci-adapter.init
+        dst: /usr/lib/mioty-bssci-adapter/scripts/mioty-bssci-adapter.init
+      - src: packaging/files/mioty-bssci-adapter.service
+        dst: "/usr/lib/mioty-bssci-adapter/scripts/mioty-bssci-adapter.service"
+      - src: packaging/files/mioty-bssci-adapter.toml
+        dst: /etc/mioty-bssci-adapter/mioty-bssci-adapter.toml
+        type: config
+    scripts:
+      postinstall: "packaging/scripts/post-install.sh"
+      postremove: "packaging/scripts/post-remove.sh"
+
+dockers:
+  - id: default
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "doernera/mioty-bssci-adapter:latest"
+    dockerfile: Dockerfile-releaser
+    # IDs to filter the binaries/packages.
+    #
+    # Make sure to only include the IDs of binaries you want to `COPY` in your
+    # Dockerfile.
+    #
+    # If you include IDs that don't exist or are not available for the current
+    # architecture being built, the build of the image will be skipped.
+    ids:
+      - bundle
+    # Skips the docker push.
+    # Could be useful if you also do draft releases.
+    #
+    # If set to auto, the release will not be pushed to the Docker repository
+    #  in case there is an indicator of a prerelease in the tag, e.g. v1.0.0-rc1.
+    #
+    # Templates: allowed.
+    skip_push: false

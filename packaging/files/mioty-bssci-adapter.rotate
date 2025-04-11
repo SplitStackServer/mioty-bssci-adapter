@@ -1,0 +1,8 @@
+/var/log/mioty-bssci-adapter/mioty-bssci-adapter.log {
+    daily
+    rotate 7
+    missingok
+    dateext
+    copytruncate
+    compress
+}

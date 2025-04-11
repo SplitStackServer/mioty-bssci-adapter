@@ -1,0 +1,7 @@
+FROM alpine:3.21.3
+
+RUN apk --no-cache add ca-certificates
+COPY mioty-bssci-adapter* /usr/bin/mioty-bssci-adapter
+USER nobody:nogroup
+ENTRYPOINT ["/usr/bin/mioty-bssci-adapter"]
+

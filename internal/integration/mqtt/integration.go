@@ -73,24 +73,24 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 	var err error
 
 	integ := Integration{
-		qos:                     conf.Integration.MQTT_V3.Auth.Generic.QOS,
-		terminateOnConnectError: conf.Integration.MQTT_V3.TerminateOnConnectError,
+		qos:                     conf.Integration.MQTTV3.Auth.Generic.QOS,
+		terminateOnConnectError: conf.Integration.MQTTV3.TerminateOnConnectError,
 		clientOpts:              paho.NewClientOptions(),
 		basestations:            make(map[common.EUI64]struct{}),
 		basestationsSubscribed:  make(map[common.EUI64]struct{}),
-		stateRetained:           conf.Integration.MQTT_V3.StateRetained,
-		maxTokenWait:            conf.Integration.MQTT_V3.MaxTokenWait,
+		stateRetained:           conf.Integration.MQTTV3.StateRetained,
+		maxTokenWait:            conf.Integration.MQTTV3.MaxTokenWait,
 	}
 
 	// set authentication
-	switch conf.Integration.MQTT_V3.Auth.Type {
+	switch conf.Integration.MQTTV3.Auth.Type {
 	case "generic":
 		integ.auth, err = auth.NewGenericAuthentication(conf)
 		if err != nil {
 			return nil, errors.Wrap(err, "new generic authentication error")
 		}
 	default:
-		return nil, errors.Errorf("unknown auth type: %s", conf.Integration.MQTT_V3.Auth.Type)
+		return nil, errors.Errorf("unknown auth type: %s", conf.Integration.MQTTV3.Auth.Type)
 	}
 
 	// set marshaler
@@ -142,8 +142,8 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 	integ.clientOpts.SetAutoReconnect(true) // this is required for buffering messages in case offline!
 	integ.clientOpts.SetOnConnectHandler(integ.onConnected)
 	integ.clientOpts.SetConnectionLostHandler(integ.onConnectionLost)
-	integ.clientOpts.SetKeepAlive(conf.Integration.MQTT_V3.KeepAlive)
-	integ.clientOpts.SetMaxReconnectInterval(conf.Integration.MQTT_V3.MaxReconnectInterval)
+	integ.clientOpts.SetKeepAlive(conf.Integration.MQTTV3.KeepAlive)
+	integ.clientOpts.SetMaxReconnectInterval(conf.Integration.MQTTV3.MaxReconnectInterval)
 
 	if err = integ.auth.Init(integ.clientOpts); err != nil {
 		return nil, errors.Wrap(err, "mqtt: init authentication error")
@@ -552,7 +552,7 @@ func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
 		return
 	}
 
-	integ.serverCommandHandler( &pb)
+	integ.serverCommandHandler(&pb)
 }
 
 func (integ *Integration) handleServerResponse(c paho.Client, msg paho.Message) {

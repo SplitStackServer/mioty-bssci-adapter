@@ -1,0 +1,17 @@
+version: "2"
+services:
+  mioty-bssci-adapter:
+    build:
+      context: .
+      dockerfile: Dockerfile-devel
+    ports:
+      - "5005:5005/tcp"
+    volumes:
+      - ./:/mioty-bssci-adapter
+    links:
+      - mosquitto
+    environment:
+      - MQTT_SERVER=tcp://mosquitto:1883
+
+  mosquitto:
+    image: eclipse-mosquitto:1.6

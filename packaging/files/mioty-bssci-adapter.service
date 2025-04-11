@@ -1,0 +1,14 @@
+[Unit]
+Description=mioty BSSCI Adapter
+Documentation=TBD
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=bssciadapter
+Group=bssciadapter
+ExecStart=/usr/bin/mioty-bssci-adapter
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

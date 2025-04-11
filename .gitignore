@@ -45,4 +45,5 @@ go.work.sum
 *_gen.go
 *_gen_test.go
 
-*.pb.go
+*.pb.go# Added by goreleaser init:
+dist/
