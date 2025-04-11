@@ -63,12 +63,10 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 	}
 
 	// create the listener
-	b.listener, err = net.Listen("tcp", conf.Backend.BssciV1.Bind)
+	b.listener, err = NewTcpKeepAliveListener(conf.Backend.BssciV1.Bind)
 	if err != nil {
-		return nil, errors.Wrap(err, "create listener error")
+		return nil, errors.Wrap(err, "create tcp keep alive error")
 	}
-
-	
 
 	// if the CA and TLS cert is configured, setup client certificate verification.
 	if b.tlsCert != "" && b.tlsKey != "" && b.caCert != "" {
