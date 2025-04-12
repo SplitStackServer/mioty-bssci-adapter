@@ -354,6 +354,13 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 	bsConnection := newConnection(conn, con.SnBsUuid)
 	conRsp := messages.NewConRsp(con.OpId, con.Version, bsConnection.SnScUuid)
 
+	// check for existing connection
+	if _, err := b.basestations.get(eui) ; err == nil {
+		err = errors.New("basestation already connected")
+		logger.Error().Err(err).Msg("connection with same gateway eui already exists")
+		return err
+	}
+
 	// set the gateway connection
 	if err := b.basestations.set(eui, &bsConnection); err != nil {
 		logger.Error().Err(err).Msg("failed to set connection")
