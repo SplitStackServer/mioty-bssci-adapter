@@ -12,6 +12,8 @@
 # certificates
 /certs
 
+# secrets
+/.github_token
 
 # Binaries for programs and plugins
 *.exe
