@@ -45,7 +45,7 @@ func (ts *TestConnectionSuite) TearDownTest() {
 	assert.NoError(ts.clientConn.Close())
 }
 
-func (ts *TestConnectionSuite) Test_connection_Write() {
+func (ts *TestConnectionSuite) TestConnection_Write() {
 	t := ts.T()
 
 	type args struct {
@@ -85,7 +85,7 @@ func (ts *TestConnectionSuite) Test_connection_Write() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_Read() {
+func (ts *TestConnectionSuite) TestConnection_Read() {
 	t := ts.T()
 
 	type args struct {
@@ -145,7 +145,7 @@ func (ts *TestConnectionSuite) Test_connection_Read() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_GetAndDecrementOpId() {
+func (ts *TestConnectionSuite) TestConnection_GetAndDecrementOpId() {
 	t := ts.T()
 
 	tests := []struct {
@@ -172,7 +172,7 @@ func (ts *TestConnectionSuite) Test_connection_GetAndDecrementOpId() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_ResumeConnection() {
+func (ts *TestConnectionSuite) TestConnection_ResumeConnection() {
 	t := ts.T()
 
 	var snScOpId int64 = -10

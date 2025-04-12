@@ -281,6 +281,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 
 // Stops the backend.
 func (b *Backend) Stop() error {
+	log.Info().Str("addr", b.listener.Addr().String()).Msg("STOPPING SERVICE")
 	b.isClosed = true
 	return b.listener.Close()
 }
@@ -297,8 +298,8 @@ func (b *Backend) Start() error {
 
 			if err != nil {
 				log.Error().Err(err).Msg("connection accept failed")
+				continue 
 			}
-			// defer conn.Close()
 
 			logger := log.With().Str("remote", conn.RemoteAddr().String()).Logger()
 			logger.Info().Msg("accepted new connection")
@@ -309,6 +310,7 @@ func (b *Backend) Start() error {
 
 			if err != nil {
 				logger.Error().Err(err).Msg("codec error")
+				continue
 			} else {
 				// first message after connecting should always be Con
 				cmd := cmdHeader.GetCommand()
@@ -327,7 +329,7 @@ func (b *Backend) Start() error {
 					}
 				} else {
 					logger.Error().Str("command", string(cmd)).Msg("expected con command")
-
+					continue
 				}
 			}
 		}
@@ -377,8 +379,8 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 	statusTicker := time.NewTicker(b.statsInterval)
 	defer statusTicker.Stop()
 
+	logger.Debug().Msg("scheduling status messages")
 	go func() {
-		logger.Debug().Msg("scheduling status messages")
 		for {
 			select {
 			case <-pingTicker.C:
@@ -407,10 +409,11 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 				logger.Debug().Msg("sent scheduled status request")
 				messageSendCounter(eui.String(), string(msg.GetCommand()))
 			case <-done:
-				logger.Debug().Msg("stopping scheduled status messages")
+				logger.Debug().Msg("stopped status messages scheduling")
 				return
 			}
 		}
+
 	}()
 
 	// send ConRsp
@@ -420,6 +423,9 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 		// terminate this connection on error
 		return err
 	}
+
+	logger.Debug().Any("json", conRsp).Msg("sent connection response")
+
 	messageSendCounter(eui.String(), string(conRsp.GetCommand()))
 
 	// start the message handler
@@ -743,8 +749,8 @@ func (b *Backend) handleDlDataResMessage(ctx context.Context, eui common.EUI64, 
 // sends a server response to a basestation
 func (b *Backend) sendServerResponseToBasestation(bsEui common.EUI64, msg messages.Message) error {
 	if msg != nil {
-		b.Lock()
-		defer b.Unlock()
+		// b.Lock()
+		// defer b.Unlock()
 		logger := log.With().Str("bs_eui", bsEui.String()).Str("command", string(msg.GetCommand())).Int64("op_id", msg.GetOpId()).Logger()
 
 		bsConnection, err := b.basestations.get(bsEui)
@@ -769,8 +775,8 @@ func (b *Backend) sendServerResponseToBasestation(bsEui common.EUI64, msg messag
 // sends a server message to a basestation
 func (b *Backend) sendServerMessageToBasestation(bsEui common.EUI64, msg messages.ServerMessage) error {
 	if msg != nil {
-		b.Lock()
-		defer b.Unlock()
+		// b.Lock()
+		// defer b.Unlock()
 		logger := log.With().Str("bs_eui", bsEui.String()).Str("command", string(msg.GetCommand())).Logger()
 
 		bsConnection, err := b.basestations.get(bsEui)
