@@ -45,7 +45,7 @@ func (ts *TestConnectionSuite) TearDownTest() {
 	assert.NoError(ts.clientConn.Close())
 }
 
-func (ts *TestConnectionSuite) Test_connection_Write() {
+func (ts *TestConnectionSuite) TestConnection_Write() {
 	t := ts.T()
 
 	type args struct {
@@ -85,7 +85,7 @@ func (ts *TestConnectionSuite) Test_connection_Write() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_Read() {
+func (ts *TestConnectionSuite) TestConnection_Read() {
 	t := ts.T()
 
 	type args struct {
@@ -127,11 +127,11 @@ func (ts *TestConnectionSuite) Test_connection_Read() {
 
 			go func() {
 				defer ts.clientConn.Close()
-				ts.clientConn.SetWriteDeadline(time.Now().Add(time.Second))
+				ts.clientConn.SetWriteDeadline(time.Now().Add(tt.args.timeout))
 				ts.clientConn.Write(tt.data)
 			}()
 
-			gotCmd, gotRaw, err := ts.connection.Read(tt.args.timeout)
+			gotCmd, gotRaw, err := ts.connection.Read()
 
 			if tt.wantErr {
 				assert.Error(err)
@@ -145,7 +145,7 @@ func (ts *TestConnectionSuite) Test_connection_Read() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_GetAndDecrementOpId() {
+func (ts *TestConnectionSuite) TestConnection_GetAndDecrementOpId() {
 	t := ts.T()
 
 	tests := []struct {
@@ -172,30 +172,7 @@ func (ts *TestConnectionSuite) Test_connection_GetAndDecrementOpId() {
 	}
 }
 
-func (ts *TestConnectionSuite) Test_connection_GetLastActive() {
-	t := ts.T()
-
-	tests := []struct {
-		name string
-		want time.Time
-	}{
-		{
-			name: "valid",
-			want: ts.connection.lastActive,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert := assert.New(t)
-
-			got := ts.connection.GetLastActive()
-			assert.Equal(tt.want, got)
-		})
-	}
-}
-
-func (ts *TestConnectionSuite) Test_connection_ResumeConnection() {
+func (ts *TestConnectionSuite) TestConnection_ResumeConnection() {
 	t := ts.T()
 
 	var snScOpId int64 = -10

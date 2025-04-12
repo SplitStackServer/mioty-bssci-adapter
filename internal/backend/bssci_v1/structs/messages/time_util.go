@@ -25,3 +25,4 @@ func DurationNsToProto(ts int64) *durationpb.Duration {
 	}
 	return &pb
 }
+

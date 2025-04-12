@@ -11,10 +11,10 @@ option go_package = "mioty-bssci-adapter/internal/api/msg";
 // option features.(pb.go).api_level = API_OPAQUE;
 
 message ProtoEndnodeMessage {
-    // Basestation EUI, 8 bytes little endian
-    uint64 bs_eui = 1;
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Basestation EUI, hex string
+    string bs_eui = 1;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
 
     // Message.
     oneof v1 {
@@ -171,7 +171,7 @@ message EndnodeVariableMacUlDataMessage {
     // Metadata.
     EndnodeUplinkMetadata meta = 4;
     // Frequency offset from center between primary and secondary channel in Hz 
-    uint64 freq_off = 5;
+    double freq_off = 5;
     // Carrier spacing step size Bc, 0 = narrow, 1 = standard, 2 = wide
     CarrierSpacingEnum carr_space = 6;
     // Uplink TSMA Pattern group, 0 = normal, 1 = repetition, 2 = low delay

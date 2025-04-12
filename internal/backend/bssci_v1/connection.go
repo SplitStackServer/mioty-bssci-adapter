@@ -15,8 +15,7 @@ import (
 type connection struct {
 	sync.RWMutex
 	conn net.Conn
-	lastActive time.Time
-	opId       int64
+	opId int64
 	// Base Station session UUID, used to resume session
 	SnBsUuid uuid.UUID
 	// Service Center session UUID, used to resume session
@@ -26,13 +25,14 @@ type connection struct {
 func newConnection(conn net.Conn, snBsUuid structs.SessionUuid) connection {
 	snScUuid := uuid.New()
 
+	conn.SetReadDeadline(time.Time{})
+
 	return connection{
 		conn: conn,
 		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
-		opId:       -1,
-		SnBsUuid:   snBsUuid.ToUuid(),
-		SnScUuid:   snScUuid,
+		opId:     -1,
+		SnBsUuid: snBsUuid.ToUuid(),
+		SnScUuid: snScUuid,
 	}
 }
 
@@ -50,26 +50,22 @@ func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err 
 	conn.conn.SetWriteDeadline(time.Now().Add(timeout))
 	_, err = conn.conn.Write(bb)
 	if err != nil {
-		conn.conn.Close()
+		// conn.conn.Close()
 		return errors.Wrap(err, "write error")
 	}
-	conn.lastActive = time.Now()
 
 	return
 }
 
 // Read a message from this connection
-func (conn *connection) Read(timeout time.Duration) (cmd structs.CommandHeader, raw msgp.Raw, err error) {
-	conn.Lock()
-	defer conn.Unlock()
+func (conn *connection) Read() (cmd structs.CommandHeader, raw msgp.Raw, err error) {
+	// conn.Lock()
+	// defer conn.Unlock()
 
-	conn.conn.SetReadDeadline(time.Now().Add(timeout))
 	cmd, raw, err = ReadBssciMessage(conn.conn)
 	if err != nil {
-		conn.conn.Close()
 		return
 	}
-	conn.lastActive = time.Now()
 
 	return
 }
@@ -84,13 +80,6 @@ func (conn *connection) GetAndDecrementOpId() (opId int64) {
 	opId = conn.opId
 	conn.opId = conn.opId - 1
 	return
-}
-
-func (conn *connection) GetLastActive() time.Time {
-	conn.RLock()
-	defer conn.RUnlock()
-
-	return conn.lastActive
 }
 
 // Check if this connection is resumed after a Con message

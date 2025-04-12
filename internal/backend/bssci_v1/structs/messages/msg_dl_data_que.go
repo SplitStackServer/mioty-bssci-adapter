@@ -8,7 +8,7 @@ import (
 )
 
 //go:generate msgp
-//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
+//msgp:shim common.EUI64 as:uint64 using:common.Eui64toUnsignedInt/common.Eui64FromUnsignedInt
 
 // Downlink data queue
 //
@@ -37,7 +37,7 @@ type DlDataQue struct {
 	// End Point packet counter for which the according userData entry is valid, omitted if cntDepend is false
 	PacketCnt *[]uint32 `msg:"packetCnt,omitempty" json:"packetCnt,omitempty"`
 	// End Point user data for each of the m packet counters, single user data entry if cntDepend is false
-	UserData [][]byte `msg:"userData" json:"userData"`
+	UserData [][]uint8 `msg:"userData" json:"userData"`
 	// User data format identifier, 8 bit, optional, default 0
 	Format *byte `msg:"format,omitempty" json:"format,omitempty"`
 	// Priority, higher values are prioritized, single precision floating point, optional, default 0
@@ -124,10 +124,15 @@ func NewDlDataQueFromProto(opId int64, pb *cmd.EnqueDownlink) (*DlDataQue, error
 			format = uint8(0xff & *pb.Format)
 		}
 
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
+
 		msg := DlDataQue{
 			Command:      structs.MsgDlDataQue,
 			OpId:         opId,
-			EpEui:        common.Eui64FromUnsignedInt(pb.EndnodeEui),
+			EpEui:        epEui,
 			QueId:        pb.DlQueId,
 			Format:       &format,
 			Prio:         pb.Priority,

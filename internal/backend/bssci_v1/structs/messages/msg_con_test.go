@@ -277,7 +277,7 @@ func TestCon_IntoProto(t *testing.T) {
 				Bidi:      true,
 			},
 			want: &msg.ProtoBasestationMessage{
-				BsEui: testBsEui.ToUnsignedInt(),
+				BsEui: testBsEui.String(),
 				V1: &msg.ProtoBasestationMessage_Con{
 					Con: &msg.BasestationConnection{
 						Ts:          &testTs,
@@ -307,7 +307,7 @@ func TestCon_IntoProto(t *testing.T) {
 				GeoLocation: &GeoLocation{1, 2, 3},
 			},
 			want: &msg.ProtoBasestationMessage{
-				BsEui: testBsEui.ToUnsignedInt(),
+				BsEui: testBsEui.String(),
 				V1: &msg.ProtoBasestationMessage_Con{
 					Con: &msg.BasestationConnection{
 						Ts:        &testTs,

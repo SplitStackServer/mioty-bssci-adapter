@@ -226,8 +226,8 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 				bsEui: common.EUI64{2},
 			},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      2,
-				EndnodeEui: 1,
+				BsEui:      "0200000000000000",
+				EndnodeEui: "0100000000000000",
 				V1: &msg.ProtoEndnodeMessage_DlRes{
 					DlRes: &msg.EndnodeDownlinkResult{
 						DlQueId:     20,
@@ -251,8 +251,8 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 				bsEui: common.EUI64{2},
 			},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      2,
-				EndnodeEui: 1,
+				BsEui:      "0200000000000000",
+				EndnodeEui: "0100000000000000",
 				V1: &msg.ProtoEndnodeMessage_DlRes{
 					DlRes: &msg.EndnodeDownlinkResult{
 						DlQueId: 20,
@@ -274,8 +274,8 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 				bsEui: common.EUI64{2},
 			},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      2,
-				EndnodeEui: 1,
+				BsEui:      "0200000000000000",
+				EndnodeEui: "0100000000000000",
 				V1: &msg.ProtoEndnodeMessage_DlRes{
 					DlRes: &msg.EndnodeDownlinkResult{
 						DlQueId: 20,

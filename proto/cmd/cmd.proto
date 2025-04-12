@@ -9,8 +9,8 @@ option go_package = "mioty-bssci-adapter/internal/api/cmd";
 
 
 message ProtoCommand {
-    // Basestation EUI, 8 bytes little endian
-    uint64 bs_eui = 1;
+    // Basestation EUI, hex string
+    string bs_eui = 1;
 
     oneof v1 {
         // Enque downlink
@@ -36,8 +36,8 @@ message ProtoCommand {
 
 // Downlink data queue
 message EnqueDownlink{
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
     // Assigned queue ID for reference
     uint64 dl_que_id = 3;
     // Priority, higher values are prioritized, optional, default 0
@@ -82,21 +82,21 @@ message DownlinkDataEncrypted{
 
 // Downlink data revoke
 message RevokeDownlink{
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
     // Assigned queue ID for reference
     uint64 dl_que_id = 3;
 }
 
 // Downlink rx status query
 message DownlinkRxStatusQuery{
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
 }
 
 message AttachPropagate{   
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
     
     // End Point short address
     uint32 sh_addr = 3;
@@ -124,8 +124,8 @@ message AttachPropagate{
 }
 
 message DetachPropagate{
-    // Endnode EUI, 8 bytes little endian
-    uint64 endnode_eui = 2;
+    // Endnode EUI, hex string
+    string endnode_eui = 2;
 }
 
 message RequestStatus{}

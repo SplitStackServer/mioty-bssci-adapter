@@ -111,7 +111,7 @@ func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage 
 	var message msg.ProtoBasestationMessage
 
 	if m != nil && bsEui != nil {
-		bsEuiB := bsEui.ToUnsignedInt()
+		bsEuiB := bsEui.String()
 		ts := TimestampNsToProto(int64(m.Time))
 
 		message = msg.ProtoBasestationMessage{

@@ -9,23 +9,25 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
+
 )
 
 const (
-	bssciHeaderSize             = 12
-	bssciHeaderIdentifierOffset = 0
-	bssciHeaderIdentifierSize   = 8
-	bssciHeaderLengthOffset     = 8
-	bssciHeaderLengthSize       = 4
+	bssciHeaderSize           = 12
+	bssciHeaderIdentifierSize = 8
+	bssciHeaderLengthOffset   = 8
+	bssciHeaderLengthSize     = 4
 )
 
 var (
 	bssciIdentifier = [8]byte{0x4D, 0x49, 0x4F, 0x54, 0x59, 0x42, 0x30, 0x31}
+	
 )
+
 
 func ReadBssciMessage(r io.Reader) (cmd structs.CommandHeader, raw msgp.Raw, err error) {
 	// reader the bssci header
-	buf := make([]byte, 12)
+	buf := make([]byte, bssciHeaderSize)
 	_, err = r.Read(buf)
 
 	if err != nil {
@@ -143,13 +145,13 @@ func prepareBssciMessage(length int) []byte {
 func getBssciMessageLengthFromHeader(buf []byte) (l int32, err error) {
 
 	if len(buf) != bssciHeaderSize {
-		err = errors.New("invalid header size")
+		err = errors.Errorf("invalid header size: %v", len(buf))
 		return
 	}
 
-	identifier := [8]byte(buf[bssciHeaderIdentifierOffset : bssciHeaderIdentifierOffset+bssciHeaderIdentifierSize])
+	identifier := [8]byte(buf[:bssciHeaderIdentifierSize])
 	if identifier != bssciIdentifier {
-		err = errors.New("invalid identifier: " + string(identifier[:]))
+		err = errors.Errorf("message header error: invalid identifier in buffer %v", buf)
 		return
 	}
 

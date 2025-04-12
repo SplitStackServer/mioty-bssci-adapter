@@ -36,7 +36,7 @@ func ParseDlDataResult(s string) dlDataResult {
 }
 
 //go:generate msgp
-//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
+//msgp:shim common.EUI64 as:uint64 using:common.Eui64toUnsignedInt/common.Eui64FromUnsignedInt
 //msgp:shim dlDataResult as:string using:(dlDataResult).String/ParseDlDataResult
 
 // Downlink data result
@@ -95,8 +95,8 @@ func (m *DlDataRes) GetEventType() events.EventType {
 
 // implements EndnodeMessage.IntoProto()
 func (m *DlDataRes) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
-	bsEuiB := bsEui.ToUnsignedInt()
-	epEuiB := m.EpEui.ToUnsignedInt()
+	bsEuiB := bsEui.String()
+	epEuiB := m.EpEui.String()
 
 	result := msg.EndnodeDownlinkResult{
 		DlQueId: m.QueId,

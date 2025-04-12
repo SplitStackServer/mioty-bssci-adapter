@@ -32,7 +32,6 @@ func Execute(v string) {
 	}
 }
 
-
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -53,8 +52,7 @@ func init() {
 	viper.SetDefault("backend.bssci_v1.bind", "0.0.0.0:5005")
 	viper.SetDefault("backend.bssci_v1.stats_interval", time.Minute*5)
 	viper.SetDefault("backend.bssci_v1.ping_interval", time.Second*30)
-	viper.SetDefault("backend.bssci_v1.read_timeout", time.Minute+(5*time.Second))
-	viper.SetDefault("backend.bssci_v1.write_timeout", time.Second)
+	viper.SetDefault("backend.bssci_v1.keep_alive_period", time.Minute)
 
 	// mqtt_v3 integration
 	viper.SetDefault("integration.marshaler", "protobuf")
@@ -69,17 +67,15 @@ func init() {
 	viper.SetDefault("integration.mqtt_v3.auth.generic.servers", []string{"tcp://127.0.0.1:1883"})
 	viper.SetDefault("integration.mqtt_v3.auth.generic.clean_session", true)
 
-
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(configCmd)
 }
-
 
 func initConfig() {
 	if cfgFiles != nil && len(*cfgFiles) != 0 {
 		var filesMerged []byte
 		for _, cfgFile := range *cfgFiles {
-			cfgFileContent, err := os.ReadFile(cfgFile) 
+			cfgFileContent, err := os.ReadFile(cfgFile)
 			if err != nil {
 				log.Fatal().Err(err).Str("config", cfgFile).Msg("error loading config file")
 			}
@@ -126,7 +122,6 @@ func initConfig() {
 		log.Fatal().Err(err).Msg("unmarshal config error")
 	}
 }
-
 
 func viperBindEnvs(iface interface{}, parts ...string) {
 	ifv := reflect.ValueOf(iface)

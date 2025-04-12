@@ -7,7 +7,10 @@ import (
 	"mioty-bssci-adapter/internal/common"
 )
 
+
+
 //go:generate msgp
+
 
 // The VM UL data operation is initiated by the Base Station after receiving uplink data from
 // an End Point using a variable MAC (VM)
@@ -20,13 +23,13 @@ type VmUlData struct {
 	// MAC-Type of the Variable MAC
 	MacType int64 `msg:"macType" json:"macType"`
 	// n Byte End Point user data U-MPDU; starting with first byte after MAC-Type
-	UserData []byte `msg:"userData" json:"userData"`
+	UserData []uint8 `msg:"userData" json:"userData"`
 	// Transceiver time of reception, center of last subpacket, 64 bit, ns resolution
 	TrxTime uint64 `msg:"trxTime" json:"trxTime"`
 	// Unix UTC time of reception, center of last subpacket, 64 bit, ns resolution
 	SysTime uint64 `msg:"sysTime" json:"sysTime"`
 	// Frequency offset from center between primary and secondary channel in Hz
-	FreqOff uint64 `msg:"freqOff" json:"freqOff"`
+	FreqOff float64 `msg:"freqOff" json:"freqOff"`
 	// Reception signal to noise ratio in dB
 	SNR float64 `msg:"snr" json:"snr"`
 	// Reception signal strength in dBm
@@ -42,7 +45,7 @@ type VmUlData struct {
 	// Uplink TSMA Pattern number p
 	PattNum byte `msg:"pattNum" json:"pattNum"`
 	// Header and payload CRC, crc[0] = header CRC, crc[1] = payload CRC
-	CRC [2]byte `msg:"crc" json:"crc"`
+	CRC [2]uint8 `msg:"crc" json:"crc"`
 }
 
 func NewVmUlData(
@@ -50,7 +53,7 @@ func NewVmUlData(
 	macType int64,
 	userData []byte,
 	trxTime uint64,
-	freqOff uint64,
+	freqOff float64,
 	snr float64,
 	rssi float64,
 	eqSnr *float64,
@@ -95,12 +98,12 @@ func (m *VmUlData) GetEventType() events.EventType {
 
 // implements EndnodeMessage.IntoProto()
 func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
-	bsEuiB := bsEui.ToUnsignedInt()
+	bsEuiB := bsEui.String()
 
 	crc := uint64(m.CRC[0]) | uint64(m.CRC[0])<<32
 
 	metadata := UplinkMetadata{
-		RxTime:     m.TrxTime,
+		RxTime:     m.SysTime,
 		RxDuration: nil,
 		PacketCnt:  0,
 		Profile:    nil,
@@ -112,7 +115,6 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 
 	message := msg.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
-		EndnodeEui: 0,
 		V1: &msg.ProtoEndnodeMessage_VmUlData{
 			VmUlData: &msg.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,

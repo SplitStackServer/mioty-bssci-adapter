@@ -2,6 +2,7 @@ package bssci_v1
 
 import (
 	"bytes"
+	"encoding/hex"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 	"reflect"
@@ -9,6 +10,18 @@ import (
 
 	"github.com/tinylib/msgp/msgp"
 )
+
+func TestHex(t *testing.T) {
+	t.Skip()
+	s := "8da7636f6d6d616e64a9766d2e756c44617461a46f70496404a76d61635479706501a87573657244617461dc00565544cca511465279cc817607cc8c00ccb7cc900f002c253e351100cc98cccaccecccc1124225707a1bcc933207102a44ccfbcca948ccf1ccd8ccfa1879cc87cca0cc920bcc89cc8d38ccde03ccfacc9fcce876cce6502dccb5cca4672f5fcc843535225d31cc9b68cc9f555721ccb6cc902b7746cc8a6ca774727854696d65cf0009533f0d4cc1c7a773797354696d65cf183555b86b09db8ea7667265714f6666cb41c9df844e000000a472737369cbc0601c8880000000a3736e72cb400a2c0bc0000000a963617272537061636501a77061747447727000a7706174744e756d03a36372639257cc8e"
+
+	data, err := hex.DecodeString(s)
+	if err != nil {
+		panic(err)
+	}
+	t.Errorf("%v", data)
+
+}
 
 func TestReadBssciMessage(t *testing.T) {
 	tests := []struct {

@@ -27,6 +27,13 @@ The following integrations are provided:
             * /bs/{{ .EventType }}
             * /ep/{{ .EventType }}
 
+# Building 
+
+## Local Test
+
+> docker build -t test:latest .
+
+> docker save -o ../mioty-bssci-adapter.tar test
 
 
 

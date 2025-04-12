@@ -8,7 +8,7 @@ import (
 )
 
 //go:generate msgp
-//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
+//msgp:shim common.EUI64 as:uint64 using:common.Eui64toUnsignedInt/common.Eui64FromUnsignedInt
 
 // Downlink data revoke
 //
@@ -41,7 +41,10 @@ func NewDlDataRev(
 
 func NewDlDataRevFromProto(opId int64, pb *cmd.RevokeDownlink) (*DlDataRev, error) {
 	if pb != nil {
-		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
 		queId := pb.DlQueId
 		m := NewDlDataRev(opId, epEui, queId)
 		return &m, nil

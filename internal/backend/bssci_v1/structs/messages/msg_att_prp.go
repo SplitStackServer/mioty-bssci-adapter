@@ -8,7 +8,7 @@ import (
 )
 
 //go:generate msgp
-//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
+//msgp:shim common.EUI64 as:uint64 using:common.Eui64toUnsignedInt/common.Eui64FromUnsignedInt
 
 // Attach Propagate
 //
@@ -61,7 +61,10 @@ func NewAttPrp(opId int64, epEui common.EUI64, bidi bool, nwkSessionKey [16]byte
 
 func NewAttPrpFromProto(opId int64, pb *cmd.AttachPropagate) (*AttPrp, error) {
 	if pb != nil {
-		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
 
 		if len(pb.NwkSessionKey) != 16 {
 			return nil, errors.New("invalid NwkSessionKey")

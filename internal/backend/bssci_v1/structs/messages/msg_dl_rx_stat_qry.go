@@ -8,7 +8,7 @@ import (
 )
 
 //go:generate msgp
-//msgp:shim common.EUI64 as:int64 using:common.Eui64toInt/common.Eui64FromInt
+//msgp:shim common.EUI64 as:uint64 using:common.Eui64toUnsignedInt/common.Eui64FromUnsignedInt
 
 // Downlink rx status query
 //
@@ -31,7 +31,10 @@ func NewDlRxStatQry(opId int64, epEui common.EUI64) DlRxStatQry {
 
 func NewDlRxStatQryFromProto(opId int64, pb *cmd.DownlinkRxStatusQuery) (*DlRxStatQry, error) {
 	if pb != nil {
-		epEui := common.Eui64FromUnsignedInt(pb.EndnodeEui)
+		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
+		if err != nil {
+			return nil, err
+		}
 		m := NewDlRxStatQry(opId, epEui)
 		return &m, nil
 	}

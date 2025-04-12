@@ -40,7 +40,7 @@ func (ts *TestBasestationsSuite) SetupTest() {
 	}
 }
 
-func (ts *TestBasestationsSuite) Test_basestations_get() {
+func (ts *TestBasestationsSuite) TestBasestations_get() {
 	t := ts.T()
 
 	type args struct {
@@ -87,7 +87,7 @@ func (ts *TestBasestationsSuite) Test_basestations_get() {
 	}
 }
 
-func (ts *TestBasestationsSuite) Test_basestations_set() {
+func (ts *TestBasestationsSuite) TestBasestations_set() {
 	t := ts.T()
 
 	serverConn, _ := net.Pipe()
@@ -146,7 +146,7 @@ func (ts *TestBasestationsSuite) Test_basestations_set() {
 	}
 }
 
-func (ts *TestBasestationsSuite) Test_basestations_remove() {
+func (ts *TestBasestationsSuite) TestBasestations_remove() {
 	t := ts.T()
 
 	type args struct {

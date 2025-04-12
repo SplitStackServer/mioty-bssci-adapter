@@ -14,16 +14,16 @@ enum ConnectionState {
 }
 
 message ProtoBasestationState{
-    // Basestation EUI, 8 bytes little endian
-    uint64 bs_eui = 1;
+    // Basestation EUI, hex string
+    string bs_eui = 1;
     // ConnectionState
     ConnectionState state = 2;
 }
 
 
 message ProtoBasestationMessage {
-    // Basestation EUI, 8 bytes little endian
-    uint64 bs_eui = 1;
+    // Basestation EUI, hex string
+    string bs_eui = 1;
     // Message.
     oneof v1 {
         // Connect

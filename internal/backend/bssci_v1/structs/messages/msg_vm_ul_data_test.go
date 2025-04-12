@@ -17,7 +17,7 @@ func TestNewVmUlData(t *testing.T) {
 		macType    int64
 		userData   []byte
 		trxTime    uint64
-		freqOff    uint64
+		freqOff    float64
 		snr        float64
 		rssi       float64
 		eqSnr      *float64
@@ -85,7 +85,7 @@ func TestVmUlData_GetOpId(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -156,7 +156,7 @@ func TestVmUlData_GetCommand(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -227,7 +227,7 @@ func TestVmUlData_GetEventType(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -292,9 +292,9 @@ func TestVmUlData_GetEventType(t *testing.T) {
 
 func TestVmUlData_IntoProto(t *testing.T) {
 
-	var testTRxTime uint64 = 1000000000000005
+	var testTime uint64 = 1000000000000005
 
-	testTRxTimePb := timestamppb.Timestamp{
+	testTimePb := timestamppb.Timestamp{
 		Seconds: int64(1000000),
 		Nanos:   int32(5),
 	}
@@ -306,7 +306,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -332,8 +332,8 @@ func TestVmUlData_IntoProto(t *testing.T) {
 				OpId:       1,
 				MacType:    0,
 				UserData:   []byte{},
-				TrxTime:    testTRxTime,
-				SysTime:    0,
+				TrxTime:    0,
+				SysTime:    testTime,
 				FreqOff:    0,
 				SNR:        0,
 				RSSI:       0,
@@ -346,14 +346,13 @@ func TestVmUlData_IntoProto(t *testing.T) {
 			},
 			args: args{bsEui: common.EUI64{1}},
 			want: &msg.ProtoEndnodeMessage{
-				BsEui:      1,
-				EndnodeEui: 0,
+				BsEui:      "0100000000000000",
 				V1: &msg.ProtoEndnodeMessage_VmUlData{
 					VmUlData: &msg.EndnodeVariableMacUlDataMessage{
 						Data:    []byte{},
 						MacType: 0,
 						Meta: &msg.EndnodeUplinkMetadata{
-							RxTime:        &testTRxTimePb,
+							RxTime:        &testTimePb,
 							RxDuration:    nil,
 							PacketCnt:     0,
 							Profile:       nil,

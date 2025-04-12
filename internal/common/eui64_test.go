@@ -22,12 +22,12 @@ func TestEui64FromInt(t *testing.T) {
 		{
 			name: "one",
 			args: args{1},
-			want: EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			want: EUI64{0, 0, 0, 0, 0, 0, 0, 1},
 		},
 		{
 			name: "max",
 			args: args{0x7FFFFFFFFFFFFFFF},
-			want: EUI64{255, 255, 255, 255, 255, 255, 255, 127},
+			want: EUI64{127, 255, 255, 255, 255, 255, 255, 255},
 		},
 		{
 			name: "min",
@@ -61,12 +61,17 @@ func TestEui64FromUnsignedInt(t *testing.T) {
 		{
 			name: "one",
 			args: args{1},
-			want: EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			want: EUI64{0, 0, 0, 0, 0, 0, 0, 1},
 		},
 		{
 			name: "max",
 			args: args{0xFFFFFFFFFFFFFFFF},
 			want: EUI64{255, 255, 255, 255, 255, 255, 255, 255},
+		},
+		{
+			name: "min",
+			args: args{13269833212312402214},
+			want: EUI64{0xB8, 0x27, 0xEB, 0x00, 0x00, 0x8F, 0xB9, 0x26},
 		},
 	}
 	for _, tt := range tests {
@@ -91,12 +96,12 @@ func TestEUI64_ToInt(t *testing.T) {
 		},
 		{
 			name: "one",
-			e:    &EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			e:    &EUI64{0, 0, 0, 0, 0, 0, 0, 1},
 			want: 1,
 		},
 		{
 			name: "max",
-			e:    &EUI64{255, 255, 255, 255, 255, 255, 255, 127},
+			e:    &EUI64{127, 255, 255, 255, 255, 255, 255, 255},
 			want: 0x7FFFFFFFFFFFFFFF,
 		},
 		{
@@ -127,7 +132,7 @@ func TestEUI64_ToUnsignedInt(t *testing.T) {
 		},
 		{
 			name: "one",
-			e:    &EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			e:    &EUI64{0, 0, 0, 0, 0, 0, 0, 1},
 			want: 1,
 		},
 		{
@@ -171,6 +176,55 @@ func TestEUI64_String(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := tt.e.String(); got != tt.want {
 				t.Errorf("EUI64.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEui64FromHexString(t *testing.T) {
+	type args struct {
+		in string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    EUI64
+		wantErr bool
+	}{
+		{
+			name: "zero",
+			args: args{in: "0000000000000000"},
+			want: EUI64{},
+			wantErr: false,
+		},
+		{
+			name: "one",
+			args: args{in: "0100000000000000"},
+			want: EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			wantErr: false,
+		},
+		{
+			name: "max",
+			args: args{in: "ffffffffffffffff"},
+			want: EUI64{255, 255, 255, 255, 255, 255, 255, 255},
+			wantErr: false,
+		},
+		{
+			name: "invalid",
+			args: args{in: "0xfffffffff"},
+			want: EUI64{},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := Eui64FromHexString(tt.args.in)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Eui64FromHexString() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Eui64FromHexString() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -302,7 +356,7 @@ func TestEUI64_MarshalBinary(t *testing.T) {
 		},
 		{
 			name:    "one",
-			e:       EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			e:       EUI64{0, 0, 0, 0, 0, 0, 0, 1},
 			want:    []byte{0, 0, 0, 0, 0, 0, 0, 1},
 			wantErr: false,
 		},
@@ -313,8 +367,8 @@ func TestEUI64_MarshalBinary(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "little_endian",
-			e:       EUI64{8, 7, 6, 5, 4, 3, 2, 1},
+			name:    "example",
+			e:       EUI64{1, 2, 3, 4, 5, 6, 7, 8},
 			want:    []byte{1, 2, 3, 4, 5, 6, 7, 8},
 			wantErr: false,
 		},
@@ -351,7 +405,7 @@ func TestEUI64_UnmarshalBinary(t *testing.T) {
 		},
 		{
 			name:    "one",
-			want:    EUI64{1, 0, 0, 0, 0, 0, 0, 0},
+			want:    EUI64{0, 0, 0, 0, 0, 0, 0, 1},
 			args:    args{[]byte{0, 0, 0, 0, 0, 0, 0, 1}},
 			wantErr: false,
 		},
@@ -362,9 +416,9 @@ func TestEUI64_UnmarshalBinary(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "little_endian",
+			name:    "example",
 			args:    args{[]byte{1, 2, 3, 4, 5, 6, 7, 8}},
-			want:    EUI64{8, 7, 6, 5, 4, 3, 2, 1},
+			want:    EUI64{1, 2, 3, 4, 5, 6, 7, 8},
 			wantErr: false,
 		},
 		{
@@ -420,12 +474,12 @@ func TestEui64toInt(t *testing.T) {
 		},
 		{
 			name: "one",
-			args: args{EUI64{1, 0, 0, 0, 0, 0, 0, 0}},
+			args: args{EUI64{0, 0, 0, 0, 0, 0, 0, 1}},
 			want: 1,
 		},
 		{
 			name: "max",
-			args: args{EUI64{255, 255, 255, 255, 255, 255, 255, 127}},
+			args: args{EUI64{127, 255, 255, 255, 255, 255, 255, 255}},
 			want: 0x7FFFFFFFFFFFFFFF,
 		},
 		{
@@ -459,7 +513,7 @@ func TestEui64toUnsignedInt(t *testing.T) {
 		},
 		{
 			name: "one",
-			args: args{EUI64{1, 0, 0, 0, 0, 0, 0, 0}},
+			args: args{EUI64{0, 0, 0, 0, 0, 0, 0, 1}},
 			want: 1,
 		},
 		{

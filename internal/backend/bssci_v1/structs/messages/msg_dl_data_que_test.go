@@ -142,7 +142,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.EnqueDownlink{
-					EndnodeEui:     0x0001020304050607,
+					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
@@ -175,7 +175,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.EnqueDownlink{
-					EndnodeEui:     0x0001020304050607,
+					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
@@ -208,7 +208,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.EnqueDownlink{
-					EndnodeEui:     0x0001020304050607,
+					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
@@ -227,7 +227,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.EnqueDownlink{
-					EndnodeEui: 0x0001020304050607,
+					EndnodeEui: "0706050403020100",
 					DlQueId:    20,
 					Priority:   new(float32),
 					Format:     new(uint32),
@@ -265,7 +265,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.EnqueDownlink{
-					EndnodeEui:     0x0001020304050607,
+					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
@@ -293,7 +293,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.EnqueDownlink{
-					EndnodeEui:     0x0001020304050607,
+					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),

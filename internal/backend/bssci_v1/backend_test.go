@@ -2,8 +2,7 @@ package bssci_v1
 
 import (
 	"context"
-
-	"errors"
+	"crypto/tls"
 
 	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/api/msg"
@@ -148,7 +147,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name:                    "ulData",
-			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 237, 0, 0, 0, 143, 167, 99, 111, 109, 109, 97, 110, 100, 166, 117, 108, 68, 97, 116, 97, 164, 111, 112, 73, 100, 0, 165, 101, 112, 69, 117, 105, 211, 8, 7, 6, 5, 4, 3, 2, 1, 166, 114, 120, 84, 105, 109, 101, 1, 170, 114, 120, 68, 117, 114, 97, 116, 105, 111, 110, 205, 1, 244, 169, 112, 97, 99, 107, 101, 116, 67, 110, 116, 2, 163, 115, 110, 114, 203, 64, 8, 0, 0, 0, 0, 0, 0, 164, 114, 115, 115, 105, 203, 192, 89, 0, 0, 0, 0, 0, 0, 165, 101, 113, 83, 110, 114, 203, 64, 16, 0, 0, 0, 0, 0, 0, 167, 112, 114, 111, 102, 105, 108, 101, 162, 101, 117, 170, 115, 117, 98, 112, 97, 99, 107, 101, 116, 115, 132, 163, 115, 110, 114, 147, 1, 2, 3, 164, 114, 115, 115, 105, 147, 4, 5, 6, 169, 102, 114, 101, 113, 117, 101, 110, 99, 121, 147, 7, 8, 9, 165, 112, 104, 97, 115, 101, 147, 10, 11, 12, 168, 117, 115, 101, 114, 68, 97, 116, 97, 196, 22, 116, 104, 105, 115, 105, 115, 97, 108, 111, 116, 111, 102, 100, 97, 116, 97, 116, 111, 115, 101, 110, 100, 166, 100, 108, 79, 112, 101, 110, 194, 171, 114, 101, 115, 112, 111, 110, 115, 101, 69, 120, 112, 194, 165, 100, 108, 65, 99, 107, 194},
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 238, 0, 0, 0, 143, 167, 99, 111, 109, 109, 97, 110, 100, 166, 117, 108, 68, 97, 116, 97, 164, 111, 112, 73, 100, 0, 165, 101, 112, 69, 117, 105, 207, 8, 7, 6, 5, 4, 3, 2, 1, 166, 114, 120, 84, 105, 109, 101, 1, 170, 114, 120, 68, 117, 114, 97, 116, 105, 111, 110, 205, 1, 244, 169, 112, 97, 99, 107, 101, 116, 67, 110, 116, 2, 163, 115, 110, 114, 203, 64, 8, 0, 0, 0, 0, 0, 0, 164, 114, 115, 115, 105, 203, 192, 89, 0, 0, 0, 0, 0, 0, 165, 101, 113, 83, 110, 114, 203, 64, 16, 0, 0, 0, 0, 0, 0, 167, 112, 114, 111, 102, 105, 108, 101, 162, 101, 117, 170, 115, 117, 98, 112, 97, 99, 107, 101, 116, 115, 132, 163, 115, 110, 114, 147, 1, 2, 3, 164, 114, 115, 115, 105, 147, 4, 5, 6, 169, 102, 114, 101, 113, 117, 101, 110, 99, 121, 147, 7, 8, 9, 165, 112, 104, 97, 115, 101, 147, 10, 11, 12, 168, 117, 115, 101, 114, 68, 97, 116, 97, 220, 0, 22, 116, 104, 105, 115, 105, 115, 97, 108, 111, 116, 111, 102, 100, 97, 116, 97, 116, 111, 115, 101, 110, 100, 166, 100, 108, 79, 112, 101, 110, 194, 171, 114, 101, 115, 112, 111, 110, 115, 101, 69, 120, 112, 194, 165, 100, 108, 65, 99, 107, 194},
 			expectResponse:          true,
 			expectedResponseCommand: structs.MsgUlDataRsp,
 		},
@@ -214,7 +213,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name:                    "vmUlData",
-			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 207, 0, 0, 0, 143, 167, 99, 111, 109, 109, 97, 110, 100, 169, 118, 109, 46, 117, 108, 68, 97, 116, 97, 164, 111, 112, 73, 100, 10, 167, 109, 97, 99, 84, 121, 112, 101, 0, 168, 117, 115, 101, 114, 68, 97, 116, 97, 196, 3, 1, 2, 3, 167, 116, 114, 120, 84, 105, 109, 101, 1, 167, 115, 121, 115, 84, 105, 109, 101, 1, 167, 102, 114, 101, 113, 79, 102, 102, 60, 163, 115, 110, 114, 203, 64, 8, 0, 0, 0, 0, 0, 0, 164, 114, 115, 115, 105, 203, 192, 89, 0, 0, 0, 0, 0, 0, 165, 101, 113, 83, 110, 114, 203, 64, 16, 0, 0, 0, 0, 0, 0, 170, 115, 117, 98, 112, 97, 99, 107, 101, 116, 115, 132, 163, 115, 110, 114, 147, 1, 2, 3, 164, 114, 115, 115, 105, 147, 4, 5, 6, 169, 102, 114, 101, 113, 117, 101, 110, 99, 121, 147, 7, 8, 9, 165, 112, 104, 97, 115, 101, 147, 10, 11, 12, 169, 99, 97, 114, 114, 83, 112, 97, 99, 101, 2, 167, 112, 97, 116, 116, 71, 114, 112, 3, 167, 112, 97, 116, 116, 78, 117, 109, 5, 163, 99, 114, 99, 196, 2, 6, 7},
+			payload:                 []byte{77, 73, 79, 84, 89, 66, 48, 49, 213, 0, 0, 0, 143, 167, 99, 111, 109, 109, 97, 110, 100, 169, 118, 109, 46, 117, 108, 68, 97, 116, 97, 164, 111, 112, 73, 100, 10, 167, 109, 97, 99, 84, 121, 112, 101, 0, 168, 117, 115, 101, 114, 68, 97, 116, 97, 147, 1, 2, 3, 167, 116, 114, 120, 84, 105, 109, 101, 1, 167, 115, 121, 115, 84, 105, 109, 101, 1, 167, 102, 114, 101, 113, 79, 102, 102, 203, 64, 78, 0, 0, 0, 0, 0, 0, 163, 115, 110, 114, 203, 64, 8, 0, 0, 0, 0, 0, 0, 164, 114, 115, 115, 105, 203, 192, 89, 0, 0, 0, 0, 0, 0, 165, 101, 113, 83, 110, 114, 203, 64, 16, 0, 0, 0, 0, 0, 0, 170, 115, 117, 98, 112, 97, 99, 107, 101, 116, 115, 132, 163, 115, 110, 114, 147, 1, 2, 3, 164, 114, 115, 115, 105, 147, 4, 5, 6, 169, 102, 114, 101, 113, 117, 101, 110, 99, 121, 147, 7, 8, 9, 165, 112, 104, 97, 115, 101, 147, 10, 11, 12, 169, 99, 97, 114, 114, 83, 112, 97, 99, 101, 2, 167, 112, 97, 116, 116, 71, 114, 112, 3, 167, 112, 97, 116, 116, 78, 117, 109, 5, 163, 99, 114, 99, 146, 6, 77},
 			expectResponse:          true,
 			expectedResponseCommand: structs.MsgVmUlDataRsp,
 		},
@@ -248,10 +247,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DlDataQue",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DlDataQue{
 					DlDataQue: &cmd.EnqueDownlink{
-						EndnodeEui:     123,
+						EndnodeEui:     "01020304050607",
 						DlQueId:        456,
 						Priority:       new(float32),
 						Format:         new(uint32),
@@ -268,10 +267,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DlDataQue_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DlDataQue{
 					DlDataQue: &cmd.EnqueDownlink{
-						EndnodeEui:     123,
+						EndnodeEui:     "01020304050607",
 						DlQueId:        456,
 						Priority:       new(float32),
 						Format:         new(uint32),
@@ -288,10 +287,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DlDataRev",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DlDataRev{
 					DlDataRev: &cmd.RevokeDownlink{
-						EndnodeEui: 123,
+						EndnodeEui: "01020304050607",
 						DlQueId:    456,
 					},
 				},
@@ -301,7 +300,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DlDataRev_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DlDataRev{
 					DlDataRev: nil,
 				},
@@ -311,10 +310,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DlRxStatQry",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DlRxStatQry{
 					DlRxStatQry: &cmd.DownlinkRxStatusQuery{
-						EndnodeEui: 123,
+						EndnodeEui: "01020304050607",
 					},
 				},
 			},
@@ -323,7 +322,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DlRxStatQry_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DlRxStatQry{
 					DlRxStatQry: nil,
 				},
@@ -333,10 +332,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_AttPrp",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_AttPrp{
 					AttPrp: &cmd.AttachPropagate{
-						EndnodeEui:    123,
+						EndnodeEui:    "01020304050607",
 						NwkSessionKey: []byte{1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4},
 					},
 				},
@@ -346,7 +345,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_AttPrp_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_AttPrp{
 					AttPrp: nil,
 				},
@@ -356,10 +355,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DetPrp",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DetPrp{
 					DetPrp: &cmd.DetachPropagate{
-						EndnodeEui: 123,
+						EndnodeEui: "01020304050607",
 					},
 				},
 			},
@@ -368,7 +367,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_DetPrp_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_DetPrp{
 					DetPrp: nil,
 				},
@@ -378,7 +377,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_ReqStatus",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_ReqStatus{
 					ReqStatus: &cmd.RequestStatus{},
 				},
@@ -388,7 +387,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_ReqStatus_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_ReqStatus{
 					ReqStatus: nil,
 				},
@@ -398,7 +397,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_VmActivate",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_VmActivate{
 					VmActivate: &cmd.EnableVariableMac{},
 				},
@@ -408,7 +407,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_VmActivate_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_VmActivate{
 					VmActivate: nil,
 				},
@@ -418,7 +417,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_VmDeactivate",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_VmDeactivate{
 					VmDeactivate: &cmd.DisableVariableMac{},
 				},
@@ -428,7 +427,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_VmDeactivate_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_VmDeactivate{
 					VmDeactivate: nil,
 				},
@@ -438,7 +437,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_VmStatus",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_VmStatus{
 					VmStatus: &cmd.RequestVariableMacStatus{},
 				},
@@ -448,7 +447,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoCommand_VmStatus_Err",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &cmd.ProtoCommand_VmStatus{
 					VmStatus: nil,
 				},
@@ -468,7 +467,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "Basestation Error",
 			cmd: &cmd.ProtoCommand{
-				BsEui: ts.bs_eui.ToUnsignedInt() + 1,
+				BsEui: common.EUI64{}.String(),
 				V1: &cmd.ProtoCommand_ReqStatus{
 					ReqStatus: &cmd.RequestStatus{},
 				},
@@ -481,10 +480,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoResponse_AttRsp",
 			rsp: &rsp.ProtoResponse{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &rsp.ProtoResponse_AttRsp{
 					AttRsp: &rsp.EndnodeAttachResponse{
-						EndnodeEui:    123,
+						EndnodeEui:    "01020304050607",
 						NwkSessionKey: []byte{1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4},
 					},
 				},
@@ -494,7 +493,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoResponse_AttRsp_Err",
 			rsp: &rsp.ProtoResponse{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &rsp.ProtoResponse_AttRsp{
 					AttRsp: nil,
 				},
@@ -504,10 +503,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoResponse_DetRsp",
 			rsp: &rsp.ProtoResponse{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &rsp.ProtoResponse_DetRsp{
 					DetRsp: &rsp.EndnodeDetachResponse{
-						EndnodeEui: 123,
+						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
 				},
@@ -517,7 +516,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "ProtoResponse_DetRsp_Err",
 			rsp: &rsp.ProtoResponse{
-				BsEui: ts.bs_eui.ToUnsignedInt(),
+				BsEui: ts.bs_eui.String(),
 				V1: &rsp.ProtoResponse_DetRsp{
 					DetRsp: nil,
 				},
@@ -537,10 +536,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		{
 			name: "Basestation Error",
 			rsp: &rsp.ProtoResponse{
-				BsEui: ts.bs_eui.ToUnsignedInt() + 1,
+				BsEui: common.EUI64{}.String(),
 				V1: &rsp.ProtoResponse_DetRsp{
 					DetRsp: &rsp.EndnodeDetachResponse{
-						EndnodeEui: 123,
+						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
 				},
@@ -561,22 +560,16 @@ func (ts *TestBackendSuite) SetupTest() {
 	conf.Backend.BssciV1.Bind = "127.0.0.1:0"
 	conf.Backend.BssciV1.StatsInterval = time.Minute
 	conf.Backend.BssciV1.PingInterval = 30 * time.Second
-	conf.Backend.BssciV1.ReadTimeout = 2 * time.Minute
-	conf.Backend.BssciV1.WriteTimeout = time.Second
+	conf.Backend.BssciV1.KeepAlivePeriod = time.Minute
 
-	backend, err := NewBackend(conf)
+	ts.backend, err = NewBackend(conf)
 	assert.NoError(err)
 
-	subscribeChan := make(chan events.Subscribe, 1)
-
 	// setup backend listener
-	backend.SetSubscribeEventHandler(func(pl events.Subscribe) {
-		subscribeChan <- pl
-	})
-	backend.SetBasestationMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage) {})
-	backend.SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage) {})
+	ts.backend.SetSubscribeEventHandler(func(pl events.Subscribe) {})
+	ts.backend.SetBasestationMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage) {})
+	ts.backend.SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage) {})
 
-	ts.backend = backend
 }
 
 func (ts *TestBackendSuite) TearDownTest() {
@@ -593,30 +586,28 @@ func (ts *TestBackendSuite) TestBackend_HandleBasestationMessages() {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
 
-			serverConn, clientConn := net.Pipe()
+			server, client := net.Pipe()
 
 			bsConnection := connection{
-				conn: clientConn,
+				conn: client,
 				// stats:      stats.NewCollector(),
-				lastActive: time.Now(),
-				opId:       -1,
-				SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
-				SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+				opId:     -1,
+				SnBsUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+				SnScUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 			}
 
 			go func() {
-				defer clientConn.Close()
-				clientConn.SetReadDeadline(time.Now().Add(time.Second))
 				ctx := context.Background()
 				assert.NoError(ts.backend.handleBasestationMessages(ctx, ts.bs_eui, &bsConnection))
+
 			}()
 
-			serverConn.SetDeadline(time.Now().Add(time.Second))
-			_, err := serverConn.Write(tt.payload)
+			server.SetDeadline(time.Now().Add(time.Second))
+			_, err := server.Write(tt.payload)
 
 			assert.NoError(err)
 			if tt.expectResponse {
-				cmd, _, err := ReadBssciMessage(serverConn)
+				cmd, _, err := ReadBssciMessage(server)
 				assert.NoError(err)
 				assert.Equal(tt.expectedResponseCommand, cmd.Command)
 			}
@@ -635,30 +626,30 @@ func BenchmarkBackend_HandleBasestationMessages(b *testing.B) {
 	for _, tt := range ts.handleBasestationMessagesTestCases {
 		b.Run(tt.name, func(b *testing.B) {
 			ts.SetupTest()
-			serverConn, clientConn := net.Pipe()
+			server, client := net.Pipe()
 
 			bsConnection := connection{
-				conn: clientConn,
+				conn: client,
 				// stats:      stats.NewCollector(),
-				lastActive: time.Now(),
-				opId:       -1,
-				SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
-				SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+
+				opId:     -1,
+				SnBsUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+				SnScUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 			}
 
 			go func() {
-				defer clientConn.Close()
-				clientConn.SetReadDeadline(time.Now().Add(time.Second))
+				defer client.Close()
+				client.SetReadDeadline(time.Now().Add(time.Second))
 				ctx := context.Background()
 				ts.backend.handleBasestationMessages(ctx, ts.bs_eui, &bsConnection)
 			}()
 
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				serverConn.SetDeadline(time.Now().Add(time.Second))
-				serverConn.Write(tt.payload)
+				server.SetDeadline(time.Now().Add(time.Second))
+				server.Write(tt.payload)
 				if tt.expectResponse {
-					ReadBssciMessage(serverConn)
+					ReadBssciMessage(server)
 				}
 			}
 		})
@@ -668,25 +659,22 @@ func BenchmarkBackend_HandleBasestationMessages(b *testing.B) {
 func (ts *TestBackendSuite) TestBackend_HandleServerCommand() {
 	t := ts.T()
 
-	serverConn, clientConn := net.Pipe()
+	server, client := net.Pipe()
 
 	bsConnection := connection{
-		conn: clientConn,
+		conn: client,
 		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
-		opId:       -1,
-		SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
-		SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+
+		opId:     -1,
+		SnBsUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+		SnScUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 	}
 	ts.backend.basestations.set(ts.bs_eui, &bsConnection)
 
 	go func() {
-		defer serverConn.Close()
-
 		for {
-			serverConn.SetReadDeadline(time.Now().Add(time.Second))
 			buf := make([]byte, 12)
-			serverConn.Read(buf)
+			server.Read(buf)
 		}
 	}()
 
@@ -708,25 +696,22 @@ func (ts *TestBackendSuite) TestBackend_HandleServerCommand() {
 func (ts *TestBackendSuite) TestBackend_HandleServerResponse() {
 	t := ts.T()
 
-	serverConn, clientConn := net.Pipe()
+	server, client := net.Pipe()
 
 	bsConnection := connection{
-		conn: clientConn,
+		conn: client,
 		// stats:      stats.NewCollector(),
-		lastActive: time.Now(),
-		opId:       -1,
-		SnBsUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
-		SnScUuid:   uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+
+		opId:     -1,
+		SnBsUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+		SnScUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
 	}
 	ts.backend.basestations.set(ts.bs_eui, &bsConnection)
 
 	go func() {
-		defer serverConn.Close()
-
 		for {
-			serverConn.SetReadDeadline(time.Now().Add(time.Second))
 			buf := make([]byte, 12)
-			serverConn.Read(buf)
+			server.Read(buf)
 		}
 	}()
 
@@ -768,7 +753,7 @@ func (ts *TestBackendSuite) TestBackend_initBasestation() {
 					SnBsUuid: structs.SessionUuid{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
 				},
 				handler: func(ctx context.Context, eui common.EUI64, conn *connection) error {
-					return errors.New("exit test")
+					return nil
 				},
 			},
 		},
@@ -784,7 +769,6 @@ func (ts *TestBackendSuite) TestBackend_initBasestation() {
 			server, client := net.Pipe()
 
 			go func() {
-				defer client.Close()
 				cmd, _, err := ReadBssciMessage(client)
 				assert.NoError(err)
 				assert.Equal(structs.MsgConRsp, cmd.Command)
@@ -823,23 +807,20 @@ func (ts *TestBackendSuite) TestBackend_Start() {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert := assert.New(t)
+	assert := assert.New(t)
+	err := ts.backend.Start()
+	assert.NoError(err)
 
-			err := ts.backend.Start()
-			assert.NoError(err)
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
 
 			addr := ts.backend.listener.Addr().String()
-
-			conn, err := net.Dial("tcp", addr)
+			conn, err := tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true})
 			assert.NoError(err)
 
-			go func() {
-				err := WriteBssciMessage(conn, tt.msg)
-				assert.NoError(err)
-
-			}()
+			err = WriteBssciMessage(conn, tt.msg)
+			assert.NoError(err)
 
 		})
 	}
