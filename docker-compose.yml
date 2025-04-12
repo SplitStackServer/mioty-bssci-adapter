@@ -8,11 +8,21 @@ services:
       - "5005:5005/tcp"
     volumes:
       - ./:/mioty-bssci-adapter
-    links:
-      - mosquitto
     environment:
-      - MQTT_SERVER=tcp://mosquitto:1883
-      - TEST_MQTT_SERVER=tcp://mosquitto:1883
+      - MQTT_SERVER=mosquitto:1883
+      - TEST_MQTT_SERVER=mosquitto:1883
+    networks:
+      - test
+    depends_on:
+      - mosquitto
 
   mosquitto:
-    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    # 1.6 has allow_anonymous = true as default
+    image: eclipse-mosquitto:1.6    
+    networks:
+      - test
+    ports:
+      - "1883:1883/tcp"
+networks:
+  test:
