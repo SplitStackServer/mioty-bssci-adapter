@@ -52,7 +52,7 @@ func init() {
 	viper.SetDefault("backend.bssci_v1.bind", "0.0.0.0:5005")
 	viper.SetDefault("backend.bssci_v1.stats_interval", time.Minute*5)
 	viper.SetDefault("backend.bssci_v1.ping_interval", time.Second*30)
-	viper.SetDefault("backend.bssci_v1.keep_alive_period", time.Minute*3)
+	viper.SetDefault("backend.bssci_v1.keep_alive_period", time.Minute)
 
 	// mqtt_v3 integration
 	viper.SetDefault("integration.marshaler", "protobuf")
