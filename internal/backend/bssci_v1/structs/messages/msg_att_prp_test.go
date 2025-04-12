@@ -80,7 +80,7 @@ func TestNewAttPrpFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.AttachPropagate{
-					EndnodeEui:    "0x0001020304050607",
+					EndnodeEui:    "0706050403020100",
 					ShAddr:        0,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
 					LastPacketCnt: 0,
@@ -120,7 +120,7 @@ func TestNewAttPrpFromProto(t *testing.T) {
 			args: args{
 				opId: 10,
 				pb: &cmd.AttachPropagate{
-					EndnodeEui:    "0x0001020304050607",
+					EndnodeEui:    "0706050403020100",
 					ShAddr:        0,
 					NwkSessionKey: []byte{},
 					LastPacketCnt: 0,
