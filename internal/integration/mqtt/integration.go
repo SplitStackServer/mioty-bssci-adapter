@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	stateTopicTemplate    = "bssci/v1/{{ .BsEui }}/state/"
+	stateTopicTemplate    = "bssci/v1/{{ .BsEui }}/state"
 	eventTopicTemplate    = "bssci/v1/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
 	commandTopicTemplate  = "bssci/v1/{{ .BsEui }}/command/#"
 	responseTopicTemplate = "bssci/v1/{{ .BsEui }}/response/#"
