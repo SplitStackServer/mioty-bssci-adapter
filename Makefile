@@ -1,4 +1,4 @@
-.PHONY: build clean test dist snapshot dev-requirements
+.PHONY: build clean test dist snapshot dev-requirements docker-test
 VERSION := $(shell git describe --always |sed -e "s/^v//")
 
 build:
@@ -31,3 +31,6 @@ dev-requirements:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/goreleaser/goreleaser/v2@latest
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
+docker-test:
+	docker compose run --rm mioty-bssci-adapter make test
