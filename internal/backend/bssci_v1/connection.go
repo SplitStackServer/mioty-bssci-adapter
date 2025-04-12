@@ -15,7 +15,7 @@ import (
 type connection struct {
 	sync.RWMutex
 	conn net.Conn
-	opId       int64
+	opId int64
 	// Base Station session UUID, used to resume session
 	SnBsUuid uuid.UUID
 	// Service Center session UUID, used to resume session
@@ -30,9 +30,9 @@ func newConnection(conn net.Conn, snBsUuid structs.SessionUuid) connection {
 	return connection{
 		conn: conn,
 		// stats:      stats.NewCollector(),
-		opId:       -1,
-		SnBsUuid:   snBsUuid.ToUuid(),
-		SnScUuid:   snScUuid,
+		opId:     -1,
+		SnBsUuid: snBsUuid.ToUuid(),
+		SnScUuid: snScUuid,
 	}
 }
 
@@ -81,7 +81,6 @@ func (conn *connection) GetAndDecrementOpId() (opId int64) {
 	conn.opId = conn.opId - 1
 	return
 }
-
 
 // Check if this connection is resumed after a Con message
 //
