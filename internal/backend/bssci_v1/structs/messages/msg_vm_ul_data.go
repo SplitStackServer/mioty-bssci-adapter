@@ -45,7 +45,7 @@ type VmUlData struct {
 	// Uplink TSMA Pattern number p
 	PattNum byte `msg:"pattNum" json:"pattNum"`
 	// Header and payload CRC, crc[0] = header CRC, crc[1] = payload CRC
-	CRC [2]byte `msg:"crc" json:"crc"`
+	CRC [2]uint8 `msg:"crc" json:"crc"`
 }
 
 func NewVmUlData(
