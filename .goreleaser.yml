@@ -19,20 +19,11 @@ builds:
     binary: mioty-bssci-adapter
     env:
       - CGO_ENABLED=0
-      - >-
-        {{- if eq .Os "darwin" }}
-          {{- if eq .Arch "amd64"}}CC=o64-clang{{- end }}
-          {{- if eq .Arch "arm64"}}CC=aarch64-apple-darwin20.2-clang{{- end }}
-        {{- end }}
-        {{- if eq .Os "windows" }}
-          {{- if eq .Arch "amd64" }}CC=x86_64-w64-mingw32-gcc{{- end }}
-        {{- end }}
     goos:
       - linux
-      - windows
-      - darwin
     goarch:
       - amd64
+      - arm64
 
 
 release:
@@ -47,6 +38,7 @@ nfpms:
     license: MIT
     formats:
       - deb
+      - rpm
     bindir: /usr/bin
     contents:
       - src: packaging/files/mioty-bssci-adapter.rotate
