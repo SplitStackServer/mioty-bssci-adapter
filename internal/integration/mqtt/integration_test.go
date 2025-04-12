@@ -40,8 +40,8 @@ func (ts *TestIntegrationSuite) SetupSuite() {
 	assert := require.New(ts.T())
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	err := godotenv.Load("../../../.env")
-	assert.NoError(err)
+	godotenv.Load("../../../.env")
+
 	var server string
 	var username string
 	var password string
@@ -78,7 +78,7 @@ func (ts *TestIntegrationSuite) SetupSuite() {
 	conf.Integration.MQTTV3.Auth.Generic.ClientID = ts.basestationsEui.String()
 	conf.Integration.MQTTV3.MaxTokenWait = time.Second
 
-	// var err error
+	var err error
 	ts.integration, err = NewIntegration(conf)
 	assert.NoError(err)
 

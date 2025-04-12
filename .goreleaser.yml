@@ -25,10 +25,6 @@ builds:
       - amd64
       - arm64
 
-
-release:
-  disable: true
-
 nfpms:
   - id: bundle
     vendor: SplitStack
@@ -59,24 +55,22 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - "doernera/mioty-bssci-adapter:latest"
+      - "alexanderdoerner/mioty-bssci-adapter:latest"
     dockerfile: Dockerfile-releaser
-    # IDs to filter the binaries/packages.
-    #
-    # Make sure to only include the IDs of binaries you want to `COPY` in your
-    # Dockerfile.
-    #
-    # If you include IDs that don't exist or are not available for the current
-    # architecture being built, the build of the image will be skipped.
     ids:
       - bin
     extra_files:
         - packaging/files/mioty-bssci-adapter.toml
-    # Skips the docker push.
-    # Could be useful if you also do draft releases.
-    #
-    # If set to auto, the release will not be pushed to the Docker repository
-    #  in case there is an indicator of a prerelease in the tag, e.g. v1.0.0-rc1.
-    #
-    # Templates: allowed.
-    skip_push: false
+    skip_push: auto
+
+
+release:
+  prerelease: auto
+  header: |
+    # Release {{ .Version }} - {{ .CurrentTag }} ({{ .Date }})
+
+    ## Changes / Improvements
+
+    ## Bugfixes
+
+
