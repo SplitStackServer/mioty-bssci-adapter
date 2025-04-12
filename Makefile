@@ -27,6 +27,7 @@ snapshot:
 	@goreleaser --snapshot --clean
 
 dev-requirements:
+	go install github.com/tinylib/msgp@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/goreleaser/goreleaser/v2@latest
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
