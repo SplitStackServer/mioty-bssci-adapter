@@ -19,24 +19,44 @@ The following backends are provided:
 The following integrations are provided:
 
 * MQTT 3.1/3.11
-    * Topic layout: "basestation/{{ .BsEui }}/#"
-        * /state
-        * /command
-        * /response
-        * /event
-            * /bs/{{ .EventType }}
-            * /ep/{{ .EventType }}
+    * Currently the topics are hardcoded as follows: 
+        * root: /bssci/#
+        * basestation: bssci/{{ .BsEui }}/#
+            * state: bssci/{{ .BsEui }}/state
+            * events: 
+                * endpoint events: "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
+                    * {{ .EventSource }} is "ep"
+                    * {{ .EventType }} is one of "otaa", "dl, "ul", "rx"
+                * basestation events: "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
+                    * {{ .EventSource }} is "bs"
+                    * {{ .EventType }} is one of "status", "con, "vm"
+            * server commands: "bssci/{{ .BsEui }}/command/#"
+            * server responses: "bssci/{{ .BsEui }}/response/#"
+
 
 # Building 
 
-## Local Test
+This project uses `goreleaser` and `nfpm` to handle build and packaging tasks. `goreleaser` also builds a Docker image.
 
-> docker build -t test:latest .
-
-> docker save -o ../mioty-bssci-adapter.tar test
+Helpful commands:
 
 
+```bash
+# install development requirements
+make dev-requirements
 
+# run the tests
+make test
+
+# compile
+make build
+
+# build for supported architectures using goreleaser
+make dist
+
+# compile snapshot for supported architectures using goreleaser
+make snapshot
+```
 
 ## License
 

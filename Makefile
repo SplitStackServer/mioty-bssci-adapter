@@ -1,4 +1,4 @@
-.PHONY: build clean test dist serve run-compose-test
+.PHONY: build clean test dist snapshot dev-requirements
 VERSION := $(shell git describe --always |sed -e "s/^v//")
 
 build:
@@ -28,12 +28,3 @@ dev-requirements:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/goreleaser/goreleaser/v2@latest
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-
-
-# shortcuts for development
-
-serve: build
-	./build/mioty-bssci-adapter
-
-run-compose-test:
-	docker compose run --rm mioty-bssci-adapter make test

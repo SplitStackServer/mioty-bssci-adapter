@@ -49,7 +49,6 @@ func gatewaySubscribeEventHandler(pl events.Subscribe) {
 
 func basestationMessageHandler(eui common.EUI64, event events.EventType, pb *msg.ProtoBasestationMessage) {
 	go func(eui common.EUI64, event events.EventType, pb *msg.ProtoBasestationMessage) {
-
 		if err := integration.GetIntegration().PublishBasestationEvent(eui, string(event), pb); err != nil {
 			log.Error().Err(err).Str("bs_eui", eui.String()).Str("event", string(event)).Msg("publish basestation event error")
 		}
@@ -68,7 +67,6 @@ func endnodeMessageHandler(eui common.EUI64, event events.EventType, pb *msg.Pro
 
 func serverCommandHandler(pb *cmd.ProtoCommand) {
 	go func(pb *cmd.ProtoCommand) {
-
 		if err := backend.GetBackend().HandleServerCommand(pb); err != nil {
 			log.Error().Err(err).Msg("failed to handle server command")
 		}
@@ -77,7 +75,6 @@ func serverCommandHandler(pb *cmd.ProtoCommand) {
 
 func serverResponseHandler( pb *rsp.ProtoResponse) {
 	go func(pb *rsp.ProtoResponse) {
-
 		if err := backend.GetBackend().HandleServerResponse(pb); err != nil {
 			log.Error().Err(err).Msg("failed to handle server response")
 		}

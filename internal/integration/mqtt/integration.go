@@ -26,10 +26,10 @@ import (
 )
 
 const (
-	stateTopicTemplate    = "bssci/v1/{{ .BsEui }}/state"
-	eventTopicTemplate    = "bssci/v1/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
-	commandTopicTemplate  = "bssci/v1/{{ .BsEui }}/command/#"
-	responseTopicTemplate = "bssci/v1/{{ .BsEui }}/response/#"
+	stateTopicTemplate    = "bssci/{{ .BsEui }}/state"
+	eventTopicTemplate    = "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
+	commandTopicTemplate  = "bssci/{{ .BsEui }}/command/#"
+	responseTopicTemplate = "bssci/{{ .BsEui }}/response/#"
 )
 
 const (
@@ -146,8 +146,14 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 	integ.clientOpts.SetMaxReconnectInterval(conf.Integration.MQTTV3.MaxReconnectInterval)
 
 	if err = integ.auth.Init(integ.clientOpts); err != nil {
-		return nil, errors.Wrap(err, "mqtt: init authentication error")
+		return nil, errors.Wrap(err, "init authentication error")
 	}
+
+	return &integ, nil
+}
+
+// Start the integration.
+func (integ *Integration) Start() error {
 
 	if bsEui := integ.auth.GetBasestationEui(); bsEui != nil {
 		logger := log.With().Str("bs_eui", bsEui.String()).Logger()
@@ -164,14 +170,14 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 		}
 		bb, err := integ.marshal(&pl)
 		if err != nil {
-			return nil, errors.Wrap(err, "marshal error")
+			return errors.Wrap(err, "marshal error")
 		}
 
 		topic := bytes.NewBuffer(nil)
 		if err := integ.stateTopicTemplate.Execute(topic, struct {
 			BsEui common.EUI64
 		}{*bsEui}); err != nil {
-			return nil, errors.Wrap(err, "execute state template error")
+			return errors.Wrap(err, "execute state template error")
 		}
 		topicStr := topic.String()
 
@@ -180,11 +186,7 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 		integ.clientOpts.SetBinaryWill(topicStr, bb, integ.qos, true)
 	}
 
-	return &integ, nil
-}
 
-// Start the integration.
-func (integ *Integration) Start() error {
 	integ.connectLoop()
 	go integ.reconnectLoop()
 	go integ.subscribeLoop()
