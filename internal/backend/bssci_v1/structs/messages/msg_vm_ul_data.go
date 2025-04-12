@@ -29,7 +29,7 @@ type VmUlData struct {
 	// Unix UTC time of reception, center of last subpacket, 64 bit, ns resolution
 	SysTime uint64 `msg:"sysTime" json:"sysTime"`
 	// Frequency offset from center between primary and secondary channel in Hz
-	FreqOff uint64 `msg:"freqOff" json:"freqOff"`
+	FreqOff float64 `msg:"freqOff" json:"freqOff"`
 	// Reception signal to noise ratio in dB
 	SNR float64 `msg:"snr" json:"snr"`
 	// Reception signal strength in dBm
@@ -53,7 +53,7 @@ func NewVmUlData(
 	macType int64,
 	userData []byte,
 	trxTime uint64,
-	freqOff uint64,
+	freqOff float64,
 	snr float64,
 	rssi float64,
 	eqSnr *float64,
@@ -103,7 +103,7 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 	crc := uint64(m.CRC[0]) | uint64(m.CRC[0])<<32
 
 	metadata := UplinkMetadata{
-		RxTime:     m.TrxTime,
+		RxTime:     m.SysTime,
 		RxDuration: nil,
 		PacketCnt:  0,
 		Profile:    nil,

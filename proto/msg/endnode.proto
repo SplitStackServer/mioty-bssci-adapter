@@ -171,7 +171,7 @@ message EndnodeVariableMacUlDataMessage {
     // Metadata.
     EndnodeUplinkMetadata meta = 4;
     // Frequency offset from center between primary and secondary channel in Hz 
-    uint64 freq_off = 5;
+    double freq_off = 5;
     // Carrier spacing step size Bc, 0 = narrow, 1 = standard, 2 = wide
     CarrierSpacingEnum carr_space = 6;
     // Uplink TSMA Pattern group, 0 = normal, 1 = repetition, 2 = low delay

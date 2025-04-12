@@ -17,7 +17,7 @@ func TestNewVmUlData(t *testing.T) {
 		macType    int64
 		userData   []byte
 		trxTime    uint64
-		freqOff    uint64
+		freqOff    float64
 		snr        float64
 		rssi       float64
 		eqSnr      *float64
@@ -85,7 +85,7 @@ func TestVmUlData_GetOpId(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -156,7 +156,7 @@ func TestVmUlData_GetCommand(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -227,7 +227,7 @@ func TestVmUlData_GetEventType(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64
@@ -306,7 +306,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
-		FreqOff    uint64
+		FreqOff    float64
 		SNR        float64
 		RSSI       float64
 		EqSnr      *float64

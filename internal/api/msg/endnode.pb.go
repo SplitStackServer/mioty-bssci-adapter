@@ -954,7 +954,7 @@ type EndnodeVariableMacUlDataMessage struct {
 	// Metadata.
 	Meta *EndnodeUplinkMetadata `protobuf:"bytes,4,opt,name=meta,proto3" json:"meta,omitempty"`
 	// Frequency offset from center between primary and secondary channel in Hz
-	FreqOff uint64 `protobuf:"varint,5,opt,name=freq_off,json=freqOff,proto3" json:"freq_off,omitempty"`
+	FreqOff float64 `protobuf:"fixed64,5,opt,name=freq_off,json=freqOff,proto3" json:"freq_off,omitempty"`
 	// Carrier spacing step size Bc, 0 = narrow, 1 = standard, 2 = wide
 	CarrSpace CarrierSpacingEnum `protobuf:"varint,6,opt,name=carr_space,json=carrSpace,proto3,enum=msg.CarrierSpacingEnum" json:"carr_space,omitempty"`
 	// Uplink TSMA Pattern group, 0 = normal, 1 = repetition, 2 = low delay
@@ -1018,7 +1018,7 @@ func (x *EndnodeVariableMacUlDataMessage) GetMeta() *EndnodeUplinkMetadata {
 	return nil
 }
 
-func (x *EndnodeVariableMacUlDataMessage) GetFreqOff() uint64 {
+func (x *EndnodeVariableMacUlDataMessage) GetFreqOff() float64 {
 	if x != nil {
 		return x.FreqOff
 	}
@@ -1136,7 +1136,7 @@ const file_msg_endnode_proto_rawDesc = "" +
 	"\x04data\x18\x01 \x01(\fR\x04data\x12\x18\n" +
 	"\amacType\x18\x02 \x01(\x03R\amacType\x12.\n" +
 	"\x04meta\x18\x04 \x01(\v2\x1a.msg.EndnodeUplinkMetadataR\x04meta\x12\x19\n" +
-	"\bfreq_off\x18\x05 \x01(\x04R\afreqOff\x126\n" +
+	"\bfreq_off\x18\x05 \x01(\x01R\afreqOff\x126\n" +
 	"\n" +
 	"carr_space\x18\x06 \x01(\x0e2\x17.msg.CarrierSpacingEnumR\tcarrSpace\x124\n" +
 	"\bpatt_grp\x18\a \x01(\x0e2\x19.msg.TsmaPatternGroupEnumR\apattGrp\x12\x19\n" +
