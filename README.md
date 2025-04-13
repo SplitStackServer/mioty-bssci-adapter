@@ -5,7 +5,9 @@
 
 # mioty<sup>&reg;</sup> BSSCI Adapter
 
-The mioty<sup>&reg;</sup> BSSCI Adapter is a service which converts mioty<sup>&reg;</sup> BSSCI protocols into a simplified format (JSON and Protobuf). It is inspired by the [ChirpStack](https://github.com/chirpstack/chirpstack) open-source LoRaWAN<sup>&reg;</sup> Network Server project.
+The mioty<sup>&reg;</sup> BSSCI Adapter is a service which converts mioty<sup>&reg;</sup> BSSCI protocols into a simplified format (JSON and Protobuf). 
+
+It is inspired by the [ChirpStack](https://github.com/chirpstack/chirpstack) open-source LoRaWAN<sup>&reg;</sup> Network Server project and follows its basic structure. Where possible this implementation reuses existing code and concepts.
 
 ## Backends
 
