@@ -64,7 +64,7 @@ dockers:
       - bin
     extra_files:
         - packaging/files/mioty-bssci-adapter.toml
-    skip_push: auto
+    skip_push: true
 
 
 release:
