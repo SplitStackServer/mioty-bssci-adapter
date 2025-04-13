@@ -18,9 +18,7 @@ import (
 
 	"mioty-bssci-adapter/internal/integration/auth"
 
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"mioty-bssci-adapter/internal/common"
 	"mioty-bssci-adapter/internal/config"
 )
@@ -46,8 +44,8 @@ type Integration struct {
 	connClosed bool
 	clientOpts *paho.ClientOptions
 
-	serverCommandHandler  func(*cmd.ProtoCommand)
-	serverResponseHandler func(*rsp.ProtoResponse)
+	serverCommandHandler  func(*bs.ProtoCommand)
+	serverResponseHandler func(*bs.ProtoResponse)
 
 	basestationsMux           sync.RWMutex
 	basestations              map[common.EUI64]struct{}
@@ -164,9 +162,9 @@ func (integ *Integration) Start() error {
 		integ.basestations[*bsEui] = struct{}{}
 
 		// set last will and testament.
-		pl := msg.ProtoBasestationState{
+		pl := bs.ProtoBasestationState{
 			BsEui: bsEui.String(),
-			State: msg.ConnectionState_OFFLINE,
+			State: bs.ConnectionState_OFFLINE,
 		}
 		bb, err := integ.marshal(&pl)
 		if err != nil {
@@ -185,7 +183,6 @@ func (integ *Integration) Start() error {
 
 		integ.clientOpts.SetBinaryWill(topicStr, bb, integ.qos, true)
 	}
-
 
 	integ.connectLoop()
 	go integ.reconnectLoop()
@@ -212,9 +209,9 @@ func (integ *Integration) Stop() error {
 			return c.Str("bs_eui", bsEui.String())
 		})
 
-		pl := msg.ProtoBasestationState{
+		pl := bs.ProtoBasestationState{
 			BsEui: bsEui.String(),
-			State: msg.ConnectionState_OFFLINE,
+			State: bs.ConnectionState_OFFLINE,
 		}
 		if err := integ.PublishState(ctx, bsEui, &pl); err != nil {
 			logger.Error().Err(err).Msg("publish state error")
@@ -252,17 +249,17 @@ func (integ *Integration) SetBasestationSubscription(subscribe bool, bsEui commo
 }
 
 // Set handler for server command messages
-func (integ *Integration) SetServerCommandHandler(f func(*cmd.ProtoCommand)) {
+func (integ *Integration) SetServerCommandHandler(f func(*bs.ProtoCommand)) {
 	integ.serverCommandHandler = f
 }
 
 // Set handler for server command messages
-func (integ *Integration) SetServerResponseHandler(f func(*rsp.ProtoResponse)) {
+func (integ *Integration) SetServerResponseHandler(f func(*bs.ProtoResponse)) {
 	integ.serverResponseHandler = f
 }
 
 // Publish basestation messages.
-func (integ *Integration) PublishState(ctx context.Context, bsEui common.EUI64, pb *msg.ProtoBasestationState) error {
+func (integ *Integration) PublishState(ctx context.Context, bsEui common.EUI64, pb *bs.ProtoBasestationState) error {
 	logger := zerolog.Ctx(ctx)
 
 	if integ.stateTopicTemplate == nil {
@@ -295,7 +292,7 @@ func (integ *Integration) PublishState(ctx context.Context, bsEui common.EUI64, 
 }
 
 // Publish endnode messages.
-func (integ *Integration) PublishEndnodeEvent(bsEui common.EUI64, event string, pb *msg.ProtoEndnodeMessage) error {
+func (integ *Integration) PublishEndnodeEvent(bsEui common.EUI64, event string, pb *bs.ProtoEndnodeMessage) error {
 	// setup ctx logger
 	logger := log.With().Str("bs_eui", bsEui.String()).Str("event", event).Str("source", eventSourceEndpoint).Logger()
 	ctx := context.Background()
@@ -305,7 +302,7 @@ func (integ *Integration) PublishEndnodeEvent(bsEui common.EUI64, event string, 
 }
 
 // Publish basestation messages.
-func (integ *Integration) PublishBasestationEvent(bsEui common.EUI64, event string, pb *msg.ProtoBasestationMessage) error {
+func (integ *Integration) PublishBasestationEvent(bsEui common.EUI64, event string, pb *bs.ProtoBasestationMessage) error {
 	// setup ctx logger
 	logger := log.With().Str("bs_eui", bsEui.String()).Str("event", event).Str("source", eventSourceBasestation).Logger()
 	ctx := context.Background()
@@ -472,9 +469,9 @@ func (integ *Integration) subscribeLoop() {
 				return c.Str("bs_eui", bsEui.String())
 			})
 
-			pl := msg.ProtoBasestationState{
+			pl := bs.ProtoBasestationState{
 				BsEui: bsEui.String(),
-				State: msg.ConnectionState_ONLINE,
+				State: bs.ConnectionState_ONLINE,
 			}
 
 			if err := integ.subscribeBasestation(ctx, bsEui); err != nil {
@@ -494,9 +491,9 @@ func (integ *Integration) subscribeLoop() {
 				return c.Str("bs_eui", bsEui.String())
 			})
 
-			pl := msg.ProtoBasestationState{
+			pl := bs.ProtoBasestationState{
 				BsEui: bsEui.String(),
-				State: msg.ConnectionState_OFFLINE,
+				State: bs.ConnectionState_OFFLINE,
 			}
 
 			if err := integ.unsubscribeBasestation(ctx, bsEui); err != nil {
@@ -547,7 +544,7 @@ func (integ *Integration) subscribeBasestation(ctx context.Context, bsEui common
 }
 
 func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
-	var pb cmd.ProtoCommand
+	var pb bs.ProtoCommand
 
 	if err := integ.unmarshal(msg.Payload(), &pb); err != nil {
 		log.Error().Err(err).Msg("unmarshal server command error")
@@ -558,7 +555,7 @@ func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
 }
 
 func (integ *Integration) handleServerResponse(c paho.Client, msg paho.Message) {
-	var pb rsp.ProtoResponse
+	var pb bs.ProtoResponse
 
 	if err := integ.unmarshal(msg.Payload(), &pb); err != nil {
 		log.Error().Err(err).Msg("unmarshal server response error")

@@ -1,6 +1,6 @@
 package messages
 
-import "mioty-bssci-adapter/internal/api/msg"
+import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
 //go:generate msgp
 
@@ -18,14 +18,14 @@ type Subpackets struct {
 	Phase *[]int32 `msg:"phase,omitempty" json:"phase,omitempty"`
 }
 
-func (subpackets *Subpackets) IntoProto() []*msg.EndnodeUplinkSubpacket {
-	var pb []*msg.EndnodeUplinkSubpacket
+func (subpackets *Subpackets) IntoProto() []*bs.EndnodeUplinkSubpacket {
+	var pb []*bs.EndnodeUplinkSubpacket
 	if subpackets != nil {
-		pb = make([]*msg.EndnodeUplinkSubpacket, 0, len(subpackets.RSSI))
+		pb = make([]*bs.EndnodeUplinkSubpacket, 0, len(subpackets.RSSI))
 
 		if subpackets.Phase == nil {
 			for i, v := range subpackets.RSSI {
-				proto := msg.EndnodeUplinkSubpacket{
+				proto := bs.EndnodeUplinkSubpacket{
 					Snr:       subpackets.SNR[i],
 					Rssi:      v,
 					Frequency: subpackets.Frequency[i],
@@ -37,7 +37,7 @@ func (subpackets *Subpackets) IntoProto() []*msg.EndnodeUplinkSubpacket {
 		} else {
 			phase := *subpackets.Phase
 			for i, v := range subpackets.RSSI {
-				proto := msg.EndnodeUplinkSubpacket{
+				proto := bs.EndnodeUplinkSubpacket{
 					Snr:       subpackets.SNR[i],
 					Rssi:      v,
 					Frequency: subpackets.Frequency[i],

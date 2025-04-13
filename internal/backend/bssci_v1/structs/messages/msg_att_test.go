@@ -1,14 +1,13 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -328,7 +327,7 @@ func TestAtt_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoEndnodeMessage
+		want   *bs.ProtoEndnodeMessage
 	}{
 		{
 			name: "att1",
@@ -348,17 +347,17 @@ func TestAtt_IntoProto(t *testing.T) {
 				Sign:       [4]byte{3, 2, 1, 0},
 				Nonce:      [4]byte{7, 6, 5, 4},
 			},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0000000000000000",
 				EndnodeEui: "0001020304050607",
-				V1: &msg.ProtoEndnodeMessage_Att{
-					Att: &msg.EndnodeAttMessage{
+				V1: &bs.ProtoEndnodeMessage_Att{
+					Att: &bs.EndnodeAttMessage{
 						OpId:          10,
 						Sign:          0x00010203,
 						Nonce:         0x04050607,
 						AttachmentCnt: 2,
 						ShAddr:        &testShAddr32,
-						Meta: &msg.EndnodeUplinkMetadata{
+						Meta: &bs.EndnodeUplinkMetadata{
 							RxTime:        &testRxTimePb,
 							RxDuration:    &testRxDurationPb,
 							PacketCnt:     0,
@@ -366,7 +365,7 @@ func TestAtt_IntoProto(t *testing.T) {
 							Rssi:          -100.0,
 							Snr:           3.0,
 							EqSnr:         nil,
-							SubpacketInfo: []*msg.EndnodeUplinkSubpacket{},
+							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 						},
 					},
 				},
@@ -389,17 +388,17 @@ func TestAtt_IntoProto(t *testing.T) {
 				Sign:       [4]byte{3, 2, 1, 0},
 				Nonce:      [4]byte{7, 6, 5, 4},
 			},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0000000000000000",
 				EndnodeEui: "0001020304050607",
-				V1: &msg.ProtoEndnodeMessage_Att{
-					Att: &msg.EndnodeAttMessage{
+				V1: &bs.ProtoEndnodeMessage_Att{
+					Att: &bs.EndnodeAttMessage{
 						OpId:          10,
 						Sign:          0x00010203,
 						Nonce:         0x04050607,
 						AttachmentCnt: 2,
 						ShAddr:        nil,
-						Meta: &msg.EndnodeUplinkMetadata{
+						Meta: &bs.EndnodeUplinkMetadata{
 							RxTime:        &testRxTimePb,
 							RxDuration:    &testRxDurationPb,
 							PacketCnt:     0,
@@ -407,7 +406,7 @@ func TestAtt_IntoProto(t *testing.T) {
 							Rssi:          -100.0,
 							Snr:           3.0,
 							EqSnr:         nil,
-							SubpacketInfo: []*msg.EndnodeUplinkSubpacket{},
+							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 						},
 					},
 				},
@@ -481,7 +480,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 
 	type args struct {
 		opId int64
-		pb   *rsp.EndnodeAttachResponse
+		pb   *bs.EndnodeAttachResponse
 	}
 	tests := []struct {
 		name    string
@@ -493,7 +492,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			name: "attRsp",
 			args: args{
 				opId: 10,
-				pb: &rsp.EndnodeAttachResponse{
+				pb: &bs.EndnodeAttachResponse{
 					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        nil,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
@@ -511,7 +510,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			name: "attRsp_shAddr",
 			args: args{
 				opId: 10,
-				pb: &rsp.EndnodeAttachResponse{
+				pb: &bs.EndnodeAttachResponse{
 					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        &testShAddr32,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
@@ -529,7 +528,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			name: "attRsp_invalid_NwkSessionKey",
 			args: args{
 				opId: 10,
-				pb: &rsp.EndnodeAttachResponse{
+				pb: &bs.EndnodeAttachResponse{
 					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        &testShAddr32,
 					NwkSessionKey: []byte{},

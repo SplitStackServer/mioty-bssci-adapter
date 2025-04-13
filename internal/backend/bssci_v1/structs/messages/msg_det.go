@@ -3,11 +3,11 @@ package messages
 import (
 	"encoding/binary"
 	"errors"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -87,7 +87,7 @@ func (m *Det) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *Det) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+func (m *Det) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
@@ -104,11 +104,11 @@ func (m *Det) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := msg.ProtoEndnodeMessage{
+	message := bs.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		V1: &msg.ProtoEndnodeMessage_Det{
-			Det: &msg.EndnodeDetMessage{
+		V1: &bs.ProtoEndnodeMessage_Det{
+			Det: &bs.EndnodeDetMessage{
 				OpId: m.OpId,
 				Sign: sign,
 				Meta: metadata.IntoProto(),
@@ -137,7 +137,7 @@ func NewDetRsp(opId int64, sign [4]byte) DetRsp {
 	}
 }
 
-func NewDetRspFromProto(opId int64, pb *rsp.EndnodeDetachResponse) (*DetRsp, error) {
+func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachResponse) (*DetRsp, error) {
 	if pb != nil {
 		sign := pb.Sign
 		signB := [4]byte{

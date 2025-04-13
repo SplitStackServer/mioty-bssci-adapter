@@ -1,10 +1,11 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -105,7 +106,7 @@ func (m *UlData) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *UlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+func (m *UlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
@@ -127,11 +128,11 @@ func (m *UlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := msg.ProtoEndnodeMessage{
+	message := bs.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		V1: &msg.ProtoEndnodeMessage_UlData{
-			UlData: &msg.EndnodeUlDataMessage{
+		V1: &bs.ProtoEndnodeMessage_UlData{
+			UlData: &bs.EndnodeUlDataMessage{
 				Data:   m.UserData,
 				Format: format,
 				Mode:   m.Mode,

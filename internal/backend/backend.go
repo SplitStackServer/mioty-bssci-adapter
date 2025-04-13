@@ -2,15 +2,14 @@ package backend
 
 import (
 	"fmt"
-	// "mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
+	// "github.com/SplitStackServer/splitstack/api/go/v4/bs"
+
 	"mioty-bssci-adapter/internal/backend/bssci_v1"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"mioty-bssci-adapter/internal/config"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/pkg/errors"
 )
 
@@ -51,14 +50,14 @@ type Backend interface {
 	SetSubscribeEventHandler(func(events.Subscribe))
 
 	// Set handler messages from basestations
-	SetBasestationMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage))
+	SetBasestationMessageHandler(func(common.EUI64, events.EventType, *bs.ProtoBasestationMessage))
 
 	// Set handler for messages from endnodes
-	SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage))
+	SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *bs.ProtoEndnodeMessage))
 
 	// Handler for server command messages
-	HandleServerCommand(*cmd.ProtoCommand) error
+	HandleServerCommand(*bs.ProtoCommand) error
 
 	// Handler for server response messages
-	HandleServerResponse(*rsp.ProtoResponse) error
+	HandleServerResponse(*bs.ProtoResponse) error
 }

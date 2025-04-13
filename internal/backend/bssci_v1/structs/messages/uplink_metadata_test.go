@@ -1,10 +1,10 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -42,7 +42,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   *msg.EndnodeUplinkMetadata
+		want   *bs.EndnodeUplinkMetadata
 	}{
 		{name: "metadata1", fields: fields{
 			RxTime:     testRxTime,
@@ -53,7 +53,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 			RSSI:       2.0,
 			EqSnr:      &testEqSnr,
 			Subpackets: nil,
-		}, want: &msg.EndnodeUplinkMetadata{
+		}, want: &bs.EndnodeUplinkMetadata{
 			RxTime:        &testRxTimePb,
 			RxDuration:    &testRxDurationPb,
 			PacketCnt:     10,
@@ -73,7 +73,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 			RSSI:       2.0,
 			EqSnr:      &testEqSnr,
 			Subpackets: &Subpackets{},
-		}, want: &msg.EndnodeUplinkMetadata{
+		}, want: &bs.EndnodeUplinkMetadata{
 			RxTime:        &testRxTimePb,
 			RxDuration:    &testRxDurationPb,
 			PacketCnt:     10,
@@ -81,7 +81,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 			Rssi:          2.0,
 			Snr:           1.0,
 			EqSnr:         &testEqSnr,
-			SubpacketInfo: []*msg.EndnodeUplinkSubpacket{},
+			SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 		}},
 	}
 	for _, tt := range tests {

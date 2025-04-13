@@ -1,14 +1,13 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -294,7 +293,7 @@ func TestDet_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoEndnodeMessage
+		want   *bs.ProtoEndnodeMessage
 	}{
 		{
 			name: "det",
@@ -313,14 +312,14 @@ func TestDet_IntoProto(t *testing.T) {
 				Sign:       [4]byte{3, 2, 1, 0},
 			},
 			args: args{bsEui: common.EUI64{1}},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0100000000000000",
 				EndnodeEui: "0001020304050607",
-				V1: &msg.ProtoEndnodeMessage_Det{
-					Det: &msg.EndnodeDetMessage{
+				V1: &bs.ProtoEndnodeMessage_Det{
+					Det: &bs.EndnodeDetMessage{
 						OpId: 10,
 						Sign: 0x00010203,
-						Meta: &msg.EndnodeUplinkMetadata{
+						Meta: &bs.EndnodeUplinkMetadata{
 							RxTime:        &testRxTimePb,
 							RxDuration:    &testRxDurationPb,
 							PacketCnt:     2,
@@ -328,7 +327,7 @@ func TestDet_IntoProto(t *testing.T) {
 							Rssi:          -100.0,
 							Snr:           3.0,
 							EqSnr:         nil,
-							SubpacketInfo: []*msg.EndnodeUplinkSubpacket{},
+							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 						},
 					},
 				},
@@ -393,7 +392,7 @@ func TestNewDetRsp(t *testing.T) {
 func TestNewDetRspFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *rsp.EndnodeDetachResponse
+		pb   *bs.EndnodeDetachResponse
 	}
 	tests := []struct {
 		name    string
@@ -405,7 +404,7 @@ func TestNewDetRspFromProto(t *testing.T) {
 			name: "detRsp",
 			args: args{
 				opId: 10,
-				pb: &rsp.EndnodeDetachResponse{
+				pb: &bs.EndnodeDetachResponse{
 					Sign: 0x00010203,
 				},
 			},

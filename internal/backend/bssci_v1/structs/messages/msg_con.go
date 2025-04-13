@@ -1,11 +1,11 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/google/uuid"
 )
 
@@ -71,9 +71,9 @@ func (m *Con) GetEventType() events.EventType {
 }
 
 // implements BasestationMessage.IntoProto()
-func (m *Con) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
+func (m *Con) IntoProto(bsEui *common.EUI64) *bs.ProtoBasestationMessage {
 	_ = bsEui
-	var message msg.ProtoBasestationMessage
+	var message bs.ProtoBasestationMessage
 
 	if m != nil {
 		bsEuiB := m.BsEui.String()
@@ -81,17 +81,17 @@ func (m *Con) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
 		now := getNow().UnixNano()
 		ts := TimestampNsToProto(now)
 
-		message = msg.ProtoBasestationMessage{
+		message = bs.ProtoBasestationMessage{
 			BsEui: bsEuiB,
-			V1: &msg.ProtoBasestationMessage_Con{
-				Con: &msg.BasestationConnection{
-					Ts:          ts,
-					Version:     m.Version,
-					Bidi:        m.Bidi,
-					Vendor:      m.Vendor,
-					Model:       m.Model,
-					Name:        m.Name,
-					SwVersion:   m.SwVersion,
+			V1: &bs.ProtoBasestationMessage_Con{
+				Con: &bs.BasestationConnection{
+					Ts:        ts,
+					Version:   m.Version,
+					Bidi:      m.Bidi,
+					Vendor:    m.Vendor,
+					Model:     m.Model,
+					Name:      m.Name,
+					SwVersion: m.SwVersion,
 				},
 			},
 		}

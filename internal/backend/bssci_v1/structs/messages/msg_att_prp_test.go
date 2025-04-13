@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestNewAttPrp(t *testing.T) {
@@ -67,7 +68,7 @@ func TestNewAttPrp(t *testing.T) {
 func TestNewAttPrpFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.AttachPropagate
+		pb   *bs.AttachPropagate
 	}
 	tests := []struct {
 		name    string
@@ -79,7 +80,7 @@ func TestNewAttPrpFromProto(t *testing.T) {
 			name: "attPrp",
 			args: args{
 				opId: 10,
-				pb: &cmd.AttachPropagate{
+				pb: &bs.AttachPropagate{
 					EndnodeEui:    "0706050403020100",
 					ShAddr:        0,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
@@ -119,7 +120,7 @@ func TestNewAttPrpFromProto(t *testing.T) {
 			name: "invalid_NwkSessionKey",
 			args: args{
 				opId: 10,
-				pb: &cmd.AttachPropagate{
+				pb: &bs.AttachPropagate{
 					EndnodeEui:    "0706050403020100",
 					ShAddr:        0,
 					NwkSessionKey: []byte{},

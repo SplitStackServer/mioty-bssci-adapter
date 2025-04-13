@@ -2,11 +2,11 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -28,7 +28,7 @@ func NewStatus(opId int64) Status {
 	return Status{OpId: opId, Command: structs.MsgStatus}
 }
 
-func NewStatusFromProto(opId int64, pb *cmd.RequestStatus) (*Status, error) {
+func NewStatusFromProto(opId int64, pb *bs.RequestStatus) (*Status, error) {
 	if pb != nil {
 		m := NewStatus(opId)
 		return &m, nil
@@ -106,18 +106,18 @@ func (m *StatusRsp) GetEventType() events.EventType {
 }
 
 // implements BasestationMessage.IntoProto()
-func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
+func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *bs.ProtoBasestationMessage {
 
-	var message msg.ProtoBasestationMessage
+	var message bs.ProtoBasestationMessage
 
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
 		ts := TimestampNsToProto(int64(m.Time))
 
-		message = msg.ProtoBasestationMessage{
+		message = bs.ProtoBasestationMessage{
 			BsEui: bsEuiB,
-			V1: &msg.ProtoBasestationMessage_Status{
-				Status: &msg.BasestationStatus{
+			V1: &bs.ProtoBasestationMessage_Status{
+				Status: &bs.BasestationStatus{
 					StatusCode:  m.Code,
 					StatusMsg:   m.Message,
 					Ts:          ts,

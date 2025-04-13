@@ -3,11 +3,12 @@ package messages
 import (
 	"encoding/binary"
 	"errors"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
+
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -111,7 +112,7 @@ func (m *Att) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *Att) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+func (m *Att) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
@@ -137,11 +138,11 @@ func (m *Att) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := msg.ProtoEndnodeMessage{
+	message := bs.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		V1: &msg.ProtoEndnodeMessage_Att{
-			Att: &msg.EndnodeAttMessage{
+		V1: &bs.ProtoEndnodeMessage_Att{
+			Att: &bs.EndnodeAttMessage{
 				OpId:          m.OpId,
 				AttachmentCnt: m.AttachCnt,
 				Nonce:         nonce,
@@ -180,7 +181,7 @@ func NewAttRsp(opId int64, nwkSessionKey [16]byte, shAddr *uint16) AttRsp {
 	}
 }
 
-func NewAttRspFromProto(opId int64, pb *rsp.EndnodeAttachResponse) (*AttRsp, error) {
+func NewAttRspFromProto(opId int64, pb *bs.EndnodeAttachResponse) (*AttRsp, error) {
 	if pb != nil {
 		var shAddr *uint16
 		if shAddrPb := pb.ShAddr; shAddrPb != nil {

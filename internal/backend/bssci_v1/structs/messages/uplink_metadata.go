@@ -1,8 +1,6 @@
 package messages
 
-import (
-	"mioty-bssci-adapter/internal/api/msg"
-)
+import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
 type UplinkMetadata struct {
 	RxTime     uint64      `json:"rxTime"`
@@ -15,13 +13,13 @@ type UplinkMetadata struct {
 	Subpackets *Subpackets `json:"subpackets,omitempty"`
 }
 
-func (m *UplinkMetadata) IntoProto() *msg.EndnodeUplinkMetadata {
-	var message msg.EndnodeUplinkMetadata
+func (m *UplinkMetadata) IntoProto() *bs.EndnodeUplinkMetadata {
+	var message bs.EndnodeUplinkMetadata
 	if m != nil {
 
 		rxTime := TimestampNsToProto(int64(m.RxTime))
 
-		message = msg.EndnodeUplinkMetadata{
+		message = bs.EndnodeUplinkMetadata{
 			RxTime:    rxTime,
 			PacketCnt: m.PacketCnt,
 			Profile:   m.Profile,

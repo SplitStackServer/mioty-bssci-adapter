@@ -1,9 +1,10 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestSubpackets_IntoProto(t *testing.T) {
@@ -19,13 +20,13 @@ func TestSubpackets_IntoProto(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   []*msg.EndnodeUplinkSubpacket
+		want   []*bs.EndnodeUplinkSubpacket
 	}{
 		{name: "subpackets1", fields: fields{
 			SNR:       []int32{1, 4},
 			RSSI:      []int32{2, 5},
 			Frequency: []int32{3, 6},
-		}, want: []*msg.EndnodeUplinkSubpacket{
+		}, want: []*bs.EndnodeUplinkSubpacket{
 			{
 				Snr:       1,
 				Rssi:      2,
@@ -41,14 +42,14 @@ func TestSubpackets_IntoProto(t *testing.T) {
 			RSSI:      []int32{2},
 			Frequency: []int32{3},
 			Phase:     &[]int32{testPhase},
-		}, want: []*msg.EndnodeUplinkSubpacket{
+		}, want: []*bs.EndnodeUplinkSubpacket{
 			{
 				Snr:       1,
 				Rssi:      2,
 				Frequency: 3,
 				Phase:     &testPhase,
 			}}},
-		{name: "subpackets3", fields: fields{}, want: []*msg.EndnodeUplinkSubpacket{}},
+		{name: "subpackets3", fields: fields{}, want: []*bs.EndnodeUplinkSubpacket{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

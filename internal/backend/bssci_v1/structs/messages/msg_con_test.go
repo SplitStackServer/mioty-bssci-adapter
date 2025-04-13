@@ -1,13 +1,13 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -260,7 +260,7 @@ func TestCon_IntoProto(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   *msg.ProtoBasestationMessage
+		want   *bs.ProtoBasestationMessage
 	}{
 		{
 			name: "con1",
@@ -276,17 +276,17 @@ func TestCon_IntoProto(t *testing.T) {
 				SnBsUuid:  testBsSessionUuid,
 				Bidi:      true,
 			},
-			want: &msg.ProtoBasestationMessage{
+			want: &bs.ProtoBasestationMessage{
 				BsEui: testBsEui.String(),
-				V1: &msg.ProtoBasestationMessage_Con{
-					Con: &msg.BasestationConnection{
-						Ts:          &testTs,
-						Version:     testVersion,
-						Bidi:        true,
-						Vendor:      &testVendor,
-						Model:       &testModel,
-						Name:        &testBsName,
-						SwVersion:   &testSwVersion,
+				V1: &bs.ProtoBasestationMessage_Con{
+					Con: &bs.BasestationConnection{
+						Ts:        &testTs,
+						Version:   testVersion,
+						Bidi:      true,
+						Vendor:    &testVendor,
+						Model:     &testModel,
+						Name:      &testBsName,
+						SwVersion: &testSwVersion,
 					},
 				},
 			},
@@ -306,10 +306,10 @@ func TestCon_IntoProto(t *testing.T) {
 				Bidi:        true,
 				GeoLocation: &GeoLocation{1, 2, 3},
 			},
-			want: &msg.ProtoBasestationMessage{
+			want: &bs.ProtoBasestationMessage{
 				BsEui: testBsEui.String(),
-				V1: &msg.ProtoBasestationMessage_Con{
-					Con: &msg.BasestationConnection{
+				V1: &bs.ProtoBasestationMessage_Con{
+					Con: &bs.BasestationConnection{
 						Ts:        &testTs,
 						Version:   testVersion,
 						Bidi:      true,

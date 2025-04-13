@@ -2,9 +2,10 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -29,7 +30,7 @@ func NewDlRxStatQry(opId int64, epEui common.EUI64) DlRxStatQry {
 	return DlRxStatQry{Command: structs.MsgDlRxStatQry, OpId: opId, EpEui: epEui}
 }
 
-func NewDlRxStatQryFromProto(opId int64, pb *cmd.DownlinkRxStatusQuery) (*DlRxStatQry, error) {
+func NewDlRxStatQryFromProto(opId int64, pb *bs.DownlinkRxStatusQuery) (*DlRxStatQry, error) {
 	if pb != nil {
 		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
 		if err != nil {

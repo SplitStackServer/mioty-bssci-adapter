@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestNewDlDataRev(t *testing.T) {
@@ -46,7 +47,7 @@ func TestNewDlDataRev(t *testing.T) {
 func TestNewDlDataRevFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.RevokeDownlink
+		pb   *bs.RevokeDownlink
 	}
 	tests := []struct {
 		name    string
@@ -58,7 +59,7 @@ func TestNewDlDataRevFromProto(t *testing.T) {
 			name: "dlDataRev",
 			args: args{
 				opId: 10,
-				pb: &cmd.RevokeDownlink{
+				pb: &bs.RevokeDownlink{
 					EndnodeEui: "0100000000000000",
 					DlQueId:    20,
 				},
