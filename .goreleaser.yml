@@ -68,7 +68,7 @@ dockers:
 
 
 release:
-  prerelease: auto
+  prerelease: true
   header: |
     # Release {{ .Version }} ({{ .Date }})
 

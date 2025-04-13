@@ -21,7 +21,7 @@ test:
 	@go test -cover -coverprofile coverage.out -p 1 ./...
 
 dist:
-	@goreleaser
+	@goreleaser --clean
 
 snapshot:
 	@goreleaser --snapshot --clean
