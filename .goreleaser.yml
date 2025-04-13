@@ -70,7 +70,7 @@ dockers:
 release:
   prerelease: auto
   header: |
-    # Release {{ .Version }} - {{ .CurrentTag }} ({{ .Date }})
+    # Release {{ .Version }} ({{ .Date }})
 
     ## Changes / Improvements
 
