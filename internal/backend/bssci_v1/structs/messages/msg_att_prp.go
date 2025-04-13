@@ -2,9 +2,10 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -59,7 +60,7 @@ func NewAttPrp(opId int64, epEui common.EUI64, bidi bool, nwkSessionKey [16]byte
 	}
 }
 
-func NewAttPrpFromProto(opId int64, pb *cmd.AttachPropagate) (*AttPrp, error) {
+func NewAttPrpFromProto(opId int64, pb *bs.AttachPropagate) (*AttPrp, error) {
 	if pb != nil {
 		epEui, err := common.Eui64FromHexString(pb.EndnodeEui)
 		if err != nil {

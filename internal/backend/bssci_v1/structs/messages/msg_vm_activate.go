@@ -2,8 +2,9 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -23,14 +24,13 @@ func NewVmActivate(opId int64, macType int64) VmActivate {
 	return VmActivate{Command: structs.MsgVmActivate, OpId: opId, MacType: macType}
 }
 
-func NewVmActivateFromProto(opId int64, pb *cmd.EnableVariableMac) (*VmActivate, error) {
+func NewVmActivateFromProto(opId int64, pb *bs.EnableVariableMac) (*VmActivate, error) {
 	if pb != nil {
 		m := NewVmActivate(opId, pb.MacType)
 		return &m, nil
 	}
 	return nil, errors.New("invalid EnableVariableMac command")
 }
-
 
 func (m *VmActivate) GetOpId() int64 {
 	return m.OpId

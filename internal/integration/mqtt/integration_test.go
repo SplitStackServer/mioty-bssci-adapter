@@ -7,6 +7,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/joho/godotenv"
 	"google.golang.org/protobuf/proto"
@@ -19,9 +20,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
 )
 
 type TestIntegrationSuite struct {
@@ -34,7 +32,7 @@ type TestIntegrationSuite struct {
 
 func TestIntegration(t *testing.T) {
 	suite.Run(t, new(TestIntegrationSuite))
-	
+
 }
 
 func (ts *TestIntegrationSuite) SetupSuite() {
@@ -86,17 +84,15 @@ func (ts *TestIntegrationSuite) SetupSuite() {
 	assert.NoError(err)
 
 	// override topics to make cleanup easier
-	testStateTopicTemplate    := "test/" + stateTopicTemplate
-	testEventTopicTemplate    := "test/" + eventTopicTemplate
-	testCommandTopicTemplate  := "test/" + commandTopicTemplate
+	testStateTopicTemplate := "test/" + stateTopicTemplate
+	testEventTopicTemplate := "test/" + eventTopicTemplate
+	testCommandTopicTemplate := "test/" + commandTopicTemplate
 	testResponseTopicTemplate := "test/" + responseTopicTemplate
 
 	ts.integration.stateTopicTemplate, _ = template.New("state").Parse(testStateTopicTemplate)
 	ts.integration.eventTopicTemplate, _ = template.New("state").Parse(testEventTopicTemplate)
 	ts.integration.commandTopicTemplate, _ = template.New("command").Parse(testCommandTopicTemplate)
 	ts.integration.responseTopicTemplate, _ = template.New("state").Parse(testResponseTopicTemplate)
-
-
 
 	assert.NoError(ts.integration.Start())
 
@@ -113,7 +109,6 @@ func (ts *TestIntegrationSuite) TearDownSuite() {
 func (ts *TestIntegrationSuite) TestIntegration_LastWill() {
 	assert := require.New(ts.T())
 
-
 	assert.True(ts.integration.clientOpts.WillEnabled)
 	assert.Equal("test/bssci/0807060504030201/state", ts.integration.clientOpts.WillTopic)
 	assert.Equal(`{"bsEui":"0807060504030201"}`, strings.ReplaceAll(string(ts.integration.clientOpts.WillPayload), " ", ""))
@@ -123,9 +118,9 @@ func (ts *TestIntegrationSuite) TestIntegration_LastWill() {
 func (ts *TestIntegrationSuite) TestIntegration_ConnStateOnline() {
 	assert := require.New(ts.T())
 
-	connStateChan := make(chan *msg.ProtoBasestationState)
+	connStateChan := make(chan *bs.ProtoBasestationState)
 	token := ts.mqttClient.Subscribe("test/bssci/0807060504030201/state", 0, func(c paho.Client, ms paho.Message) {
-		var pl msg.ProtoBasestationState
+		var pl bs.ProtoBasestationState
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		connStateChan <- &pl
 	})
@@ -134,9 +129,9 @@ func (ts *TestIntegrationSuite) TestIntegration_ConnStateOnline() {
 
 	pl := <-connStateChan
 
-	assert.True(proto.Equal(&msg.ProtoBasestationState{
+	assert.True(proto.Equal(&bs.ProtoBasestationState{
 		BsEui: ts.basestationsEui.String(),
-		State: msg.ConnectionState_ONLINE,
+		State: bs.ConnectionState_ONLINE,
 	}, pl))
 
 	token = ts.mqttClient.Unsubscribe("test/bssci/0807060504030201/state")
@@ -148,7 +143,7 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 	assert := require.New(ts.T())
 
 	bsEui := common.EUI64{1, 2, 3, 4, 5, 6, 7, 8}
-	connStateChan := make(chan *msg.ProtoBasestationState)
+	connStateChan := make(chan *bs.ProtoBasestationState)
 
 	assert.NoError(ts.integration.SetBasestationSubscription(true, bsEui))
 	_, ok := ts.integration.basestations[bsEui]
@@ -160,7 +155,7 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 	time.Sleep(1000 * time.Millisecond)
 
 	token := ts.mqttClient.Subscribe("test/bssci/0102030405060708/state", 0, func(c paho.Client, ms paho.Message) {
-		var pl msg.ProtoBasestationState
+		var pl bs.ProtoBasestationState
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		connStateChan <- &pl
 	})
@@ -169,9 +164,9 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 
 	pl := <-connStateChan
 
-	assert.True(proto.Equal(&msg.ProtoBasestationState{
+	assert.True(proto.Equal(&bs.ProtoBasestationState{
 		BsEui: bsEui.String(),
-		State: msg.ConnectionState_ONLINE,
+		State: bs.ConnectionState_ONLINE,
 	}, pl))
 
 	ts.T().Run("Unsubscribe", func(t *testing.T) {
@@ -183,9 +178,9 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 
 		pl := <-connStateChan
 
-		assert.True(proto.Equal(&msg.ProtoBasestationState{
+		assert.True(proto.Equal(&bs.ProtoBasestationState{
 			BsEui: bsEui.String(),
-			State: msg.ConnectionState_OFFLINE,
+			State: bs.ConnectionState_OFFLINE,
 		}, pl))
 	})
 
@@ -197,19 +192,19 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 func (ts *TestIntegrationSuite) TestIntegration_PublishPublishEndnodeEvent() {
 	assert := require.New(ts.T())
 
-	pb := msg.ProtoEndnodeMessage{
+	pb := bs.ProtoEndnodeMessage{
 		BsEui:      "test_bs",
 		EndnodeEui: "test_ep",
-		V1: &msg.ProtoEndnodeMessage_UlData{
-			UlData: &msg.EndnodeUlDataMessage{
+		V1: &bs.ProtoEndnodeMessage_UlData{
+			UlData: &bs.EndnodeUlDataMessage{
 				Data: []byte{0, 1, 2, 3},
 			},
 		},
 	}
 
-	uplinkFrameChan := make(chan *msg.ProtoEndnodeMessage)
+	uplinkFrameChan := make(chan *bs.ProtoEndnodeMessage)
 	token := ts.mqttClient.Subscribe("test/bssci/0807060504030201/event/ep/ul", 0, func(c paho.Client, ms paho.Message) {
-		var pl msg.ProtoEndnodeMessage
+		var pl bs.ProtoEndnodeMessage
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		uplinkFrameChan <- &pl
 	})
@@ -224,19 +219,19 @@ func (ts *TestIntegrationSuite) TestIntegration_PublishPublishEndnodeEvent() {
 func (ts *TestIntegrationSuite) TestIntegration_PublishBasestationEvent() {
 	assert := require.New(ts.T())
 
-	pb := msg.ProtoBasestationMessage{
+	pb := bs.ProtoBasestationMessage{
 		BsEui: "test_bs",
 
-		V1: &msg.ProtoBasestationMessage_VmStatus{
-			VmStatus: &msg.BasestationVariableMacStatus{
+		V1: &bs.ProtoBasestationMessage_VmStatus{
+			VmStatus: &bs.BasestationVariableMacStatus{
 				MacTypes: []int64{1, 2, 3},
 			},
 		},
 	}
 
-	uplinkFrameChan := make(chan *msg.ProtoBasestationMessage)
+	uplinkFrameChan := make(chan *bs.ProtoBasestationMessage)
 	token := ts.mqttClient.Subscribe("test/bssci/0807060504030201/event/ep/vm", 0, func(c paho.Client, ms paho.Message) {
-		var pl msg.ProtoBasestationMessage
+		var pl bs.ProtoBasestationMessage
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		uplinkFrameChan <- &pl
 	})
@@ -250,16 +245,16 @@ func (ts *TestIntegrationSuite) TestIntegration_PublishBasestationEvent() {
 
 func (ts *TestIntegrationSuite) TestIntegration_HandleServerResponse() {
 	assert := require.New(ts.T())
-	rspChan := make(chan *rsp.ProtoResponse, 1)
-	ts.integration.SetServerResponseHandler(func(pl *rsp.ProtoResponse) {
+	rspChan := make(chan *bs.ProtoResponse, 1)
+	ts.integration.SetServerResponseHandler(func(pl *bs.ProtoResponse) {
 		rspChan <- pl
 	})
 
-	response := rsp.ProtoResponse{
+	response := bs.ProtoResponse{
 		OpId:  1,
 		BsEui: "test_bs",
-		V1: &rsp.ProtoResponse_Err{
-			Err: &rsp.ErrorResponse{
+		V1: &bs.ProtoResponse_Err{
+			Err: &bs.ErrorResponse{
 				Message: "test",
 			},
 		},
@@ -278,15 +273,15 @@ func (ts *TestIntegrationSuite) TestIntegration_HandleServerResponse() {
 
 func (ts *TestIntegrationSuite) TestIntegration_HandleServerCommand() {
 	assert := require.New(ts.T())
-	cmdChan := make(chan *cmd.ProtoCommand, 1)
-	ts.integration.SetServerCommandHandler(func(pl *cmd.ProtoCommand) {
+	cmdChan := make(chan *bs.ProtoCommand, 1)
+	ts.integration.SetServerCommandHandler(func(pl *bs.ProtoCommand) {
 		cmdChan <- pl
 	})
 
-	command := cmd.ProtoCommand{
+	command := bs.ProtoCommand{
 		BsEui: "test_bs",
-		V1: &cmd.ProtoCommand_VmStatus{
-			VmStatus: &cmd.RequestVariableMacStatus{},
+		V1: &bs.ProtoCommand_VmStatus{
+			VmStatus: &bs.RequestVariableMacStatus{},
 		},
 	}
 

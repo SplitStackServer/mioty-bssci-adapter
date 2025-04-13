@@ -10,13 +10,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 	"mioty-bssci-adapter/internal/backend/events"
@@ -41,8 +39,8 @@ type Backend struct {
 	keepAlivePeriod time.Duration
 	writeTimeout    time.Duration
 
-	basestationMessageHandler func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage)
-	endnodeMessageHandler     func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage)
+	basestationMessageHandler func(common.EUI64, events.EventType, *bs.ProtoBasestationMessage)
+	endnodeMessageHandler     func(common.EUI64, events.EventType, *bs.ProtoEndnodeMessage)
 }
 
 // NewBackend creates a new Backend.
@@ -111,17 +109,17 @@ func (b *Backend) SetSubscribeEventHandler(f func(events.Subscribe)) {
 }
 
 // Handler for connection messages from basestations
-func (b *Backend) SetBasestationMessageHandler(f func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage)) {
+func (b *Backend) SetBasestationMessageHandler(f func(common.EUI64, events.EventType, *bs.ProtoBasestationMessage)) {
 	b.basestationMessageHandler = f
 }
 
 // Handler for uplink messages from endnodes
-func (b *Backend) SetEndnodeMessageHandler(f func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage)) {
+func (b *Backend) SetEndnodeMessageHandler(f func(common.EUI64, events.EventType, *bs.ProtoEndnodeMessage)) {
 	b.endnodeMessageHandler = f
 }
 
 // Handler for server commands
-func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
+func (b *Backend) HandleServerCommand(pb *bs.ProtoCommand) error {
 	if pb == nil {
 		return errors.New("empty protobuf command")
 	}
@@ -136,7 +134,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 	var msg messages.ServerMessage
 
 	switch pb.V1.(type) {
-	case *cmd.ProtoCommand_DlDataQue:
+	case *bs.ProtoCommand_DlDataQue:
 		command := pb.GetDlDataQue()
 		msgA, err := messages.NewDlDataQueFromProto(0, command)
 		if err != nil {
@@ -146,7 +144,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_DlDataQue").Str("ep_eui", msgA.EpEui.String()).Uint64("que_id", msgA.QueId).Msg("queing downlink")
 
-	case *cmd.ProtoCommand_DlDataRev:
+	case *bs.ProtoCommand_DlDataRev:
 		command := pb.GetDlDataRev()
 		msgA, err := messages.NewDlDataRevFromProto(0, command)
 		if err != nil {
@@ -156,7 +154,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_DlDataRev").Str("ep_eui", msgA.EpEui.String()).Uint64("que_id", msgA.QueId).Msg("revoking downlink")
 
-	case *cmd.ProtoCommand_DlRxStatQry:
+	case *bs.ProtoCommand_DlRxStatQry:
 		command := pb.GetDlRxStatQry()
 		msgA, err := messages.NewDlRxStatQryFromProto(0, command)
 		if err != nil {
@@ -166,7 +164,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_DlRxStatQry").Str("ep_eui", msgA.EpEui.String()).Msg("requesting downlink status ")
 
-	case *cmd.ProtoCommand_AttPrp:
+	case *bs.ProtoCommand_AttPrp:
 		command := pb.GetAttPrp()
 		msgA, err := messages.NewAttPrpFromProto(0, command)
 		if err != nil {
@@ -176,7 +174,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_AttPrp").Str("ep_eui", msgA.EpEui.String()).Msg("propagate attaching endnode")
 
-	case *cmd.ProtoCommand_DetPrp:
+	case *bs.ProtoCommand_DetPrp:
 		command := pb.GetDetPrp()
 		msgA, err := messages.NewDetPrpFromProto(0, command)
 		if err != nil {
@@ -186,7 +184,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_DetPrp").Str("ep_eui", msgA.EpEui.String()).Msg("propagate detaching endnode")
 
-	case *cmd.ProtoCommand_ReqStatus:
+	case *bs.ProtoCommand_ReqStatus:
 		command := pb.GetReqStatus()
 		msgA, err := messages.NewStatusFromProto(0, command)
 		if err != nil {
@@ -196,7 +194,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_ReqStatus").Msg("requesting basestation status")
 
-	case *cmd.ProtoCommand_VmActivate:
+	case *bs.ProtoCommand_VmActivate:
 		command := pb.GetVmActivate()
 		msgA, err := messages.NewVmActivateFromProto(0, command)
 		if err != nil {
@@ -206,7 +204,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_VmActivate").Msgf("requesting variable mac activation: %v", msgA.MacType)
 
-	case *cmd.ProtoCommand_VmDeactivate:
+	case *bs.ProtoCommand_VmDeactivate:
 		command := pb.GetVmDeactivate()
 		msgA, err := messages.NewVmDeactivateFromProto(0, command)
 		if err != nil {
@@ -216,7 +214,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 
 		logger.Debug().Str("proto", "ProtoCommand_VmDeactivate").Msgf("requesting variable mac deactivation: %v", msgA.MacType)
 
-	case *cmd.ProtoCommand_VmStatus:
+	case *bs.ProtoCommand_VmStatus:
 		command := pb.GetVmStatus()
 		msgA, err := messages.NewVmStatusFromProto(0, command)
 		if err != nil {
@@ -234,7 +232,7 @@ func (b *Backend) HandleServerCommand(pb *cmd.ProtoCommand) error {
 }
 
 // Handler for server response messages
-func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
+func (b *Backend) HandleServerResponse(pb *bs.ProtoResponse) error {
 	if pb == nil {
 		return errors.New("empty protobuf command")
 	}
@@ -248,7 +246,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 	var msg messages.Message
 
 	switch pb.V1.(type) {
-	case *rsp.ProtoResponse_DetRsp:
+	case *bs.ProtoResponse_DetRsp:
 		command := pb.GetDetRsp()
 		msgA, err := messages.NewDetRspFromProto(opId, command)
 		if err != nil {
@@ -256,7 +254,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 		}
 		msg = msgA
 		log.Debug().Str("proto", "ProtoResponse_DetRsp").Int64("op_id", opId).Msgf("detaching endnode %v from basestation %v", command.EndnodeEui, bsEui.String())
-	case *rsp.ProtoResponse_AttRsp:
+	case *bs.ProtoResponse_AttRsp:
 		command := pb.GetAttRsp()
 		msgA, err := messages.NewAttRspFromProto(opId, command)
 		if err != nil {
@@ -265,7 +263,7 @@ func (b *Backend) HandleServerResponse(pb *rsp.ProtoResponse) error {
 		msg = msgA
 		log.Debug().Str("proto", "ProtoResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", command.EndnodeEui, bsEui.String())
 
-	case *rsp.ProtoResponse_Err:
+	case *bs.ProtoResponse_Err:
 		command := pb.GetErr()
 		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
 
@@ -298,7 +296,7 @@ func (b *Backend) Start() error {
 
 			if err != nil {
 				log.Error().Err(err).Msg("connection accept failed")
-				continue 
+				continue
 			}
 
 			logger := log.With().Str("remote", conn.RemoteAddr().String()).Logger()
@@ -355,7 +353,7 @@ func (b *Backend) initBasestation(ctx context.Context, con messages.Con, conn ne
 	conRsp := messages.NewConRsp(con.OpId, con.Version, bsConnection.SnScUuid)
 
 	// check for existing connection
-	if _, err := b.basestations.get(eui) ; err == nil {
+	if _, err := b.basestations.get(eui); err == nil {
 		err = errors.New("basestation already connected")
 		logger.Error().Err(err).Msg("connection with same gateway eui already exists")
 		return err

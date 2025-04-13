@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestNewDetPrp(t *testing.T) {
@@ -40,7 +41,7 @@ func TestNewDetPrp(t *testing.T) {
 func TestNewDetPrpFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.DetachPropagate
+		pb   *bs.DetachPropagate
 	}
 	tests := []struct {
 		name    string
@@ -52,7 +53,7 @@ func TestNewDetPrpFromProto(t *testing.T) {
 			name: "attRsp",
 			args: args{
 				opId: 10,
-				pb: &cmd.DetachPropagate{
+				pb: &bs.DetachPropagate{
 					EndnodeEui: "0706050403020100",
 				},
 			},

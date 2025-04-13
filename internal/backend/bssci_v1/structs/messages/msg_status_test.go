@@ -1,13 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -37,7 +36,7 @@ func TestNewStatus(t *testing.T) {
 func TestNewStatusFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.RequestStatus
+		pb   *bs.RequestStatus
 	}
 	tests := []struct {
 		name    string
@@ -49,7 +48,7 @@ func TestNewStatusFromProto(t *testing.T) {
 			name: "valid",
 			args: args{
 				opId: 10,
-				pb:   &cmd.RequestStatus{},
+				pb:   &bs.RequestStatus{},
 			},
 			want: &Status{
 				Command: structs.MsgStatus,
@@ -346,7 +345,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoBasestationMessage
+		want   *bs.ProtoBasestationMessage
 	}{
 		{
 			name: "statusRsp1",
@@ -364,15 +363,15 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				MemLoad:     nil,
 			},
 			args: args{common.EUI64{1}},
-			want: &msg.ProtoBasestationMessage{
+			want: &bs.ProtoBasestationMessage{
 				BsEui: "0100000000000000",
-				V1: &msg.ProtoBasestationMessage_Status{
-					Status: &msg.BasestationStatus{
+				V1: &bs.ProtoBasestationMessage_Status{
+					Status: &bs.BasestationStatus{
 						StatusCode:  0,
 						StatusMsg:   "test",
 						Ts:          &testTs,
 						DutyCycle:   0.5,
-						GeoLocation: &msg.GeoLocation{},
+						GeoLocation: &bs.GeoLocation{},
 						Uptime:      nil,
 						Temp:        nil,
 						Cpu:         nil,
@@ -397,15 +396,15 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				MemLoad:     nil,
 			},
 			args: args{common.EUI64{1}},
-			want: &msg.ProtoBasestationMessage{
+			want: &bs.ProtoBasestationMessage{
 				BsEui: "0100000000000000",
-				V1: &msg.ProtoBasestationMessage_Status{
-					Status: &msg.BasestationStatus{
+				V1: &bs.ProtoBasestationMessage_Status{
+					Status: &bs.BasestationStatus{
 						StatusCode:  0,
 						StatusMsg:   "test",
 						Ts:          &testTs,
 						DutyCycle:   0.5,
-						GeoLocation: &msg.GeoLocation{},
+						GeoLocation: &bs.GeoLocation{},
 						Uptime:      nil,
 						Temp:        nil,
 						Cpu:         nil,
@@ -430,15 +429,15 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				MemLoad:     &testMemory,
 			},
 			args: args{common.EUI64{1}},
-			want: &msg.ProtoBasestationMessage{
+			want: &bs.ProtoBasestationMessage{
 				BsEui: "0100000000000000",
-				V1: &msg.ProtoBasestationMessage_Status{
-					Status: &msg.BasestationStatus{
+				V1: &bs.ProtoBasestationMessage_Status{
+					Status: &bs.BasestationStatus{
 						StatusCode:  0,
 						StatusMsg:   "test",
 						Ts:          &testTs,
 						DutyCycle:   0.5,
-						GeoLocation: &msg.GeoLocation{},
+						GeoLocation: &bs.GeoLocation{},
 						Uptime:      &testUptime,
 						Temp:        &testTemp,
 						Cpu:         &testCpu,

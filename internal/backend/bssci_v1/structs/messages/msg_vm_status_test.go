@@ -1,12 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestNewVmStatus(t *testing.T) {
@@ -39,7 +39,7 @@ func TestNewVmStatus(t *testing.T) {
 func TestNewVmStatusFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.RequestVariableMacStatus
+		pb   *bs.RequestVariableMacStatus
 	}
 	tests := []struct {
 		name    string
@@ -51,7 +51,7 @@ func TestNewVmStatusFromProto(t *testing.T) {
 			name: "valid",
 			args: args{
 				opId: 1,
-				pb:   &cmd.RequestVariableMacStatus{},
+				pb:   &bs.RequestVariableMacStatus{},
 			},
 			want: &VmStatus{
 				Command: structs.MsgVmStatus,
@@ -289,7 +289,7 @@ func TestVmStatusRsp_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoBasestationMessage
+		want   *bs.ProtoBasestationMessage
 	}{
 		{
 			name: "vmStatusRsp",
@@ -299,10 +299,10 @@ func TestVmStatusRsp_IntoProto(t *testing.T) {
 				[]int64{10, 20},
 			},
 			args: args{bsEui: &common.EUI64{1}},
-			want: &msg.ProtoBasestationMessage{
+			want: &bs.ProtoBasestationMessage{
 				BsEui: "0100000000000000",
-				V1: &msg.ProtoBasestationMessage_VmStatus{
-					VmStatus: &msg.BasestationVariableMacStatus{
+				V1: &bs.ProtoBasestationMessage_VmStatus{
+					VmStatus: &bs.BasestationVariableMacStatus{
 						MacTypes: []int64{10, 20},
 					},
 				},

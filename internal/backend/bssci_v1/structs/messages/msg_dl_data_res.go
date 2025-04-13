@@ -1,10 +1,11 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 type dlDataResult int
@@ -94,29 +95,29 @@ func (m *DlDataRes) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *DlDataRes) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+func (m *DlDataRes) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
-	result := msg.EndnodeDownlinkResult{
+	result := bs.EndnodeDownlinkResult{
 		DlQueId: m.QueId,
 	}
 
 	switch m.Result {
 	case dlDataResult_Sent:
-		result.Result = msg.DownlinkResultEnum_SENT
+		result.Result = bs.DownlinkResultEnum_SENT
 		result.TxTime = TimestampNsToProto(int64(*m.TxTime))
 		result.EpPacketCnt = *m.PacketCnt
 	case dlDataResult_Expired:
-		result.Result = msg.DownlinkResultEnum_EXPIRED
+		result.Result = bs.DownlinkResultEnum_EXPIRED
 	case dlDataResult_Invalid:
-		result.Result = msg.DownlinkResultEnum_INVALID
+		result.Result = bs.DownlinkResultEnum_INVALID
 	}
 
-	message := msg.ProtoEndnodeMessage{
+	message := bs.ProtoEndnodeMessage{
 		BsEui:      bsEuiB,
 		EndnodeEui: epEuiB,
-		V1: &msg.ProtoEndnodeMessage_DlRes{
+		V1: &bs.ProtoEndnodeMessage_DlRes{
 			DlRes: &result,
 		},
 	}

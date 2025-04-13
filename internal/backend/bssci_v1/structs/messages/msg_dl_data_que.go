@@ -2,9 +2,10 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -116,7 +117,7 @@ func NewDlDataQueEnc(
 	}
 }
 
-func NewDlDataQueFromProto(opId int64, pb *cmd.EnqueDownlink) (*DlDataQue, error) {
+func NewDlDataQueFromProto(opId int64, pb *bs.EnqueDownlink) (*DlDataQue, error) {
 	if pb != nil {
 		var format byte
 
@@ -143,9 +144,9 @@ func NewDlDataQueFromProto(opId int64, pb *cmd.EnqueDownlink) (*DlDataQue, error
 		}
 
 		switch pb.Payload.(type) {
-		case *cmd.EnqueDownlink_Ack:
+		case *bs.EnqueDownlink_Ack:
 			return &msg, nil
-		case *cmd.EnqueDownlink_Data:
+		case *bs.EnqueDownlink_Data:
 			payload := pb.GetData()
 			if len(payload.Data) != 0 {
 				msg.UserData = [][]byte{payload.Data}
@@ -153,7 +154,7 @@ func NewDlDataQueFromProto(opId int64, pb *cmd.EnqueDownlink) (*DlDataQue, error
 			} else {
 				return nil, errors.New("EnqueDownlink_Data has no payload")
 			}
-		case *cmd.EnqueDownlink_DataEnc:
+		case *bs.EnqueDownlink_DataEnc:
 			payload := pb.GetDataEnc()
 			if len(payload.Data) != 0 && len(payload.PacketCnt) != 0 {
 				msg.CntDepend = true

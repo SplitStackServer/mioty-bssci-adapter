@@ -1,13 +1,13 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -209,7 +209,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoEndnodeMessage
+		want   *bs.ProtoEndnodeMessage
 	}{
 		{
 			name: "dlDataRes_Sent",
@@ -225,13 +225,13 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			args: args{
 				bsEui: common.EUI64{2},
 			},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0200000000000000",
 				EndnodeEui: "0100000000000000",
-				V1: &msg.ProtoEndnodeMessage_DlRes{
-					DlRes: &msg.EndnodeDownlinkResult{
+				V1: &bs.ProtoEndnodeMessage_DlRes{
+					DlRes: &bs.EndnodeDownlinkResult{
 						DlQueId:     20,
-						Result:      msg.DownlinkResultEnum_SENT,
+						Result:      bs.DownlinkResultEnum_SENT,
 						EpPacketCnt: testPacketCnt,
 						TxTime:      &testTxTimePb,
 					},
@@ -250,13 +250,13 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			args: args{
 				bsEui: common.EUI64{2},
 			},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0200000000000000",
 				EndnodeEui: "0100000000000000",
-				V1: &msg.ProtoEndnodeMessage_DlRes{
-					DlRes: &msg.EndnodeDownlinkResult{
+				V1: &bs.ProtoEndnodeMessage_DlRes{
+					DlRes: &bs.EndnodeDownlinkResult{
 						DlQueId: 20,
-						Result:  msg.DownlinkResultEnum_EXPIRED,
+						Result:  bs.DownlinkResultEnum_EXPIRED,
 					},
 				},
 			},
@@ -273,13 +273,13 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			args: args{
 				bsEui: common.EUI64{2},
 			},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0200000000000000",
 				EndnodeEui: "0100000000000000",
-				V1: &msg.ProtoEndnodeMessage_DlRes{
-					DlRes: &msg.EndnodeDownlinkResult{
+				V1: &bs.ProtoEndnodeMessage_DlRes{
+					DlRes: &bs.EndnodeDownlinkResult{
 						DlQueId: 20,
-						Result:  msg.DownlinkResultEnum_INVALID,
+						Result:  bs.DownlinkResultEnum_INVALID,
 					},
 				},
 			},

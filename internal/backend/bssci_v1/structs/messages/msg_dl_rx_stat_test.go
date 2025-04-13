@@ -1,13 +1,13 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -213,7 +213,7 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoEndnodeMessage
+		want   *bs.ProtoEndnodeMessage
 	}{
 		{
 			name: "dlRxStat",
@@ -227,11 +227,11 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 				DlRxRssi:  -100.5,
 			},
 			args: args{bsEui: common.EUI64{2}},
-			want: &msg.ProtoEndnodeMessage{
+			want: &bs.ProtoEndnodeMessage{
 				BsEui:      "0200000000000000",
 				EndnodeEui: "0100000000000000",
-				V1: &msg.ProtoEndnodeMessage_DlRxStat{
-					DlRxStat: &msg.EndnodeDownlinkRxStatus{
+				V1: &bs.ProtoEndnodeMessage_DlRxStat{
+					DlRxStat: &bs.EndnodeDownlinkRxStatus{
 						RxTime:    &testRxTimePb,
 						PacketCnt: 10,
 						DlRxRssi:  -100.5,

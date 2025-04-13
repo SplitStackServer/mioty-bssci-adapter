@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestNewDlDataQue(t *testing.T) {
@@ -129,7 +130,7 @@ func TestNewDlDataQueEnc(t *testing.T) {
 func TestNewDlDataQueFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.EnqueDownlink
+		pb   *bs.EnqueDownlink
 	}
 	tests := []struct {
 		name    string
@@ -141,12 +142,12 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			name: "dlDataQue_Ack",
 			args: args{
 				opId: 10,
-				pb: &cmd.EnqueDownlink{
+				pb: &bs.EnqueDownlink{
 					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
-					Payload:        &cmd.EnqueDownlink_Ack{Ack: &cmd.Acknowledgement{}},
+					Payload:        &bs.EnqueDownlink_Ack{Ack: &bs.Acknowledgement{}},
 					ResponseExp:    new(bool),
 					ResponsePrio:   new(bool),
 					ReqDlWindow:    new(bool),
@@ -174,12 +175,12 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			name: "dlDataQue_Data",
 			args: args{
 				opId: 10,
-				pb: &cmd.EnqueDownlink{
+				pb: &bs.EnqueDownlink{
 					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
-					Payload:        &cmd.EnqueDownlink_Data{Data: &cmd.DownlinkData{Data: []byte{0, 1, 2, 3}}},
+					Payload:        &bs.EnqueDownlink_Data{Data: &bs.DownlinkData{Data: []byte{0, 1, 2, 3}}},
 					ResponseExp:    new(bool),
 					ResponsePrio:   new(bool),
 					ReqDlWindow:    new(bool),
@@ -207,12 +208,12 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			name: "dlDataQue_Data_Err",
 			args: args{
 				opId: 10,
-				pb: &cmd.EnqueDownlink{
+				pb: &bs.EnqueDownlink{
 					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
-					Payload:        &cmd.EnqueDownlink_Data{Data: &cmd.DownlinkData{Data: []byte{}}},
+					Payload:        &bs.EnqueDownlink_Data{Data: &bs.DownlinkData{Data: []byte{}}},
 					ResponseExp:    new(bool),
 					ResponsePrio:   new(bool),
 					ReqDlWindow:    new(bool),
@@ -226,13 +227,13 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			name: "dlDataQue_DataEnc",
 			args: args{
 				opId: 10,
-				pb: &cmd.EnqueDownlink{
+				pb: &bs.EnqueDownlink{
 					EndnodeEui: "0706050403020100",
 					DlQueId:    20,
 					Priority:   new(float32),
 					Format:     new(uint32),
 
-					Payload: &cmd.EnqueDownlink_DataEnc{DataEnc: &cmd.DownlinkDataEncrypted{
+					Payload: &bs.EnqueDownlink_DataEnc{DataEnc: &bs.DownlinkDataEncrypted{
 						Data:      [][]byte{{0, 1, 2, 3}, {0, 1, 2, 3}},
 						PacketCnt: []uint32{1, 2},
 					},
@@ -264,12 +265,12 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			name: "dlDataQue_DataEnc_Err",
 			args: args{
 				opId: 10,
-				pb: &cmd.EnqueDownlink{
+				pb: &bs.EnqueDownlink{
 					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),
 					Format:         new(uint32),
-					Payload:        &cmd.EnqueDownlink_DataEnc{DataEnc: &cmd.DownlinkDataEncrypted{}},
+					Payload:        &bs.EnqueDownlink_DataEnc{DataEnc: &bs.DownlinkDataEncrypted{}},
 					ResponseExp:    new(bool),
 					ResponsePrio:   new(bool),
 					ReqDlWindow:    new(bool),
@@ -292,7 +293,7 @@ func TestNewDlDataQueFromProto(t *testing.T) {
 			name: "invalid",
 			args: args{
 				opId: 10,
-				pb: &cmd.EnqueDownlink{
+				pb: &bs.EnqueDownlink{
 					EndnodeEui:     "0706050403020100",
 					DlQueId:        20,
 					Priority:       new(float32),

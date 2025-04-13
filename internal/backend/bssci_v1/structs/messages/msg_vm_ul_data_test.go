@@ -1,13 +1,13 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -323,7 +323,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *msg.ProtoEndnodeMessage
+		want   *bs.ProtoEndnodeMessage
 	}{
 		{
 			name: "vmUlDataRsp",
@@ -345,13 +345,13 @@ func TestVmUlData_IntoProto(t *testing.T) {
 				CRC:        [2]byte{},
 			},
 			args: args{bsEui: common.EUI64{1}},
-			want: &msg.ProtoEndnodeMessage{
-				BsEui:      "0100000000000000",
-				V1: &msg.ProtoEndnodeMessage_VmUlData{
-					VmUlData: &msg.EndnodeVariableMacUlDataMessage{
+			want: &bs.ProtoEndnodeMessage{
+				BsEui: "0100000000000000",
+				V1: &bs.ProtoEndnodeMessage_VmUlData{
+					VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 						Data:    []byte{},
 						MacType: 0,
-						Meta: &msg.EndnodeUplinkMetadata{
+						Meta: &bs.EndnodeUplinkMetadata{
 							RxTime:        &testTimePb,
 							RxDuration:    nil,
 							PacketCnt:     0,
@@ -359,7 +359,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 							Rssi:          0,
 							Snr:           0,
 							EqSnr:         nil,
-							SubpacketInfo: []*msg.EndnodeUplinkSubpacket{},
+							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 						},
 						FreqOff:   0,
 						CarrSpace: 0,

@@ -1,16 +1,14 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
-
-
 //go:generate msgp
-
 
 // The VM UL data operation is initiated by the Base Station after receiving uplink data from
 // an End Point using a variable MAC (VM)
@@ -97,7 +95,7 @@ func (m *VmUlData) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
+func (m *VmUlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 	bsEuiB := bsEui.String()
 
 	crc := uint64(m.CRC[0]) | uint64(m.CRC[0])<<32
@@ -113,16 +111,16 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *msg.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := msg.ProtoEndnodeMessage{
-		BsEui:      bsEuiB,
-		V1: &msg.ProtoEndnodeMessage_VmUlData{
-			VmUlData: &msg.EndnodeVariableMacUlDataMessage{
+	message := bs.ProtoEndnodeMessage{
+		BsEui: bsEuiB,
+		V1: &bs.ProtoEndnodeMessage_VmUlData{
+			VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,
 				Meta:      metadata.IntoProto(),
 				MacType:   m.MacType,
 				FreqOff:   m.FreqOff,
-				CarrSpace: msg.CarrierSpacingEnum(m.CarrSpace),
-				PattGrp:   msg.TsmaPatternGroupEnum(m.PattGrp),
+				CarrSpace: bs.CarrierSpacingEnum(m.CarrSpace),
+				PattGrp:   bs.TsmaPatternGroupEnum(m.PattGrp),
 				PattNum:   uint32(m.PattNum),
 				Crc:       crc,
 			},

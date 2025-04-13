@@ -1,6 +1,6 @@
 package messages
 
-import "mioty-bssci-adapter/internal/api/msg"
+import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
 //go:generate msgp
 //msgp:tuple GeoLocation
@@ -11,11 +11,11 @@ type GeoLocation struct {
 	Alt float32 `json:"alt"`
 }
 
-func (m *GeoLocation) IntoProto() *msg.GeoLocation {
-	var message msg.GeoLocation
+func (m *GeoLocation) IntoProto() *bs.GeoLocation {
+	var message bs.GeoLocation
 
 	if m != nil {
-		message = msg.GeoLocation{
+		message = bs.GeoLocation{
 			Lat: m.Lat,
 			Lon: m.Lon,
 			Alt: m.Alt,

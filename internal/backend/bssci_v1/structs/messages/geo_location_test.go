@@ -1,9 +1,10 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/msg"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestGeoLocation_IntoProto(t *testing.T) {
@@ -15,7 +16,7 @@ func TestGeoLocation_IntoProto(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   *msg.GeoLocation
+		want   *bs.GeoLocation
 	}{
 		{
 			name: "geolocation1",
@@ -24,7 +25,7 @@ func TestGeoLocation_IntoProto(t *testing.T) {
 				Lon: 2.0,
 				Alt: 3.0,
 			},
-			want: &msg.GeoLocation{
+			want: &bs.GeoLocation{
 				Lat: 1.0,
 				Lon: 2.0,
 				Alt: 3.0,

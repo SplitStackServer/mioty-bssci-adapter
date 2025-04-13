@@ -2,11 +2,11 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/events"
 	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 //go:generate msgp
@@ -24,7 +24,7 @@ func NewVmStatus(opId int64) VmStatus {
 	return VmStatus{Command: structs.MsgVmStatus, OpId: opId}
 }
 
-func NewVmStatusFromProto(opId int64, pb *cmd.RequestVariableMacStatus) (*VmStatus, error) {
+func NewVmStatusFromProto(opId int64, pb *bs.RequestVariableMacStatus) (*VmStatus, error) {
 	if pb != nil {
 		m := NewVmStatus(opId)
 		return &m, nil
@@ -74,17 +74,17 @@ func (m *VmStatusRsp) GetEventType() events.EventType {
 }
 
 // implements BasestationMessage.IntoProto()
-func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *msg.ProtoBasestationMessage {
+func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *bs.ProtoBasestationMessage {
 
-	var message msg.ProtoBasestationMessage
+	var message bs.ProtoBasestationMessage
 
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
 
-		message = msg.ProtoBasestationMessage{
+		message = bs.ProtoBasestationMessage{
 			BsEui: bsEuiB,
-			V1: &msg.ProtoBasestationMessage_VmStatus{
-				VmStatus: &msg.BasestationVariableMacStatus{
+			V1: &bs.ProtoBasestationMessage_VmStatus{
+				VmStatus: &bs.BasestationVariableMacStatus{
 					MacTypes: m.MacTypes,
 				},
 			},

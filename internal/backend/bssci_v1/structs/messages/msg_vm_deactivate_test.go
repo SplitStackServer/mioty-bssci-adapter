@@ -1,10 +1,11 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/api/cmd"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
 
 func TestNewVmDeactivate(t *testing.T) {
@@ -39,7 +40,7 @@ func TestNewVmDeactivate(t *testing.T) {
 func TestNewVmDeactivateFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *cmd.DisableVariableMac
+		pb   *bs.DisableVariableMac
 	}
 	tests := []struct {
 		name    string
@@ -50,8 +51,8 @@ func TestNewVmDeactivateFromProto(t *testing.T) {
 		{
 			name: "valid",
 			args: args{
-				opId: 1, 
-				pb: &cmd.DisableVariableMac{
+				opId: 1,
+				pb: &bs.DisableVariableMac{
 					MacType: 10,
 				},
 			},
@@ -64,10 +65,10 @@ func TestNewVmDeactivateFromProto(t *testing.T) {
 		{
 			name: "nil",
 			args: args{
-				opId: 1, 
-				pb: nil,
+				opId: 1,
+				pb:   nil,
 			},
-			want: nil,
+			want:    nil,
 			wantErr: true,
 		},
 	}
@@ -170,9 +171,9 @@ func TestVmDeactivate_SetOpId(t *testing.T) {
 		args   args
 	}{
 		{
-			name: "vmDeactivate", 
-			fields: fields{structs.MsgVmDeactivate, 1, 10}, 
-			args: args{opId: 2}},
+			name:   "vmDeactivate",
+			fields: fields{structs.MsgVmDeactivate, 1, 10},
+			args:   args{opId: 2}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

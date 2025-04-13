@@ -4,9 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 
-	"mioty-bssci-adapter/internal/api/cmd"
-	"mioty-bssci-adapter/internal/api/msg"
-	"mioty-bssci-adapter/internal/api/rsp"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 	"mioty-bssci-adapter/internal/backend/events"
@@ -14,6 +11,8 @@ import (
 	"mioty-bssci-adapter/internal/config"
 	"net"
 	"os"
+
+	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
 	"testing"
 	"time"
@@ -47,13 +46,13 @@ type testCaseHandleBasestationMessages struct {
 
 type testCaseHandleServerCommand struct {
 	name    string
-	cmd     *cmd.ProtoCommand
+	cmd     *bs.ProtoCommand
 	wantErr bool
 }
 
 type testCaseHandleServerResponse struct {
 	name    string
-	rsp     *rsp.ProtoResponse
+	rsp     *bs.ProtoResponse
 	wantErr bool
 }
 
@@ -246,15 +245,15 @@ func (ts *TestBackendSuite) SetupSuite() {
 	ts.handleServerCommandTestCases = []testCaseHandleServerCommand{
 		{
 			name: "ProtoCommand_DlDataQue",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DlDataQue{
-					DlDataQue: &cmd.EnqueDownlink{
+				V1: &bs.ProtoCommand_DlDataQue{
+					DlDataQue: &bs.EnqueDownlink{
 						EndnodeEui:     "01020304050607",
 						DlQueId:        456,
 						Priority:       new(float32),
 						Format:         new(uint32),
-						Payload:        &cmd.EnqueDownlink_Ack{Ack: &cmd.Acknowledgement{}},
+						Payload:        &bs.EnqueDownlink_Ack{Ack: &bs.Acknowledgement{}},
 						ResponseExp:    new(bool),
 						ResponsePrio:   new(bool),
 						ReqDlWindow:    new(bool),
@@ -266,10 +265,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DlDataQue_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DlDataQue{
-					DlDataQue: &cmd.EnqueDownlink{
+				V1: &bs.ProtoCommand_DlDataQue{
+					DlDataQue: &bs.EnqueDownlink{
 						EndnodeEui:     "01020304050607",
 						DlQueId:        456,
 						Priority:       new(float32),
@@ -286,10 +285,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DlDataRev",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DlDataRev{
-					DlDataRev: &cmd.RevokeDownlink{
+				V1: &bs.ProtoCommand_DlDataRev{
+					DlDataRev: &bs.RevokeDownlink{
 						EndnodeEui: "01020304050607",
 						DlQueId:    456,
 					},
@@ -299,9 +298,9 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DlDataRev_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DlDataRev{
+				V1: &bs.ProtoCommand_DlDataRev{
 					DlDataRev: nil,
 				},
 			},
@@ -309,10 +308,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DlRxStatQry",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DlRxStatQry{
-					DlRxStatQry: &cmd.DownlinkRxStatusQuery{
+				V1: &bs.ProtoCommand_DlRxStatQry{
+					DlRxStatQry: &bs.DownlinkRxStatusQuery{
 						EndnodeEui: "01020304050607",
 					},
 				},
@@ -321,9 +320,9 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DlRxStatQry_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DlRxStatQry{
+				V1: &bs.ProtoCommand_DlRxStatQry{
 					DlRxStatQry: nil,
 				},
 			},
@@ -331,10 +330,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_AttPrp",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_AttPrp{
-					AttPrp: &cmd.AttachPropagate{
+				V1: &bs.ProtoCommand_AttPrp{
+					AttPrp: &bs.AttachPropagate{
 						EndnodeEui:    "01020304050607",
 						NwkSessionKey: []byte{1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4},
 					},
@@ -344,9 +343,9 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_AttPrp_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_AttPrp{
+				V1: &bs.ProtoCommand_AttPrp{
 					AttPrp: nil,
 				},
 			},
@@ -354,10 +353,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DetPrp",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DetPrp{
-					DetPrp: &cmd.DetachPropagate{
+				V1: &bs.ProtoCommand_DetPrp{
+					DetPrp: &bs.DetachPropagate{
 						EndnodeEui: "01020304050607",
 					},
 				},
@@ -366,9 +365,9 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_DetPrp_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_DetPrp{
+				V1: &bs.ProtoCommand_DetPrp{
 					DetPrp: nil,
 				},
 			},
@@ -376,19 +375,19 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_ReqStatus",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_ReqStatus{
-					ReqStatus: &cmd.RequestStatus{},
+				V1: &bs.ProtoCommand_ReqStatus{
+					ReqStatus: &bs.RequestStatus{},
 				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "ProtoCommand_ReqStatus_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_ReqStatus{
+				V1: &bs.ProtoCommand_ReqStatus{
 					ReqStatus: nil,
 				},
 			},
@@ -396,19 +395,19 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_VmActivate",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_VmActivate{
-					VmActivate: &cmd.EnableVariableMac{},
+				V1: &bs.ProtoCommand_VmActivate{
+					VmActivate: &bs.EnableVariableMac{},
 				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "ProtoCommand_VmActivate_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_VmActivate{
+				V1: &bs.ProtoCommand_VmActivate{
 					VmActivate: nil,
 				},
 			},
@@ -416,19 +415,19 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_VmDeactivate",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_VmDeactivate{
-					VmDeactivate: &cmd.DisableVariableMac{},
+				V1: &bs.ProtoCommand_VmDeactivate{
+					VmDeactivate: &bs.DisableVariableMac{},
 				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "ProtoCommand_VmDeactivate_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_VmDeactivate{
+				V1: &bs.ProtoCommand_VmDeactivate{
 					VmDeactivate: nil,
 				},
 			},
@@ -436,19 +435,19 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoCommand_VmStatus",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_VmStatus{
-					VmStatus: &cmd.RequestVariableMacStatus{},
+				V1: &bs.ProtoCommand_VmStatus{
+					VmStatus: &bs.RequestVariableMacStatus{},
 				},
 			},
 			wantErr: false,
 		},
 		{
 			name: "ProtoCommand_VmStatus_Err",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: ts.bs_eui.String(),
-				V1: &cmd.ProtoCommand_VmStatus{
+				V1: &bs.ProtoCommand_VmStatus{
 					VmStatus: nil,
 				},
 			},
@@ -461,15 +460,15 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name:    "Empty",
-			cmd:     &cmd.ProtoCommand{},
+			cmd:     &bs.ProtoCommand{},
 			wantErr: true,
 		},
 		{
 			name: "Basestation Error",
-			cmd: &cmd.ProtoCommand{
+			cmd: &bs.ProtoCommand{
 				BsEui: common.EUI64{}.String(),
-				V1: &cmd.ProtoCommand_ReqStatus{
-					ReqStatus: &cmd.RequestStatus{},
+				V1: &bs.ProtoCommand_ReqStatus{
+					ReqStatus: &bs.RequestStatus{},
 				},
 			},
 			wantErr: true,
@@ -479,10 +478,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 	ts.handleServerResponseTestCases = []testCaseHandleServerResponse{
 		{
 			name: "ProtoResponse_AttRsp",
-			rsp: &rsp.ProtoResponse{
+			rsp: &bs.ProtoResponse{
 				BsEui: ts.bs_eui.String(),
-				V1: &rsp.ProtoResponse_AttRsp{
-					AttRsp: &rsp.EndnodeAttachResponse{
+				V1: &bs.ProtoResponse_AttRsp{
+					AttRsp: &bs.EndnodeAttachResponse{
 						EndnodeEui:    "01020304050607",
 						NwkSessionKey: []byte{1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4},
 					},
@@ -492,9 +491,9 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoResponse_AttRsp_Err",
-			rsp: &rsp.ProtoResponse{
+			rsp: &bs.ProtoResponse{
 				BsEui: ts.bs_eui.String(),
-				V1: &rsp.ProtoResponse_AttRsp{
+				V1: &bs.ProtoResponse_AttRsp{
 					AttRsp: nil,
 				},
 			},
@@ -502,10 +501,10 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoResponse_DetRsp",
-			rsp: &rsp.ProtoResponse{
+			rsp: &bs.ProtoResponse{
 				BsEui: ts.bs_eui.String(),
-				V1: &rsp.ProtoResponse_DetRsp{
-					DetRsp: &rsp.EndnodeDetachResponse{
+				V1: &bs.ProtoResponse_DetRsp{
+					DetRsp: &bs.EndnodeDetachResponse{
 						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
@@ -515,9 +514,9 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name: "ProtoResponse_DetRsp_Err",
-			rsp: &rsp.ProtoResponse{
+			rsp: &bs.ProtoResponse{
 				BsEui: ts.bs_eui.String(),
-				V1: &rsp.ProtoResponse_DetRsp{
+				V1: &bs.ProtoResponse_DetRsp{
 					DetRsp: nil,
 				},
 			},
@@ -530,15 +529,15 @@ func (ts *TestBackendSuite) SetupSuite() {
 		},
 		{
 			name:    "Empty",
-			rsp:     &rsp.ProtoResponse{},
+			rsp:     &bs.ProtoResponse{},
 			wantErr: true,
 		},
 		{
 			name: "Basestation Error",
-			rsp: &rsp.ProtoResponse{
+			rsp: &bs.ProtoResponse{
 				BsEui: common.EUI64{}.String(),
-				V1: &rsp.ProtoResponse_DetRsp{
-					DetRsp: &rsp.EndnodeDetachResponse{
+				V1: &bs.ProtoResponse_DetRsp{
+					DetRsp: &bs.EndnodeDetachResponse{
 						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
@@ -567,8 +566,8 @@ func (ts *TestBackendSuite) SetupTest() {
 
 	// setup backend listener
 	ts.backend.SetSubscribeEventHandler(func(pl events.Subscribe) {})
-	ts.backend.SetBasestationMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoBasestationMessage) {})
-	ts.backend.SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *msg.ProtoEndnodeMessage) {})
+	ts.backend.SetBasestationMessageHandler(func(common.EUI64, events.EventType, *bs.ProtoBasestationMessage) {})
+	ts.backend.SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *bs.ProtoEndnodeMessage) {})
 
 }
 
