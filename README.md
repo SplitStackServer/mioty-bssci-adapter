@@ -17,7 +17,11 @@ This component is part of the [SplitStackServer](https://github.com/SplitStackSe
 The following backends are provided:
 
 * [BSSCI V1.0.0](https://developers.mioty-alliance.com/wp-content/uploads/2025/01/BSSCI_specification_v1.0.0_rev1.pdf)
-    * Variable MAC sub channel is mostly implemented except for vm.downlink. Variable MAC uplinks can contain 
+    * TCP/TLS stream based protocol 
+    * Error messages from basestations are currently not forwarded to MQTT
+    * [Variable MAC](https://developers.mioty-alliance.com/wp-content/uploads/2025/01/BSSCI_Attachement_VM_v1.0.0.pdf) sub channel is implemented except for `vm.downlink`. 
+
+    
 
 ## Integrations
 
