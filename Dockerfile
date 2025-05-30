@@ -1,4 +1,4 @@
-FROM golang:1.24.2-alpine AS development
+FROM golang:1.24.3-alpine AS development
 
 ENV PROJECT_PATH=/mioty-bssci-adapter
 ENV PATH=$PATH:$PROJECT_PATH/build

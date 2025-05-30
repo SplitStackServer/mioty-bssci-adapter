@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -338,7 +339,7 @@ func TestUlData_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *bs.ProtoEndnodeMessage
+		want   *bs.EndnodeUplink
 	}{
 		{
 			name: "ulData1",
@@ -360,27 +361,28 @@ func TestUlData_IntoProto(t *testing.T) {
 				DlOpen:     true,
 				DlAck:      true,
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0000000000000000",
-				EndnodeEui: "0001020304050607",
-				V1: &bs.ProtoEndnodeMessage_UlData{
+			want: &bs.EndnodeUplink{
+				BsEui: "0000000000000000",
+
+				Message: &bs.EndnodeUplink_UlData{
 					UlData: &bs.EndnodeUlDataMessage{
 						Data:   []byte{0, 1, 2, 3},
+						EpEui:  "0001020304050607",
 						Format: 0x83,
 						Mode:   &testMode,
 						DlOpen: true,
 						DlAck:  true,
-						Meta: &bs.EndnodeUplinkMetadata{
-							RxTime:        &testRxTimePb,
-							RxDuration:    &testRxDurationPb,
-							PacketCnt:     2,
-							Profile:       new(string),
-							Rssi:          -100.0,
-							Snr:           3.0,
-							EqSnr:         nil,
-							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
-						},
 					},
+				},
+				Meta: &bs.EndnodeUplinkMetadata{
+					RxTime:        &testRxTimePb,
+					RxDuration:    &testRxDurationPb,
+					PacketCnt:     2,
+					Profile:       new(string),
+					Rssi:          -100.0,
+					Snr:           3.0,
+					EqSnr:         nil,
+					SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 				},
 			},
 		},
@@ -401,25 +403,26 @@ func TestUlData_IntoProto(t *testing.T) {
 				Subpackets: &Subpackets{},
 				Mode:       &testMode,
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0000000000000000",
-				EndnodeEui: "0001020304050607",
-				V1: &bs.ProtoEndnodeMessage_UlData{
+			want: &bs.EndnodeUplink{
+				BsEui: "0000000000000000",
+
+				Message: &bs.EndnodeUplink_UlData{
 					UlData: &bs.EndnodeUlDataMessage{
+						EpEui:  "0001020304050607",
 						Data:   []byte{0, 1, 2, 3},
 						Format: 0,
 						Mode:   &testMode,
-						Meta: &bs.EndnodeUplinkMetadata{
-							RxTime:        &testRxTimePb,
-							RxDuration:    &testRxDurationPb,
-							PacketCnt:     2,
-							Profile:       new(string),
-							Rssi:          -100.0,
-							Snr:           3.0,
-							EqSnr:         nil,
-							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
-						},
 					},
+				},
+				Meta: &bs.EndnodeUplinkMetadata{
+					RxTime:        &testRxTimePb,
+					RxDuration:    &testRxDurationPb,
+					PacketCnt:     2,
+					Profile:       new(string),
+					Rssi:          -100.0,
+					Snr:           3.0,
+					EqSnr:         nil,
+					SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 				},
 			},
 		},
@@ -445,7 +448,7 @@ func TestUlData_IntoProto(t *testing.T) {
 				ResponseExp: tt.fields.ResponseExp,
 				DlAck:       tt.fields.DlAck,
 			}
-			if got := m.IntoProto(tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
+			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("UlData.IntoProto() = %v, want %v", got, tt.want)
 			}
 		})

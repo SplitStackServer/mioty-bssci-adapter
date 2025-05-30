@@ -3,9 +3,10 @@ package messages
 import (
 	"encoding/binary"
 	"errors"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -87,7 +88,7 @@ func (m *Det) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *Det) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
+func (m *Det) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
@@ -104,16 +105,17 @@ func (m *Det) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := bs.ProtoEndnodeMessage{
+	message := bs.EndnodeUplink{
 		BsEui:      bsEuiB,
-		EndnodeEui: epEuiB,
-		V1: &bs.ProtoEndnodeMessage_Det{
+		Message: &bs.EndnodeUplink_Det{
 			Det: &bs.EndnodeDetMessage{
+
 				OpId: m.OpId,
+				EpEui: epEuiB,
 				Sign: sign,
-				Meta: metadata.IntoProto(),
 			},
 		},
+		Meta: metadata.IntoProto(),
 	}
 	return &message
 }

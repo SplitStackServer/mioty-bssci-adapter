@@ -7,9 +7,9 @@ import (
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
-	"mioty-bssci-adapter/internal/common"
-	"mioty-bssci-adapter/internal/config"
-	"mioty-bssci-adapter/internal/integration/mqtt"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/integration/mqtt"
 )
 
 // Event types.
@@ -44,19 +44,19 @@ type Integration interface {
 	SetBasestationSubscription(subscribe bool, bsEui common.EUI64) error
 
 	// Publishes the current state as retained message.
-	PublishState(ctx context.Context, bsEui common.EUI64, pb *bs.ProtoBasestationState) error
+	PublishState(ctx context.Context, bsEui common.EUI64, pb *bs.BasestationState) error
 
 	// Publish endnode messages.
-	PublishEndnodeEvent(bsEui common.EUI64, event string, pb *bs.ProtoEndnodeMessage) error
+	PublishEndnodeEvent(bsEui common.EUI64, event string, pb *bs.EndnodeUplink) error
 
 	// Publish basestation messages.
-	PublishBasestationEvent(bsEui common.EUI64, event string, pb *bs.ProtoBasestationMessage) error
+	PublishBasestationEvent(bsEui common.EUI64, event string, pb *bs.BasestationUplink) error
 
 	// Set handler for server command messages
-	SetServerCommandHandler(func(*bs.ProtoCommand))
+	SetServerCommandHandler(func(*bs.ServerCommand))
 
 	// Set handler for server command messages
-	SetServerResponseHandler(func(*bs.ProtoResponse))
+	SetServerResponseHandler(func(*bs.ServerResponse))
 
 	// Start starts the integration.
 	Start() error

@@ -1,9 +1,9 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -106,7 +106,7 @@ func (m *UlData) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *UlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
+func (m *UlData) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
@@ -128,19 +128,19 @@ func (m *UlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := bs.ProtoEndnodeMessage{
+	message := bs.EndnodeUplink{
 		BsEui:      bsEuiB,
-		EndnodeEui: epEuiB,
-		V1: &bs.ProtoEndnodeMessage_UlData{
+		Message: &bs.EndnodeUplink_UlData{
 			UlData: &bs.EndnodeUlDataMessage{
+				EpEui: epEuiB,
 				Data:   m.UserData,
 				Format: format,
 				Mode:   m.Mode,
-				Meta:   metadata.IntoProto(),
 				DlAck:  m.DlAck,
 				DlOpen: m.DlOpen,
 			},
 		},
+		Meta:   metadata.IntoProto(),
 	}
 	return &message
 }

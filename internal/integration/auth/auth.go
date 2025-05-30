@@ -9,7 +9,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/pkg/errors"
 
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 )
 
 // Authentication defines the authentication interface.

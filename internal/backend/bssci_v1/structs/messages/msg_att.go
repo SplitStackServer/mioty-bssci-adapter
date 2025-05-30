@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -112,7 +112,7 @@ func (m *Att) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *Att) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
+func (m *Att) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
@@ -138,23 +138,25 @@ func (m *Att) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := bs.ProtoEndnodeMessage{
-		BsEui:      bsEuiB,
-		EndnodeEui: epEuiB,
-		V1: &bs.ProtoEndnodeMessage_Att{
+	message := bs.EndnodeUplink{
+		BsEui: bsEuiB,
+		Message: &bs.EndnodeUplink_Att{
 			Att: &bs.EndnodeAttMessage{
-				OpId:          m.OpId,
+				OpId: m.OpId,
+
+				EpEui:         epEuiB,
 				AttachmentCnt: m.AttachCnt,
 				Nonce:         nonce,
 				Sign:          sign,
 				ShAddr:        shAddr,
-				Meta:          metadata.IntoProto(),
-				DualChannel:   m.DualChan,
-				Repetition:    m.Repetition,
-				WideCarrOff:   m.WideCarrOff,
-				LongBlkDist:   m.LongBlkDist,
+
+				DualChannel: m.DualChan,
+				Repetition:  m.Repetition,
+				WideCarrOff: m.WideCarrOff,
+				LongBlkDist: m.LongBlkDist,
 			},
 		},
+		Meta: metadata.IntoProto(),
 	}
 	return &message
 }

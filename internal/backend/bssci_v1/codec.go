@@ -4,12 +4,11 @@ import (
 	// "encoding/binary"
 	"io"
 
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 
 	"github.com/pkg/errors"
 	"github.com/tinylib/msgp/msgp"
-
 )
 
 const (
@@ -21,9 +20,7 @@ const (
 
 var (
 	bssciIdentifier = [8]byte{0x4D, 0x49, 0x4F, 0x54, 0x59, 0x42, 0x30, 0x31}
-	
 )
-
 
 func ReadBssciMessage(r io.Reader) (cmd structs.CommandHeader, raw msgp.Raw, err error) {
 	// reader the bssci header

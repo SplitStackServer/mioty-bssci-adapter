@@ -1,8 +1,9 @@
 package metrics
 
 import (
-	"mioty-bssci-adapter/internal/config"
 	"net/http"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog/log"

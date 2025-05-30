@@ -4,7 +4,7 @@
 package cmd
 
 import (
-	"mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 	"github.com/rs/zerolog/log"
 )
 

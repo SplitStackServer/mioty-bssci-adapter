@@ -5,7 +5,8 @@ package cmd
 
 import (
 	"log/syslog"
-	"mioty-bssci-adapter/internal/config"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

@@ -1,9 +1,9 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -95,7 +95,7 @@ func (m *VmUlData) GetEventType() events.EventType {
 }
 
 // implements EndnodeMessage.IntoProto()
-func (m *VmUlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
+func (m *VmUlData) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 	bsEuiB := bsEui.String()
 
 	crc := uint64(m.CRC[0]) | uint64(m.CRC[0])<<32
@@ -111,12 +111,11 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 		Subpackets: m.Subpackets,
 	}
 
-	message := bs.ProtoEndnodeMessage{
+	message := bs.EndnodeUplink{
 		BsEui: bsEuiB,
-		V1: &bs.ProtoEndnodeMessage_VmUlData{
+		Message: &bs.EndnodeUplink_VmUlData{
 			VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,
-				Meta:      metadata.IntoProto(),
 				MacType:   m.MacType,
 				FreqOff:   m.FreqOff,
 				CarrSpace: bs.CarrierSpacingEnum(m.CarrSpace),
@@ -125,6 +124,7 @@ func (m *VmUlData) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 				Crc:       crc,
 			},
 		},
+		Meta: metadata.IntoProto(),
 	}
 	return &message
 }

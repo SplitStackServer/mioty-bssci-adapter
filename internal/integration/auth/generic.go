@@ -9,8 +9,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"mioty-bssci-adapter/internal/common"
-	"mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 )
 
 // GenericAuthentication implements a generic MQTT authentication.

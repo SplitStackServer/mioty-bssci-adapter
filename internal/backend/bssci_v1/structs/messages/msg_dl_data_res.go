@@ -1,9 +1,9 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -89,17 +89,17 @@ func (m *DlDataRes) GetCommand() structs.Command {
 	return structs.MsgDlDataRes
 }
 
-// implements EndnodeMessage.GetEventType()
+// implements BasestationMessage.GetEventType()
 func (m *DlDataRes) GetEventType() events.EventType {
 	return events.EventTypeEpDl
 }
 
-// implements EndnodeMessage.IntoProto()
-func (m *DlDataRes) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
+// implements BasestationMessage.IntoProto()
+func (m *DlDataRes) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 	bsEuiB := bsEui.String()
 	epEuiB := m.EpEui.String()
 
-	result := bs.EndnodeDownlinkResult{
+	result := bs.BasestationDownlinkResult{
 		DlQueId: m.QueId,
 	}
 
@@ -114,10 +114,10 @@ func (m *DlDataRes) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
 		result.Result = bs.DownlinkResultEnum_INVALID
 	}
 
-	message := bs.ProtoEndnodeMessage{
+	message := bs.BasestationUplink{
 		BsEui:      bsEuiB,
-		EndnodeEui: epEuiB,
-		V1: &bs.ProtoEndnodeMessage_DlRes{
+		Message: &bs.BasestationUplink_DlRes{
+			EpEui: epEuiB,
 			DlRes: &result,
 		},
 	}

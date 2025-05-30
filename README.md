@@ -66,4 +66,4 @@ make snapshot
 ## License
 
 mioty<sup>&reg;</sup> BSSCI Adapter is distributed under the MIT license. See 
-[LICENSE](https://github.com/ipaid2win/mioty-bssci-adapter/blob/main/LICENSE).
+[LICENSE](https://github.com/SplitStackServer/mioty-bssci-adapter/blob/main/LICENSE).

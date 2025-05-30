@@ -1,8 +1,9 @@
 package main
 
 import (
-	"mioty-bssci-adapter/cmd/cmd"
 	"time"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/cmd/cmd"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/rs/zerolog"
@@ -24,10 +25,10 @@ func (d pahoLogWrapper) Printf(format string, v ...interface{}) {
 
 func enableClientLogging() {
 	l := log.Logger.With().Str("module", "mqtt").Logger()
-	
-	paho.ERROR = pahoLogWrapper{func(v ...interface{}) {l.Error().Msgf("%v", v)}, l.Error().Msgf}
-	paho.WARN = pahoLogWrapper{func(v ...interface{}) {l.Warn().Msgf("%v", v)}, l.Warn().Msgf}
-	paho.CRITICAL = pahoLogWrapper{func(v ...interface{}) {l.Error().Msgf("%v", v)}, l.Error().Msgf}
+
+	paho.ERROR = pahoLogWrapper{func(v ...interface{}) { l.Error().Msgf("%v", v) }, l.Error().Msgf}
+	paho.WARN = pahoLogWrapper{func(v ...interface{}) { l.Warn().Msgf("%v", v) }, l.Warn().Msgf}
+	paho.CRITICAL = pahoLogWrapper{func(v ...interface{}) { l.Error().Msgf("%v", v) }, l.Error().Msgf}
 }
 
 func init() {

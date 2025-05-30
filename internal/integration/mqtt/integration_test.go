@@ -12,14 +12,13 @@ import (
 	"github.com/joho/godotenv"
 	"google.golang.org/protobuf/proto"
 
-	"mioty-bssci-adapter/internal/common"
-	"mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-
 )
 
 type TestIntegrationSuite struct {
@@ -118,9 +117,9 @@ func (ts *TestIntegrationSuite) TestIntegration_LastWill() {
 func (ts *TestIntegrationSuite) TestIntegration_ConnStateOnline() {
 	assert := require.New(ts.T())
 
-	connStateChan := make(chan *bs.ProtoBasestationState)
+	connStateChan := make(chan *bs.BasestationState)
 	token := ts.mqttClient.Subscribe("test/bssci/0807060504030201/state", 0, func(c paho.Client, ms paho.Message) {
-		var pl bs.ProtoBasestationState
+		var pl bs.BasestationState
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		connStateChan <- &pl
 	})
@@ -129,9 +128,9 @@ func (ts *TestIntegrationSuite) TestIntegration_ConnStateOnline() {
 
 	pl := <-connStateChan
 
-	assert.True(proto.Equal(&bs.ProtoBasestationState{
+	assert.True(proto.Equal(&bs.BasestationState{
 		BsEui: ts.basestationsEui.String(),
-		State: bs.ConnectionState_ONLINE,
+		State: bs.BasestationState_ONLINE,
 	}, pl))
 
 	token = ts.mqttClient.Unsubscribe("test/bssci/0807060504030201/state")
@@ -143,7 +142,7 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 	assert := require.New(ts.T())
 
 	bsEui := common.EUI64{1, 2, 3, 4, 5, 6, 7, 8}
-	connStateChan := make(chan *bs.ProtoBasestationState)
+	connStateChan := make(chan *bs.BasestationState)
 
 	assert.NoError(ts.integration.SetBasestationSubscription(true, bsEui))
 	_, ok := ts.integration.basestations[bsEui]
@@ -155,7 +154,7 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 	time.Sleep(1000 * time.Millisecond)
 
 	token := ts.mqttClient.Subscribe("test/bssci/0102030405060708/state", 0, func(c paho.Client, ms paho.Message) {
-		var pl bs.ProtoBasestationState
+		var pl bs.BasestationState
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		connStateChan <- &pl
 	})
@@ -164,9 +163,9 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 
 	pl := <-connStateChan
 
-	assert.True(proto.Equal(&bs.ProtoBasestationState{
+	assert.True(proto.Equal(&bs.BasestationState{
 		BsEui: bsEui.String(),
-		State: bs.ConnectionState_ONLINE,
+		State: bs.BasestationState_ONLINE,
 	}, pl))
 
 	ts.T().Run("Unsubscribe", func(t *testing.T) {
@@ -178,9 +177,9 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 
 		pl := <-connStateChan
 
-		assert.True(proto.Equal(&bs.ProtoBasestationState{
+		assert.True(proto.Equal(&bs.BasestationState{
 			BsEui: bsEui.String(),
-			State: bs.ConnectionState_OFFLINE,
+			State: bs.BasestationState_OFFLINE,
 		}, pl))
 	})
 
@@ -192,19 +191,19 @@ func (ts *TestIntegrationSuite) TestIntegration_SubscribeBasestation() {
 func (ts *TestIntegrationSuite) TestIntegration_PublishPublishEndnodeEvent() {
 	assert := require.New(ts.T())
 
-	pb := bs.ProtoEndnodeMessage{
+	pb := bs.EndnodeUplink{
 		BsEui:      "test_bs",
-		EndnodeEui: "test_ep",
-		V1: &bs.ProtoEndnodeMessage_UlData{
+		Message: &bs.EndnodeUplink_UlData{
 			UlData: &bs.EndnodeUlDataMessage{
+				EpEui: "test_ep",
 				Data: []byte{0, 1, 2, 3},
 			},
 		},
 	}
 
-	uplinkFrameChan := make(chan *bs.ProtoEndnodeMessage)
+	uplinkFrameChan := make(chan *bs.EndnodeUplink)
 	token := ts.mqttClient.Subscribe("test/bssci/0807060504030201/event/ep/ul", 0, func(c paho.Client, ms paho.Message) {
-		var pl bs.ProtoEndnodeMessage
+		var pl bs.EndnodeUplink
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		uplinkFrameChan <- &pl
 	})
@@ -219,19 +218,18 @@ func (ts *TestIntegrationSuite) TestIntegration_PublishPublishEndnodeEvent() {
 func (ts *TestIntegrationSuite) TestIntegration_PublishBasestationEvent() {
 	assert := require.New(ts.T())
 
-	pb := bs.ProtoBasestationMessage{
+	pb := bs.BasestationUplink{
 		BsEui: "test_bs",
-
-		V1: &bs.ProtoBasestationMessage_VmStatus{
+		Message: &bs.BasestationUplink_VmStatus{
 			VmStatus: &bs.BasestationVariableMacStatus{
-				MacTypes: []int64{1, 2, 3},
+				MacTypes: []uint32{1, 2, 3},
 			},
 		},
 	}
 
-	uplinkFrameChan := make(chan *bs.ProtoBasestationMessage)
+	uplinkFrameChan := make(chan *bs.BasestationUplink)
 	token := ts.mqttClient.Subscribe("test/bssci/0807060504030201/event/ep/vm", 0, func(c paho.Client, ms paho.Message) {
-		var pl bs.ProtoBasestationMessage
+		var pl bs.BasestationUplink
 		assert.NoError(ts.integration.unmarshal(ms.Payload(), &pl))
 		uplinkFrameChan <- &pl
 	})
@@ -245,15 +243,15 @@ func (ts *TestIntegrationSuite) TestIntegration_PublishBasestationEvent() {
 
 func (ts *TestIntegrationSuite) TestIntegration_HandleServerResponse() {
 	assert := require.New(ts.T())
-	rspChan := make(chan *bs.ProtoResponse, 1)
-	ts.integration.SetServerResponseHandler(func(pl *bs.ProtoResponse) {
+	rspChan := make(chan *bs.ServerResponse, 1)
+	ts.integration.SetServerResponseHandler(func(pl *bs.ServerResponse) {
 		rspChan <- pl
 	})
 
-	response := bs.ProtoResponse{
+	response := bs.ServerResponse{
 		OpId:  1,
 		BsEui: "test_bs",
-		V1: &bs.ProtoResponse_Err{
+		Response: &bs.ServerResponse_Err{
 			Err: &bs.ErrorResponse{
 				Message: "test",
 			},
@@ -273,14 +271,14 @@ func (ts *TestIntegrationSuite) TestIntegration_HandleServerResponse() {
 
 func (ts *TestIntegrationSuite) TestIntegration_HandleServerCommand() {
 	assert := require.New(ts.T())
-	cmdChan := make(chan *bs.ProtoCommand, 1)
-	ts.integration.SetServerCommandHandler(func(pl *bs.ProtoCommand) {
+	cmdChan := make(chan *bs.ServerCommand, 1)
+	ts.integration.SetServerCommandHandler(func(pl *bs.ServerCommand) {
 		cmdChan <- pl
 	})
 
-	command := bs.ProtoCommand{
+	command := bs.ServerCommand{
 		BsEui: "test_bs",
-		V1: &bs.ProtoCommand_VmStatus{
+		Command: &bs.ServerCommand_VmStatus{
 			VmStatus: &bs.RequestVariableMacStatus{},
 		},
 	}

@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"bytes"
-	"mioty-bssci-adapter/internal/config"
 	"os"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 
 	"github.com/rs/zerolog/log"
 

@@ -1,6 +1,6 @@
 package messages
 
-import "mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+import "github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 
 //go:generate msgp
 

@@ -10,13 +10,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"mioty-bssci-adapter/internal/backend"
-	"mioty-bssci-adapter/internal/config"
-	"mioty-bssci-adapter/internal/forwarder"
-	"mioty-bssci-adapter/internal/integration"
-	"mioty-bssci-adapter/internal/metrics"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/forwarder"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/integration"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/metrics"
 )
-
 
 func run(cmd *cobra.Command, args []string) error {
 
@@ -47,7 +46,6 @@ func run(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
-
 
 func setLogLevel() error {
 	log.Logger = log.Logger.With().Caller().Logger()

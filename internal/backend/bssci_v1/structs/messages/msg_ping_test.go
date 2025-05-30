@@ -1,9 +1,10 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 )
 
 func TestNewPing(t *testing.T) {
@@ -112,14 +113,13 @@ func TestPing_SetOpId(t *testing.T) {
 				OpId:    tt.fields.OpId,
 			}
 			m.SetOpId(tt.args.opId)
-			
+
 			if m.OpId != tt.args.opId {
 				t.Errorf("Ping.SetOpId() = %v, want %v", m.OpId, tt.args.opId)
 			}
 		})
 	}
 }
-
 
 func TestNewPingRsp(t *testing.T) {
 	type args struct {
@@ -276,4 +276,3 @@ func TestPingCmp_GetCommand(t *testing.T) {
 		})
 	}
 }
-

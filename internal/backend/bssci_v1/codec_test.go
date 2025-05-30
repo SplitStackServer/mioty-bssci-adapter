@@ -3,10 +3,11 @@ package bssci_v1
 import (
 	"bytes"
 	"encoding/hex"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 
 	"github.com/tinylib/msgp/msgp"
 )

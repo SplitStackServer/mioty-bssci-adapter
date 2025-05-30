@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -209,7 +210,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *bs.ProtoEndnodeMessage
+		want   *bs.BasestationUplink
 	}{
 		{
 			name: "dlDataRes_Sent",
@@ -225,12 +226,12 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			args: args{
 				bsEui: common.EUI64{2},
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0200000000000000",
-				EndnodeEui: "0100000000000000",
-				V1: &bs.ProtoEndnodeMessage_DlRes{
-					DlRes: &bs.EndnodeDownlinkResult{
+			want: &bs.BasestationUplink{
+				BsEui: "0200000000000000",
+				Message: &bs.BasestationUplink_DlRes{
+					DlRes: &bs.BasestationDownlinkResult{
 						DlQueId:     20,
+						EpEui:       "0100000000000000",
 						Result:      bs.DownlinkResultEnum_SENT,
 						EpPacketCnt: testPacketCnt,
 						TxTime:      &testTxTimePb,
@@ -250,12 +251,12 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			args: args{
 				bsEui: common.EUI64{2},
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0200000000000000",
-				EndnodeEui: "0100000000000000",
-				V1: &bs.ProtoEndnodeMessage_DlRes{
-					DlRes: &bs.EndnodeDownlinkResult{
+			want: &bs.BasestationUplink{
+				BsEui: "0200000000000000",
+				Message: &bs.BasestationUplink_DlRes{
+					DlRes: &bs.BasestationDownlinkResult{
 						DlQueId: 20,
+						EpEui:   "0100000000000000",
 						Result:  bs.DownlinkResultEnum_EXPIRED,
 					},
 				},
@@ -273,11 +274,11 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			args: args{
 				bsEui: common.EUI64{2},
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0200000000000000",
-				EndnodeEui: "0100000000000000",
-				V1: &bs.ProtoEndnodeMessage_DlRes{
-					DlRes: &bs.EndnodeDownlinkResult{
+			want: &bs.BasestationUplink{
+				BsEui: "0200000000000000",
+				Message: &bs.BasestationUplink_DlRes{
+					DlRes: &bs.BasestationDownlinkResult{
+						EpEui:   "0100000000000000",
 						DlQueId: 20,
 						Result:  bs.DownlinkResultEnum_INVALID,
 					},
@@ -296,7 +297,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 				TxTime:    tt.fields.TxTime,
 				PacketCnt: tt.fields.PacketCnt,
 			}
-			if got := m.IntoProto(tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
+			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DlDataRes.IntoProto() = %v, want %v", got, tt.want)
 			}
 		})

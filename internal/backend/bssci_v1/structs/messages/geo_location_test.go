@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v4/common"
 )
 
 func TestGeoLocation_IntoProto(t *testing.T) {
@@ -16,7 +16,7 @@ func TestGeoLocation_IntoProto(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   *bs.GeoLocation
+		want   *common.GeoLocation
 	}{
 		{
 			name: "geolocation1",
@@ -25,7 +25,7 @@ func TestGeoLocation_IntoProto(t *testing.T) {
 				Lon: 2.0,
 				Alt: 3.0,
 			},
-			want: &bs.GeoLocation{
+			want: &common.GeoLocation{
 				Lat: 1.0,
 				Lon: 2.0,
 				Alt: 3.0,

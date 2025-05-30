@@ -2,9 +2,10 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -106,17 +107,17 @@ func (m *StatusRsp) GetEventType() events.EventType {
 }
 
 // implements BasestationMessage.IntoProto()
-func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *bs.ProtoBasestationMessage {
+func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 
-	var message bs.ProtoBasestationMessage
+	var message bs.BasestationUplink
 
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
 		ts := TimestampNsToProto(int64(m.Time))
 
-		message = bs.ProtoBasestationMessage{
+		message = bs.BasestationUplink{
 			BsEui: bsEuiB,
-			V1: &bs.ProtoBasestationMessage_Status{
+			Message: &bs.BasestationUplink_Status{
 				Status: &bs.BasestationStatus{
 					StatusCode:  m.Code,
 					StatusMsg:   m.Message,

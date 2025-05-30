@@ -1,6 +1,6 @@
 package messages
 
-import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
+import "github.com/SplitStackServer/splitstack/api/go/v4/common"
 
 //go:generate msgp
 //msgp:tuple GeoLocation
@@ -11,14 +11,14 @@ type GeoLocation struct {
 	Alt float32 `json:"alt"`
 }
 
-func (m *GeoLocation) IntoProto() *bs.GeoLocation {
-	var message bs.GeoLocation
+func (m *GeoLocation) IntoProto() *common.GeoLocation {
+	var message common.GeoLocation
 
 	if m != nil {
-		message = bs.GeoLocation{
-			Lat: m.Lat,
-			Lon: m.Lon,
-			Alt: m.Alt,
+		message = common.GeoLocation{
+			Lat: float64(m.Lat),
+			Lon: float64(m.Lon),
+			Alt: float64(m.Alt),
 		}
 	}
 

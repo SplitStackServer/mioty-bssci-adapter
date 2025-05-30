@@ -2,12 +2,11 @@ package backend
 
 import (
 	"fmt"
-	// "github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
-	"mioty-bssci-adapter/internal/backend/bssci_v1"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
-	"mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/pkg/errors"
@@ -50,14 +49,14 @@ type Backend interface {
 	SetSubscribeEventHandler(func(events.Subscribe))
 
 	// Set handler messages from basestations
-	SetBasestationMessageHandler(func(common.EUI64, events.EventType, *bs.ProtoBasestationMessage))
+	SetBasestationMessageHandler(func(common.EUI64, events.EventType, *bs.BasestationUplink))
 
 	// Set handler for messages from endnodes
-	SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *bs.ProtoEndnodeMessage))
+	SetEndnodeMessageHandler(func(common.EUI64, events.EventType, *bs.EndnodeUplink))
 
 	// Handler for server command messages
-	HandleServerCommand(*bs.ProtoCommand) error
+	HandleServerCommand(*bs.ServerCommand) error
 
 	// Handler for server response messages
-	HandleServerResponse(*bs.ProtoResponse) error
+	HandleServerResponse(*bs.ServerResponse) error
 }

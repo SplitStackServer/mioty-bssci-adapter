@@ -1,11 +1,11 @@
 package forwarder
 
 import (
-	"mioty-bssci-adapter/internal/backend"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
-	"mioty-bssci-adapter/internal/config"
-	"mioty-bssci-adapter/internal/integration"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/integration"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/pkg/errors"
@@ -45,16 +45,16 @@ func gatewaySubscribeEventHandler(pl events.Subscribe) {
 	}(pl)
 }
 
-func basestationMessageHandler(eui common.EUI64, event events.EventType, pb *bs.ProtoBasestationMessage) {
-	go func(eui common.EUI64, event events.EventType, pb *bs.ProtoBasestationMessage) {
+func basestationMessageHandler(eui common.EUI64, event events.EventType, pb *bs.BasestationUplink) {
+	go func(eui common.EUI64, event events.EventType, pb *bs.BasestationUplink) {
 		if err := integration.GetIntegration().PublishBasestationEvent(eui, string(event), pb); err != nil {
 			log.Error().Err(err).Str("bs_eui", eui.String()).Str("event", string(event)).Msg("publish basestation event error")
 		}
 	}(eui, event, pb)
 }
 
-func endnodeMessageHandler(eui common.EUI64, event events.EventType, pb *bs.ProtoEndnodeMessage) {
-	go func(eui common.EUI64, event events.EventType, pb *bs.ProtoEndnodeMessage) {
+func endnodeMessageHandler(eui common.EUI64, event events.EventType, pb *bs.EndnodeUplink) {
+	go func(eui common.EUI64, event events.EventType, pb *bs.EndnodeUplink) {
 
 		if err := integration.GetIntegration().PublishEndnodeEvent(eui, string(event), pb); err != nil {
 			log.Error().Err(err).Str("bs_eui", eui.String()).Str("event", string(event)).Msg("publish endnode event error")
@@ -62,16 +62,16 @@ func endnodeMessageHandler(eui common.EUI64, event events.EventType, pb *bs.Prot
 	}(eui, event, pb)
 }
 
-func serverCommandHandler(pb *bs.ProtoCommand) {
-	go func(pb *bs.ProtoCommand) {
+func serverCommandHandler(pb *bs.ServerCommand) {
+	go func(pb *bs.ServerCommand) {
 		if err := backend.GetBackend().HandleServerCommand(pb); err != nil {
 			log.Error().Err(err).Msg("failed to handle server command")
 		}
 	}(pb)
 }
 
-func serverResponseHandler(pb *bs.ProtoResponse) {
-	go func(pb *bs.ProtoResponse) {
+func serverResponseHandler(pb *bs.ServerResponse) {
+	go func(pb *bs.ServerResponse) {
 		if err := backend.GetBackend().HandleServerResponse(pb); err != nil {
 			log.Error().Err(err).Msg("failed to handle server response")
 		}

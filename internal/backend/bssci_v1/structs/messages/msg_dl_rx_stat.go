@@ -1,9 +1,9 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -61,29 +61,32 @@ func (m *DlRxStat) GetCommand() structs.Command {
 	return structs.MsgDlRxStat
 }
 
-// implements EndnodeMessage.GetEventType()
+// implements BasestationMessage.GetEventType()
 func (m *DlRxStat) GetEventType() events.EventType {
 	return events.EventTypeEpRx
 }
 
-// implements EndnodeMessage.IntoProto()
-func (m *DlRxStat) IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage {
-	bsEuiB := bsEui.String()
-	epEuiB := m.EpEui.String()
+// implements BasestationMessage.IntoProto()
+func (m *DlRxStat) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
+	var message bs.BasestationUplink
+	if m != nil {
+		bsEuiB := bsEui.String()
+		epEuiB := m.EpEui.String()
 
-	message := bs.ProtoEndnodeMessage{
-		BsEui:      bsEuiB,
-		EndnodeEui: epEuiB,
-
-		V1: &bs.ProtoEndnodeMessage_DlRxStat{
-			DlRxStat: &bs.EndnodeDownlinkRxStatus{
-				RxTime:    TimestampNsToProto(int64(m.RxTime)),
-				PacketCnt: m.PacketCnt,
-				DlRxRssi:  m.DlRxRssi,
-				DlRxSnr:   m.DlRxSnr,
+		message = bs.BasestationUplink{
+			BsEui: bsEuiB,
+			Message: &bs.BasestationUplink_DlRxStat{
+				DlRxStat: &bs.BasestationDownlinkRxStatus{
+					EpEui:     epEuiB,
+					RxTime:    TimestampNsToProto(int64(m.RxTime)),
+					PacketCnt: m.PacketCnt,
+					DlRxRssi:  m.DlRxRssi,
+					DlRxSnr:   m.DlRxSnr,
+				},
 			},
-		},
+		}
 	}
+
 	return &message
 }
 

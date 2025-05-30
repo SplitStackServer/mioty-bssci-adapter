@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/google/uuid"
@@ -260,7 +261,7 @@ func TestCon_IntoProto(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   *bs.ProtoBasestationMessage
+		want   *bs.BasestationUplink
 	}{
 		{
 			name: "con1",
@@ -276,9 +277,9 @@ func TestCon_IntoProto(t *testing.T) {
 				SnBsUuid:  testBsSessionUuid,
 				Bidi:      true,
 			},
-			want: &bs.ProtoBasestationMessage{
+			want: &bs.BasestationUplink{
 				BsEui: testBsEui.String(),
-				V1: &bs.ProtoBasestationMessage_Con{
+				Message: &bs.BasestationUplink_Con{
 					Con: &bs.BasestationConnection{
 						Ts:        &testTs,
 						Version:   testVersion,
@@ -306,9 +307,9 @@ func TestCon_IntoProto(t *testing.T) {
 				Bidi:        true,
 				GeoLocation: &GeoLocation{1, 2, 3},
 			},
-			want: &bs.ProtoBasestationMessage{
+			want: &bs.BasestationUplink{
 				BsEui: testBsEui.String(),
-				V1: &bs.ProtoBasestationMessage_Con{
+				Message: &bs.BasestationUplink_Con{
 					Con: &bs.BasestationConnection{
 						Ts:        &testTs,
 						Version:   testVersion,

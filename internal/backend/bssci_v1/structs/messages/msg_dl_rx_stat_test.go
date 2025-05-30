@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -213,7 +214,7 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *bs.ProtoEndnodeMessage
+		want   *bs.BasestationUplink
 	}{
 		{
 			name: "dlRxStat",
@@ -227,11 +228,11 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 				DlRxRssi:  -100.5,
 			},
 			args: args{bsEui: common.EUI64{2}},
-			want: &bs.ProtoEndnodeMessage{
+			want: &bs.BasestationUplink{
 				BsEui:      "0200000000000000",
-				EndnodeEui: "0100000000000000",
-				V1: &bs.ProtoEndnodeMessage_DlRxStat{
-					DlRxStat: &bs.EndnodeDownlinkRxStatus{
+				Message: &bs.BasestationUplink_DlRxStat{
+					DlRxStat: &bs.BasestationDownlinkRxStatus{
+						EpEui:     "0100000000000000",
 						RxTime:    &testRxTimePb,
 						PacketCnt: 10,
 						DlRxRssi:  -100.5,
@@ -252,7 +253,7 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 				DlRxSnr:   tt.fields.DlRxSnr,
 				DlRxRssi:  tt.fields.DlRxRssi,
 			}
-			if got := m.IntoProto(tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
+			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DlRxStat.IntoProto() = %v, want %v", got, tt.want)
 			}
 		})

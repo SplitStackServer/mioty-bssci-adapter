@@ -1,11 +1,12 @@
 package bssci_v1
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs/messages"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"

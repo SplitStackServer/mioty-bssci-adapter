@@ -2,7 +2,8 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -17,10 +18,10 @@ type VmDeactivate struct {
 	// ID of the operation
 	OpId int64 `msg:"opId" json:"opId"`
 	// MAC-Type of the intended Variable MAC
-	MacType int64 `msg:"macType" json:"macType"`
+	MacType uint32 `msg:"macType" json:"macType"`
 }
 
-func NewVmDeactivate(opId int64, macType int64) VmDeactivate {
+func NewVmDeactivate(opId int64, macType uint32) VmDeactivate {
 	return VmDeactivate{Command: structs.MsgVmDeactivate, OpId: opId, MacType: macType}
 }
 

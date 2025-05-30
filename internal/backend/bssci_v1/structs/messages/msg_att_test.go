@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -327,7 +328,7 @@ func TestAtt_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *bs.ProtoEndnodeMessage
+		want   *bs.EndnodeUplink
 	}{
 		{
 			name: "att1",
@@ -347,27 +348,27 @@ func TestAtt_IntoProto(t *testing.T) {
 				Sign:       [4]byte{3, 2, 1, 0},
 				Nonce:      [4]byte{7, 6, 5, 4},
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0000000000000000",
-				EndnodeEui: "0001020304050607",
-				V1: &bs.ProtoEndnodeMessage_Att{
+			want: &bs.EndnodeUplink{
+				BsEui: "0000000000000000",
+				Message: &bs.EndnodeUplink_Att{
 					Att: &bs.EndnodeAttMessage{
 						OpId:          10,
+						EpEui:         "0001020304050607",
 						Sign:          0x00010203,
 						Nonce:         0x04050607,
 						AttachmentCnt: 2,
 						ShAddr:        &testShAddr32,
-						Meta: &bs.EndnodeUplinkMetadata{
-							RxTime:        &testRxTimePb,
-							RxDuration:    &testRxDurationPb,
-							PacketCnt:     0,
-							Profile:       new(string),
-							Rssi:          -100.0,
-							Snr:           3.0,
-							EqSnr:         nil,
-							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
-						},
 					},
+				},
+				Meta: &bs.EndnodeUplinkMetadata{
+					RxTime:        &testRxTimePb,
+					RxDuration:    &testRxDurationPb,
+					PacketCnt:     0,
+					Profile:       new(string),
+					Rssi:          -100.0,
+					Snr:           3.0,
+					EqSnr:         nil,
+					SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 				},
 			},
 		},
@@ -388,27 +389,28 @@ func TestAtt_IntoProto(t *testing.T) {
 				Sign:       [4]byte{3, 2, 1, 0},
 				Nonce:      [4]byte{7, 6, 5, 4},
 			},
-			want: &bs.ProtoEndnodeMessage{
-				BsEui:      "0000000000000000",
-				EndnodeEui: "0001020304050607",
-				V1: &bs.ProtoEndnodeMessage_Att{
+			want: &bs.EndnodeUplink{
+				BsEui: "0000000000000000",
+
+				Message: &bs.EndnodeUplink_Att{
 					Att: &bs.EndnodeAttMessage{
 						OpId:          10,
+						EpEui:         "0001020304050607",
 						Sign:          0x00010203,
 						Nonce:         0x04050607,
 						AttachmentCnt: 2,
 						ShAddr:        nil,
-						Meta: &bs.EndnodeUplinkMetadata{
-							RxTime:        &testRxTimePb,
-							RxDuration:    &testRxDurationPb,
-							PacketCnt:     0,
-							Profile:       new(string),
-							Rssi:          -100.0,
-							Snr:           3.0,
-							EqSnr:         nil,
-							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
-						},
 					},
+				},
+				Meta: &bs.EndnodeUplinkMetadata{
+					RxTime:        &testRxTimePb,
+					RxDuration:    &testRxDurationPb,
+					PacketCnt:     0,
+					Profile:       new(string),
+					Rssi:          -100.0,
+					Snr:           3.0,
+					EqSnr:         nil,
+					SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 				},
 			},
 		},
@@ -435,7 +437,7 @@ func TestAtt_IntoProto(t *testing.T) {
 				WideCarrOff: tt.fields.WideCarrOff,
 				LongBlkDist: tt.fields.LongBlkDist,
 			}
-			if got := m.IntoProto(tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
+			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Att.IntoProto() = %v, want %v", got, tt.want)
 			}
 		})

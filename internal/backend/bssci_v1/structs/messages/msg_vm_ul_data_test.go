@@ -1,11 +1,12 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -323,7 +324,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *bs.ProtoEndnodeMessage
+		want   *bs.EndnodeUplink
 	}{
 		{
 			name: "vmUlDataRsp",
@@ -345,28 +346,29 @@ func TestVmUlData_IntoProto(t *testing.T) {
 				CRC:        [2]byte{},
 			},
 			args: args{bsEui: common.EUI64{1}},
-			want: &bs.ProtoEndnodeMessage{
+			want: &bs.EndnodeUplink{
 				BsEui: "0100000000000000",
-				V1: &bs.ProtoEndnodeMessage_VmUlData{
+				Message: &bs.EndnodeUplink_VmUlData{
 					VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 						Data:    []byte{},
 						MacType: 0,
-						Meta: &bs.EndnodeUplinkMetadata{
-							RxTime:        &testTimePb,
-							RxDuration:    nil,
-							PacketCnt:     0,
-							Profile:       nil,
-							Rssi:          0,
-							Snr:           0,
-							EqSnr:         nil,
-							SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
-						},
+
 						FreqOff:   0,
 						CarrSpace: 0,
 						PattGrp:   0,
 						PattNum:   0,
 						Crc:       0,
 					},
+				},
+				Meta: &bs.EndnodeUplinkMetadata{
+					RxTime:        &testTimePb,
+					RxDuration:    nil,
+					PacketCnt:     0,
+					Profile:       nil,
+					Rssi:          0,
+					Snr:           0,
+					EqSnr:         nil,
+					SubpacketInfo: []*bs.EndnodeUplinkSubpacket{},
 				},
 			},
 		},
@@ -390,7 +392,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 				PattNum:    tt.fields.PattNum,
 				CRC:        tt.fields.CRC,
 			}
-			if got := m.IntoProto(tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
+			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("VmUlData.IntoProto() = %v, want %v", got, tt.want)
 			}
 		})

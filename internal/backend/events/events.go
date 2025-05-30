@@ -1,17 +1,17 @@
 package events
 
-import "mioty-bssci-adapter/internal/common"
+import "github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 type EventType string
 
 const (
-	EventTypeBsStatus EventType = "status"
-	EventTypeBsCon EventType = "con"
+	EventTypeBsStatus   EventType = "status"
+	EventTypeBsCon      EventType = "con"
 	EventTypeBsVmStatus EventType = "vm"
-	EventTypeEpOtaa EventType = "otaa"
-	EventTypeEpDl EventType = "dl"
-	EventTypeEpUl EventType = "ul"
-	EventTypeEpRx EventType = "rx"
+	EventTypeEpOtaa     EventType = "otaa"
+	EventTypeEpDl       EventType = "dl"
+	EventTypeEpUl       EventType = "ul"
+	EventTypeEpRx       EventType = "rx"
 )
 
 // Subscribe event

@@ -1,9 +1,9 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/tinylib/msgp/msgp"
@@ -25,13 +25,13 @@ type Message interface {
 type EndnodeMessage interface {
 	Message
 	GetEventType() events.EventType
-	IntoProto(bsEui common.EUI64) *bs.ProtoEndnodeMessage
+	IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink
 }
 
 type BasestationMessage interface {
 	Message
 	GetEventType() events.EventType
-	IntoProto(bsEui *common.EUI64) *bs.ProtoBasestationMessage
+	IntoProto(bsEui *common.EUI64) *bs.BasestationUplink
 }
 
 type ServerMessage interface {

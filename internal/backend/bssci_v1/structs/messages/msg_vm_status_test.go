@@ -1,10 +1,11 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/common"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -289,7 +290,7 @@ func TestVmStatusRsp_IntoProto(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   *bs.ProtoBasestationMessage
+		want   *bs.BasestationUplink
 	}{
 		{
 			name: "vmStatusRsp",
@@ -299,11 +300,11 @@ func TestVmStatusRsp_IntoProto(t *testing.T) {
 				[]int64{10, 20},
 			},
 			args: args{bsEui: &common.EUI64{1}},
-			want: &bs.ProtoBasestationMessage{
+			want: &bs.BasestationUplink{
 				BsEui: "0100000000000000",
-				V1: &bs.ProtoBasestationMessage_VmStatus{
+				Message: &bs.BasestationUplink_VmStatus{
 					VmStatus: &bs.BasestationVariableMacStatus{
-						MacTypes: []int64{10, 20},
+						MacTypes: []uint32{10, 20},
 					},
 				},
 			},

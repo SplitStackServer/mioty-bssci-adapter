@@ -1,9 +1,10 @@
 package messages
 
 import (
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"reflect"
 	"testing"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -11,7 +12,7 @@ import (
 func TestNewVmActivate(t *testing.T) {
 	type args struct {
 		opId    int64
-		macType int64
+		macType uint32
 	}
 	tests := []struct {
 		name string
@@ -90,7 +91,7 @@ func TestVmActivate_GetOpId(t *testing.T) {
 	type fields struct {
 		Command structs.Command
 		OpId    int64
-		MacType int64
+		MacType uint32
 	}
 	tests := []struct {
 		name   string
@@ -125,7 +126,7 @@ func TestVmActivate_GetCommand(t *testing.T) {
 	type fields struct {
 		Command structs.Command
 		OpId    int64
-		MacType int64
+		MacType uint32
 	}
 	tests := []struct {
 		name   string
@@ -160,7 +161,7 @@ func TestVmActivate_SetOpId(t *testing.T) {
 	type fields struct {
 		Command structs.Command
 		OpId    int64
-		MacType int64
+		MacType uint32
 	}
 	type args struct {
 		opId int64

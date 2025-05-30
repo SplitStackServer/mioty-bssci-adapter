@@ -2,9 +2,10 @@ package messages
 
 import (
 	"errors"
-	"mioty-bssci-adapter/internal/backend/bssci_v1/structs"
-	"mioty-bssci-adapter/internal/backend/events"
-	"mioty-bssci-adapter/internal/common"
+
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
+	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 )
@@ -74,18 +75,24 @@ func (m *VmStatusRsp) GetEventType() events.EventType {
 }
 
 // implements BasestationMessage.IntoProto()
-func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *bs.ProtoBasestationMessage {
+func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 
-	var message bs.ProtoBasestationMessage
+	var message bs.BasestationUplink
 
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
 
-		message = bs.ProtoBasestationMessage{
+		// Convert []int64 to []uint32
+		macTypesUint32 := make([]uint32, len(m.MacTypes))
+		for i, v := range m.MacTypes {
+			macTypesUint32[i] = uint32(v)
+		}
+
+		message = bs.BasestationUplink{
 			BsEui: bsEuiB,
-			V1: &bs.ProtoBasestationMessage_VmStatus{
+			Message: &bs.BasestationUplink_VmStatus{
 				VmStatus: &bs.BasestationVariableMacStatus{
-					MacTypes: m.MacTypes,
+					MacTypes: macTypesUint32,
 				},
 			},
 		}
