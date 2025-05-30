@@ -1,8 +1,3 @@
-
-**WORK IN PROGRESS**
-
-> DISCLAIMER: This project is not endorsed by or associated with any company or the [mioty<sup>&reg;</sup> alliance](https://mioty-alliance.com/). 
-
 # mioty<sup>&reg;</sup> BSSCI Adapter
 
 The mioty<sup>&reg;</sup> BSSCI Adapter is a service which converts mioty<sup>&reg;</sup> BSSCI protocols into a simplified format (JSON and Protobuf). mioty<sup>&reg;</sup> is a LPWAN technology that implements the TS-UNB protocol as specified in [ETSI TS 103 357-2 V2.1.1](https://www.etsi.org/deliver/etsi_ts/103300_103399/10335702/02.01.01_60/ts_10335702v020101p.pdf
