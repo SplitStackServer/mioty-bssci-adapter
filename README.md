@@ -10,7 +10,7 @@ The mioty<sup>&reg;</sup> BSSCI Adapter is a service which converts mioty<sup>&r
 
 It is inspired by the [ChirpStack](https://github.com/chirpstack/chirpstack) open-source LoRaWAN<sup>&reg;</sup> Network Server project and follows the structure of the [ChirpStack Gateway Bridge](https://github.com/chirpstack/chirpstack-gateway-bridge). Where possible this implementation reuses existing code and concepts.
 
-This component is part of the [SplitStackServer](https://github.com/SplitStackServer/splitstack), a fork of ChirpStack, to provide an open-source mioty<sup>&reg;</sup> Network Server.
+This component is part of the [SplitStackServer](https://github.com/SplitStackServer) to provide an open-source mioty<sup>&reg;</sup> Network Server.
 
 ## Backends
 
