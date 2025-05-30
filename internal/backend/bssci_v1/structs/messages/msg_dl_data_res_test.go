@@ -162,7 +162,7 @@ func TestDlDataRes_GetEventType(t *testing.T) {
 				OpId:    10,
 				EpEui:   common.EUI64{1, 2, 3, 4, 5, 6, 7, 8},
 			},
-			want: events.EventTypeEpDl,
+			want: events.EventTypeBsDl,
 		},
 	}
 	for _, tt := range tests {

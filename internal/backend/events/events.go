@@ -8,8 +8,8 @@ const (
 	EventTypeBsStatus   EventType = "status"
 	EventTypeBsCon      EventType = "con"
 	EventTypeBsVmStatus EventType = "vm"
+	EventTypeBsDl       EventType = "dl"
 	EventTypeEpOtaa     EventType = "otaa"
-	EventTypeEpDl       EventType = "dl"
 	EventTypeEpUl       EventType = "ul"
 	EventTypeEpRx       EventType = "rx"
 )

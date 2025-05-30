@@ -91,7 +91,7 @@ func (m *DlDataRes) GetCommand() structs.Command {
 
 // implements BasestationMessage.GetEventType()
 func (m *DlDataRes) GetEventType() events.EventType {
-	return events.EventTypeEpDl
+	return events.EventTypeBsDl
 }
 
 // implements BasestationMessage.IntoProto()
@@ -115,7 +115,7 @@ func (m *DlDataRes) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 	}
 
 	message := bs.BasestationUplink{
-		BsEui:      bsEuiB,
+		BsEui: bsEuiB,
 		Message: &bs.BasestationUplink_DlRes{
 			EpEui: epEuiB,
 			DlRes: &result,
