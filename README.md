@@ -31,10 +31,10 @@ The following integrations are provided:
             * events: 
                 * endpoint events: "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
                     * {{ .EventSource }} is "ep"
-                    * {{ .EventType }} is one of "otaa", "dl, "ul", "rx"
+                    * {{ .EventType }} is one of "otaa", "ul"
                 * basestation events: "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
                     * {{ .EventSource }} is "bs"
-                    * {{ .EventType }} is one of "status", "con, "vm"
+                    * {{ .EventType }} is one of "status", "con, "vm", "dl", "rx"
             * server commands: "bssci/{{ .BsEui }}/command/#"
             * server responses: "bssci/{{ .BsEui }}/response/#"
 
