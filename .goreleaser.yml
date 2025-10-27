@@ -58,7 +58,7 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - "github.com/SplitStackServer/mioty-bssci-adapter/mioty-bssci-adapter:latest"
+      - "github.com/splitstackserver/mioty-bssci-adapter/mioty-bssci-adapter:latest"
     dockerfile: Dockerfile-releaser
     ids:
       - bin
