@@ -142,8 +142,6 @@ func (m *Att) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 		BsEui: bsEuiB,
 		Message: &bs.EndnodeUplink_Att{
 			Att: &bs.EndnodeAttMessage{
-				OpId: m.OpId,
-
 				EpEui:         epEuiB,
 				AttachmentCnt: m.AttachCnt,
 				Nonce:         nonce,
@@ -183,7 +181,7 @@ func NewAttRsp(opId int64, nwkSessionKey [16]byte, shAddr *uint16) AttRsp {
 	}
 }
 
-func NewAttRspFromProto(opId int64, pb *bs.EndnodeAttachResponse) (*AttRsp, error) {
+func NewAttRspFromProto(opId int64, pb *bs.EndnodeAttachSuccessResponse) (*AttRsp, error) {
 	if pb != nil {
 		var shAddr *uint16
 		if shAddrPb := pb.ShAddr; shAddrPb != nil {
@@ -198,7 +196,7 @@ func NewAttRspFromProto(opId int64, pb *bs.EndnodeAttachResponse) (*AttRsp, erro
 		msg := NewAttRsp(opId, [16]byte(pb.NwkSessionKey), shAddr)
 		return &msg, nil
 	}
-	return nil, errors.New("invalid EndnodeAttachResponse command")
+	return nil, errors.New("invalid EndnodeAttachSuccessResponse command")
 }
 
 func (m *AttRsp) GetOpId() int64 {

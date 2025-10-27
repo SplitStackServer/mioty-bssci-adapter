@@ -109,8 +109,6 @@ func (m *Det) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 		BsEui:      bsEuiB,
 		Message: &bs.EndnodeUplink_Det{
 			Det: &bs.EndnodeDetMessage{
-
-				OpId: m.OpId,
 				EpEui: epEuiB,
 				Sign: sign,
 			},
@@ -139,7 +137,7 @@ func NewDetRsp(opId int64, sign [4]byte) DetRsp {
 	}
 }
 
-func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachResponse) (*DetRsp, error) {
+func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachSuccessResponse) (*DetRsp, error) {
 	if pb != nil {
 		sign := pb.Sign
 		signB := [4]byte{
@@ -152,7 +150,7 @@ func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachResponse) (*DetRsp, erro
 		msg := NewDetRsp(opId, signB)
 		return &msg, nil
 	}
-	return nil, errors.New("invalid EndnodeDetachResponse command")
+	return nil, errors.New("invalid EndnodeDetachSuccessResponse command")
 }
 
 func (m *DetRsp) GetOpId() int64 {

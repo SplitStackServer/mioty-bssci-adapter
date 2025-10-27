@@ -100,6 +100,7 @@ func (m *DlDataRes) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 	epEuiB := m.EpEui.String()
 
 	result := bs.BasestationDownlinkResult{
+		EpEui:   epEuiB,
 		DlQueId: m.QueId,
 	}
 
@@ -116,8 +117,8 @@ func (m *DlDataRes) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 
 	message := bs.BasestationUplink{
 		BsEui: bsEuiB,
+		OpId:  m.OpId,
 		Message: &bs.BasestationUplink_DlRes{
-			EpEui: epEuiB,
 			DlRes: &result,
 		},
 	}

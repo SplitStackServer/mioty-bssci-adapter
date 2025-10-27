@@ -482,7 +482,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 			rsp: &bs.ServerResponse{
 				BsEui: ts.bs_eui.String(),
 				Response: &bs.ServerResponse_AttRsp{
-					AttRsp: &bs.EndnodeAttachResponse{
+					AttRsp: &bs.EndnodeAttachSuccessResponse{
 						EndnodeEui:    "01020304050607",
 						NwkSessionKey: []byte{1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4},
 					},
@@ -505,7 +505,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 			rsp: &bs.ServerResponse{
 				BsEui: ts.bs_eui.String(),
 				Response: &bs.ServerResponse_DetRsp{
-					DetRsp: &bs.EndnodeDetachResponse{
+					DetRsp: &bs.EndnodeDetachSuccessResponse{
 						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
@@ -538,7 +538,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 			rsp: &bs.ServerResponse{
 				BsEui: common.EUI64{}.String(),
 				Response: &bs.ServerResponse_DetRsp{
-					DetRsp: &bs.EndnodeDetachResponse{
+					DetRsp: &bs.EndnodeDetachSuccessResponse{
 						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},

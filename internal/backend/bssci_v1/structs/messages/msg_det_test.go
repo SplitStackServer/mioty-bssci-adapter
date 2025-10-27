@@ -314,15 +314,15 @@ func TestDet_IntoProto(t *testing.T) {
 			},
 			args: args{bsEui: common.EUI64{1}},
 			want: &bs.EndnodeUplink{
-				BsEui:      "0100000000000000",
+				BsEui: "0100000000000000",
 				Message: &bs.EndnodeUplink_Det{
 					Det: &bs.EndnodeDetMessage{
-						EpEui: 	"0001020304050607",
-						OpId: 10,
-						Sign: 0x00010203,
+						EpEui: "0001020304050607",
+						Sign:  0x00010203,
 					},
 				},
 				Meta: &bs.EndnodeUplinkMetadata{
+					OpId:          10,
 					RxTime:        &testRxTimePb,
 					RxDuration:    &testRxDurationPb,
 					PacketCnt:     2,
@@ -393,7 +393,7 @@ func TestNewDetRsp(t *testing.T) {
 func TestNewDetRspFromProto(t *testing.T) {
 	type args struct {
 		opId int64
-		pb   *bs.EndnodeDetachResponse
+		pb   *bs.EndnodeDetachSuccessResponse
 	}
 	tests := []struct {
 		name    string
@@ -405,7 +405,7 @@ func TestNewDetRspFromProto(t *testing.T) {
 			name: "detRsp",
 			args: args{
 				opId: 10,
-				pb: &bs.EndnodeDetachResponse{
+				pb: &bs.EndnodeDetachSuccessResponse{
 					Sign: 0x00010203,
 				},
 			},

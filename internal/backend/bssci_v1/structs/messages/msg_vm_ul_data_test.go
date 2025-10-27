@@ -15,7 +15,7 @@ import (
 func TestNewVmUlData(t *testing.T) {
 	type args struct {
 		opId       int64
-		macType    int64
+		macType    uint8
 		userData   []byte
 		trxTime    uint64
 		freqOff    float64
@@ -82,7 +82,7 @@ func TestVmUlData_GetOpId(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -153,7 +153,7 @@ func TestVmUlData_GetCommand(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -224,7 +224,7 @@ func TestVmUlData_GetEventType(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -303,7 +303,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
