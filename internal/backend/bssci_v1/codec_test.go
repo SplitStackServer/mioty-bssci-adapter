@@ -93,7 +93,7 @@ func TestReadBssciMessage(t *testing.T) {
 
 func TestWriteBssciMessage(t *testing.T) {
 	type args struct {
-		msg messages.Message
+		msg messages.MessageMsgp
 	}
 	tests := []struct {
 		name    string
@@ -130,7 +130,7 @@ func TestWriteBssciMessage(t *testing.T) {
 
 func TestMarshalBssciMessage(t *testing.T) {
 	type args struct {
-		msg messages.Message
+		msg messages.MessageMsgp
 	}
 	tests := []struct {
 		name    string

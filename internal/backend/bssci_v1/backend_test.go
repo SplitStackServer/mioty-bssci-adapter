@@ -852,7 +852,7 @@ func (ts *TestBackendSuite) TestBackend_Start() {
 
 	tests := []struct {
 		name string
-		msg  messages.Message
+		msg  messages.MessageMsgp
 	}{
 		{
 			name: "valid",

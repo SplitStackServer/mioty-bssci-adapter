@@ -17,6 +17,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/tinylib/msgp v1.4.0
 	google.golang.org/protobuf v1.36.10
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
 
 require (

@@ -58,7 +58,7 @@ func ReadBssciMessage(r io.Reader) (cmd structs.CommandHeader, raw msgp.Raw, err
 	return
 }
 
-func WriteBssciMessage(w io.Writer, msg messages.Message) (err error) {
+func WriteBssciMessage(w io.Writer, msg messages.MessageMsgp) (err error) {
 	// marshal message
 	buf, err := MarshalBssciMessage(msg)
 	if err != nil {
@@ -77,7 +77,7 @@ func WriteBssciMessage(w io.Writer, msg messages.Message) (err error) {
 }
 
 // convert msg to message pack and attach bssci header
-func MarshalBssciMessage(msg messages.Message) ([]byte, error) {
+func MarshalBssciMessage(msg messages.MessageMsgp) ([]byte, error) {
 	msgBuf, err := msg.MarshalMsg(nil)
 	if err != nil {
 		err = errors.Wrap(err, "message marshal error")

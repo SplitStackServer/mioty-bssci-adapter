@@ -75,6 +75,8 @@ const (
 	MsgVmUlData        Command = "vm.ulData"
 	MsgVmUlDataRsp     Command = "vm.ulDataRsp"
 	MsgVmUlDataCmp     Command = "vm.ulDataCmp"
+	// Acknowledgement for propagate messages
+	MsgPrpAck Command = "prpAck"
 )
 
 // A message send by the server
@@ -143,5 +145,4 @@ const (
 	ClientMsgVmStatusRsp     Command = MsgVmStatusRsp
 	ClientMsgVmUlData        Command = MsgVmUlData
 	ClientMsgVmUlDataCmp     Command = MsgVmUlDataCmp
-
 )

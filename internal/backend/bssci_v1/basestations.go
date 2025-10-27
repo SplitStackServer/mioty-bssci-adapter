@@ -6,6 +6,7 @@ import (
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
+
 	"github.com/pkg/errors"
 )
 
@@ -13,6 +14,14 @@ type basestations struct {
 	sync.RWMutex
 	basestations          map[common.EUI64]*connection
 	subscribeEventHandler func(events.Subscribe)
+
+
+}
+
+func newBasestations() basestations { 
+	return basestations{
+		basestations:  make(map[common.EUI64]*connection),
+	}
 }
 
 func (b *basestations) get(eui common.EUI64) (*connection, error) {

@@ -38,7 +38,7 @@ func newConnection(conn net.Conn, snBsUuid structs.SessionUuid) connection {
 }
 
 // Send the message to this connection
-func (conn *connection) Write(msg messages.Message, timeout time.Duration) (err error) {
+func (conn *connection) Write(msg messages.MessageMsgp, timeout time.Duration) (err error) {
 	conn.Lock()
 	defer conn.Unlock()
 
