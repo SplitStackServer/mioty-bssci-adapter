@@ -224,9 +224,41 @@ func (b *Backend) HandleServerCommand(pb *bs.ServerCommand) error {
 
 		logger.Debug().Str("proto", "ServerCommand_VmStatus").Msg("requesting variable mac status")
 
-	default:
-		return errors.New("empty protobuf command")
+	case *bs.ServerCommand_VmBatch:
+		command := pb.GetVmBatch()
+
+		if command == nil {
+			return errors.New("empty vm batch command")
+		}
+
+		toActivate := command.GetActivateVms()
+		toDeactivate := command.GetDeactivateVms()
+
+		logger.Debug().
+			Str("proto", "ServerCommand_VmBatch").
+			Int32("activate_count", int32(len(toActivate))).
+			Int32("deactivate_count", int32(len(toDeactivate))).
+			Msg("requesting variable mac batch operations")
+
+		for _, vm := range toActivate {
+			msgA := messages.NewVmActivate(0, vm)
+			err = b.sendServerMessageToBasestation(bsEui, &msgA)
+			if err != nil {
+				return err
+			}
+		}
+		for _, vm := range toDeactivate {
+			msgA := messages.NewVmDeactivate(0, vm)
+			err = b.sendServerMessageToBasestation(bsEui, &msgA)
+			if err != nil {
+				return err
+			}
+		}
 	}
+
+	// default:
+	// 	return errors.New("empty protobuf command")
+	// }
 
 	return b.sendServerMessageToBasestation(bsEui, msg)
 }

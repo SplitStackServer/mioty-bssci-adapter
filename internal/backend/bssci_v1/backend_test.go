@@ -438,6 +438,26 @@ func (ts *TestBackendSuite) SetupSuite() {
 			name: "ServerCommand_VmStatus",
 			cmd: &bs.ServerCommand{
 				BsEui: ts.bs_eui.String(),
+				Command: &bs.ServerCommand_VmBatch{
+					VmBatch: &bs.BatchVariableMac{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ServerCommand_VmStatus_Err",
+			cmd: &bs.ServerCommand{
+				BsEui: ts.bs_eui.String(),
+				Command: &bs.ServerCommand_VmBatch{
+					VmBatch: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ServerCommand_VmStatus",
+			cmd: &bs.ServerCommand{
+				BsEui: ts.bs_eui.String(),
 				Command: &bs.ServerCommand_VmStatus{
 					VmStatus: &bs.RequestVariableMacStatus{},
 				},
