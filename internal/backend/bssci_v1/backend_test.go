@@ -438,6 +438,26 @@ func (ts *TestBackendSuite) SetupSuite() {
 			name: "ServerCommand_VmStatus",
 			cmd: &bs.ServerCommand{
 				BsEui: ts.bs_eui.String(),
+				Command: &bs.ServerCommand_VmBatch{
+					VmBatch: &bs.BatchVariableMac{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ServerCommand_VmStatus_Err",
+			cmd: &bs.ServerCommand{
+				BsEui: ts.bs_eui.String(),
+				Command: &bs.ServerCommand_VmBatch{
+					VmBatch: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ServerCommand_VmStatus",
+			cmd: &bs.ServerCommand{
+				BsEui: ts.bs_eui.String(),
 				Command: &bs.ServerCommand_VmStatus{
 					VmStatus: &bs.RequestVariableMacStatus{},
 				},
@@ -482,7 +502,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 			rsp: &bs.ServerResponse{
 				BsEui: ts.bs_eui.String(),
 				Response: &bs.ServerResponse_AttRsp{
-					AttRsp: &bs.EndnodeAttachResponse{
+					AttRsp: &bs.EndnodeAttachSuccessResponse{
 						EndnodeEui:    "01020304050607",
 						NwkSessionKey: []byte{1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4},
 					},
@@ -505,7 +525,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 			rsp: &bs.ServerResponse{
 				BsEui: ts.bs_eui.String(),
 				Response: &bs.ServerResponse_DetRsp{
-					DetRsp: &bs.EndnodeDetachResponse{
+					DetRsp: &bs.EndnodeDetachSuccessResponse{
 						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
@@ -524,6 +544,53 @@ func (ts *TestBackendSuite) SetupSuite() {
 			wantErr: true,
 		},
 		{
+			name: "ServerResponse_DetRspErr",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_DetRspErr{
+					DetRspErr: &bs.EndnodeDetachErrorResponse{
+						EndnodeEui: "01020304050607",
+						Message:    "Error message",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ServerResponse_DetRspErr_Err",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_DetRspErr{
+					DetRspErr: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ServerResponse_AttRspErr",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_AttRspErr{
+					AttRspErr: &bs.EndnodeAttachErrorResponse{
+						EndnodeEui: "01020304050607",
+						Message:    "Error message",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ServerResponse_AttRspErr_Err",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_AttRspErr{
+					AttRspErr: nil,
+				},
+			},
+			wantErr: true,
+		},
+
+		{
 			name:    "Nil",
 			rsp:     nil,
 			wantErr: true,
@@ -538,7 +605,7 @@ func (ts *TestBackendSuite) SetupSuite() {
 			rsp: &bs.ServerResponse{
 				BsEui: common.EUI64{}.String(),
 				Response: &bs.ServerResponse_DetRsp{
-					DetRsp: &bs.EndnodeDetachResponse{
+					DetRsp: &bs.EndnodeDetachSuccessResponse{
 						EndnodeEui: "01020304050607",
 						Sign:       456,
 					},
@@ -785,7 +852,7 @@ func (ts *TestBackendSuite) TestBackend_Start() {
 
 	tests := []struct {
 		name string
-		msg  messages.Message
+		msg  messages.MessageMsgp
 	}{
 		{
 			name: "valid",

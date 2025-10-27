@@ -82,6 +82,9 @@ func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
 
+		now := getNow().UnixNano()
+		ts := TimestampNsToProto(now)
+
 		// Convert []int64 to []uint32
 		macTypesUint32 := make([]uint32, len(m.MacTypes))
 		for i, v := range m.MacTypes {
@@ -89,7 +92,9 @@ func (m *VmStatusRsp) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 		}
 
 		message = bs.BasestationUplink{
+			Ts:    ts,
 			BsEui: bsEuiB,
+			OpId:  m.OpId,
 			Message: &bs.BasestationUplink_VmStatus{
 				VmStatus: &bs.BasestationVariableMacStatus{
 					MacTypes: macTypesUint32,

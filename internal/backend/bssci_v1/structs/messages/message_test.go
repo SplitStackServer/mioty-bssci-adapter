@@ -13,9 +13,9 @@ import (
 
 type TestMessageData struct {
 	name    string
-	msgType Message
+	msgType MessageMsgp
 	raw     []byte
-	msg     Message
+	msg     MessageMsgp
 	wantErr bool
 	json    string
 }

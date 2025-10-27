@@ -9,6 +9,7 @@ const (
 	EventTypeBsCon      EventType = "con"
 	EventTypeBsVmStatus EventType = "vm"
 	EventTypeBsDl       EventType = "dl"
+	EventTypeBsPrpAck   EventType = "prp_ack"
 	EventTypeEpOtaa     EventType = "otaa"
 	EventTypeEpUl       EventType = "ul"
 	EventTypeEpRx       EventType = "rx"

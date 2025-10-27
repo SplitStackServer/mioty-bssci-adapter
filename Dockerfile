@@ -1,4 +1,4 @@
-FROM golang:1.24.3-alpine AS development
+FROM golang:1.25.3-alpine AS development
 
 ENV PROJECT_PATH=/mioty-bssci-adapter
 ENV PATH=$PATH:$PROJECT_PATH/build
@@ -14,7 +14,7 @@ WORKDIR $PROJECT_PATH
 RUN make dev-requirements
 RUN make
 
-FROM alpine:3.21.3 AS production
+FROM alpine:3.22.2 AS production
 
 RUN apk --no-cache add ca-certificates
 COPY --from=development /mioty-bssci-adapter/build/mioty-bssci-adapter /usr/bin/mioty-bssci-adapter

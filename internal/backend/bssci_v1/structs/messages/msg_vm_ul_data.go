@@ -19,7 +19,7 @@ type VmUlData struct {
 	// ID of the operation
 	OpId int64 `msg:"opId" json:"opId"`
 	// MAC-Type of the Variable MAC
-	MacType int64 `msg:"macType" json:"macType"`
+	MacType uint8 `msg:"macType" json:"macType"`
 	// n Byte End Point user data U-MPDU; starting with first byte after MAC-Type
 	UserData []uint8 `msg:"userData" json:"userData"`
 	// Transceiver time of reception, center of last subpacket, 64 bit, ns resolution
@@ -48,7 +48,7 @@ type VmUlData struct {
 
 func NewVmUlData(
 	opId int64,
-	macType int64,
+	macType uint8,
 	userData []byte,
 	trxTime uint64,
 	freqOff float64,
@@ -111,12 +111,16 @@ func (m *VmUlData) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 		Subpackets: m.Subpackets,
 	}
 
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
+
 	message := bs.EndnodeUplink{
 		BsEui: bsEuiB,
+		Ts:    ts,
 		Message: &bs.EndnodeUplink_VmUlData{
 			VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,
-				MacType:   m.MacType,
+				MacType:   uint32(m.MacType),
 				FreqOff:   m.FreqOff,
 				CarrSpace: bs.CarrierSpacingEnum(m.CarrSpace),
 				PattGrp:   bs.TsmaPatternGroupEnum(m.PattGrp),

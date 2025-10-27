@@ -4,11 +4,14 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 
 	"net"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/patrickmn/go-cache"
 
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
 	"github.com/pkg/errors"
@@ -41,14 +44,16 @@ type Backend struct {
 
 	basestationMessageHandler func(common.EUI64, events.EventType, *bs.BasestationUplink)
 	endnodeMessageHandler     func(common.EUI64, events.EventType, *bs.EndnodeUplink)
+
+	// cache for storing pending attPrp/detPrp requests
+	// key: BasestationEUI_opId value EndnodeEUI
+	propagationCache *cache.Cache
 }
 
 // NewBackend creates a new Backend.
 func NewBackend(conf config.Config) (backend *Backend, err error) {
 	b := Backend{
-		basestations: basestations{
-			basestations: make(map[common.EUI64]*connection),
-		},
+		basestations: newBasestations(),
 
 		caCert:  conf.Backend.BssciV1.CACert,
 		tlsCert: conf.Backend.BssciV1.TLSCert,
@@ -58,6 +63,8 @@ func NewBackend(conf config.Config) (backend *Backend, err error) {
 		pingInterval:    conf.Backend.BssciV1.PingInterval,
 		keepAlivePeriod: conf.Backend.BssciV1.KeepAlivePeriod,
 		writeTimeout:    time.Second,
+
+		propagationCache: cache.New(time.Minute, time.Minute),
 	}
 
 	// create the listener
@@ -224,8 +231,40 @@ func (b *Backend) HandleServerCommand(pb *bs.ServerCommand) error {
 
 		logger.Debug().Str("proto", "ServerCommand_VmStatus").Msg("requesting variable mac status")
 
+	case *bs.ServerCommand_VmBatch:
+		command := pb.GetVmBatch()
+
+		if command == nil {
+			return errors.New("empty vm batch command")
+		}
+
+		toActivate := command.GetActivateVms()
+		toDeactivate := command.GetDeactivateVms()
+
+		logger.Debug().
+			Str("proto", "ServerCommand_VmBatch").
+			Int32("activate_count", int32(len(toActivate))).
+			Int32("deactivate_count", int32(len(toDeactivate))).
+			Msg("requesting variable mac batch operations")
+
+		for _, vm := range toActivate {
+			msgA := messages.NewVmActivate(0, vm)
+			err = b.sendServerMessageToBasestation(bsEui, &msgA)
+			if err != nil {
+				return err
+			}
+		}
+		for _, vm := range toDeactivate {
+			msgA := messages.NewVmDeactivate(0, vm)
+			err = b.sendServerMessageToBasestation(bsEui, &msgA)
+			if err != nil {
+				return err
+			}
+		}
+
 	default:
 		return errors.New("empty protobuf command")
+
 	}
 
 	return b.sendServerMessageToBasestation(bsEui, msg)
@@ -243,7 +282,7 @@ func (b *Backend) HandleServerResponse(pb *bs.ServerResponse) error {
 		return err
 	}
 
-	var msg messages.Message
+	var msg messages.MessageMsgp
 
 	switch pb.Response.(type) {
 	case *bs.ServerResponse_DetRsp:
@@ -262,6 +301,24 @@ func (b *Backend) HandleServerResponse(pb *bs.ServerResponse) error {
 		}
 		msg = msgA
 		log.Debug().Str("proto", "ServerResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", command.EndnodeEui, bsEui.String())
+	case *bs.ServerResponse_DetRspErr:
+		command := pb.GetDetRspErr()
+		if command == nil {
+			return errors.New("invalid EndnodeDetachErrorResponse command")
+		}
+		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
+
+		msg = &msgA
+		log.Debug().Str("proto", "ServerResponse_DetRspErr").Int64("op_id", opId).Msgf("Server failed detaching endnode %v from basestation %v", command.EndnodeEui, bsEui.String())
+	case *bs.ServerResponse_AttRspErr:
+		command := pb.GetAttRspErr()
+		if command == nil {
+			return errors.New("invalid EndnodeAttachErrorResponse command")
+		}
+		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
+
+		msg = &msgA
+		log.Debug().Str("proto", "ServerResponse_AttRspErr").Int64("op_id", opId).Msgf("Server failed attaching endnode %v to basestation %v", command.EndnodeEui, bsEui.String())
 
 	case *bs.ServerResponse_Err:
 		command := pb.GetErr()
@@ -461,7 +518,7 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 
 		messageReceiveCounter(eui.String(), string(cmd))
 
-		var response messages.Message
+		var response messages.MessageMsgp
 		// only match ClientMsg... messages
 		switch cmd {
 		case structs.ClientMsgCon:
@@ -559,12 +616,10 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 			response = &defaultResponse
 		case structs.ClientMsgAttPrpRsp:
 			// handle attach propagate response message
-			defaultResponse := messages.NewAttPrpCmp(opId)
-			response = &defaultResponse
+			response = b.handleAttPrpRspMessage(ctx, eui, opId)
 		case structs.ClientMsgDetPrpRsp:
 			// handle detach propagate response message
-			defaultResponse := messages.NewDetPrpCmp(opId)
-			response = &defaultResponse
+			response = b.handleDetPrpRspMessage(ctx, eui, opId)
 		case structs.ClientMsgVmActivateRsp:
 			// handle variable mac activate response message
 			defaultResponse := messages.NewVmActivateCmp(opId)
@@ -590,9 +645,9 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 				response = log_and_notify_msgp_error(logger, err, opId)
 				break
 			}
+			response = b.handlePrpRspError(ctx, eui, opId)
 			logger.Warn().Uint32("err_code", msg.Code).Str("err_msg", msg.Message).Msg("received bssci error message")
-			defaultResponse := messages.NewBssciErrorAck(opId)
-			response = &defaultResponse
+
 		case structs.ClientMsgErrorAck:
 			// Equivalent to ...Cmp message
 			continue
@@ -634,7 +689,7 @@ func (b *Backend) handleBasestationMessages(ctx context.Context, eui common.EUI6
 }
 
 // upstream messages from basestations
-func (b *Backend) forwardBasestationMessage(ctx context.Context, eui common.EUI64, msg messages.BasestationMessage) messages.Message {
+func (b *Backend) forwardBasestationMessage(ctx context.Context, eui common.EUI64, msg messages.BasestationMessage) messages.MessageMsgp {
 	logger := zerolog.Ctx(ctx)
 
 	if b.basestationMessageHandler != nil {
@@ -643,14 +698,14 @@ func (b *Backend) forwardBasestationMessage(ctx context.Context, eui common.EUI6
 		return nil
 	}
 
-	logger.Warn().Msg("basestationConnectionMessageHandler not set")
+	logger.Warn().Msg("basestationMessageHandler not set")
 	response := messages.NewBssciError(msg.GetOpId(), 5, "server unable to handle message")
 	return &response
 
 }
 
 // upstream messages from endnodes
-func (b *Backend) forwardEndnodeMessage(ctx context.Context, eui common.EUI64, msg messages.EndnodeMessage) messages.Message {
+func (b *Backend) forwardEndnodeMessage(ctx context.Context, eui common.EUI64, msg messages.EndnodeMessage) messages.MessageMsgp {
 	logger := zerolog.Ctx(ctx)
 
 	if b.endnodeMessageHandler != nil {
@@ -664,7 +719,7 @@ func (b *Backend) forwardEndnodeMessage(ctx context.Context, eui common.EUI64, m
 	return &response
 }
 
-func (b *Backend) handleConMessage(ctx context.Context, conn *connection, msg messages.Con) messages.Message {
+func (b *Backend) handleConMessage(ctx context.Context, conn *connection, msg messages.Con) messages.MessageMsgp {
 	logger := zerolog.Ctx(ctx)
 
 	error_response := b.forwardBasestationMessage(ctx, msg.BsEui, &msg)
@@ -687,7 +742,7 @@ func (b *Backend) handleConMessage(ctx context.Context, conn *connection, msg me
 
 }
 
-func (b *Backend) handleStatusRspMessage(ctx context.Context, eui common.EUI64, msg *messages.StatusRsp) messages.Message {
+func (b *Backend) handleStatusRspMessage(ctx context.Context, eui common.EUI64, msg *messages.StatusRsp) messages.MessageMsgp {
 	error_response := b.forwardBasestationMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewStatusCmp(msg.GetOpId())
@@ -696,7 +751,75 @@ func (b *Backend) handleStatusRspMessage(ctx context.Context, eui common.EUI64, 
 	return error_response
 }
 
-func (b *Backend) handleVmStatusRspMessage(ctx context.Context, eui common.EUI64, msg *messages.VmStatusRsp) messages.Message {
+func (b *Backend) handleAttPrpRspMessage(ctx context.Context, eui common.EUI64, opId int64) messages.MessageMsgp {
+
+	key := fmt.Sprintf("%s_%d_att", eui, opId)
+	if v, ok := b.propagationCache.Get(key); ok {
+		epEui := v.(*common.EUI64)
+
+		msg := messages.NewPrpAck(opId, *epEui, true, true)
+
+		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
+		if error_response != nil {
+			return error_response
+		}
+	}
+
+	defaultResponse := messages.NewAttPrpCmp(opId)
+	return &defaultResponse
+
+}
+
+func (b *Backend) handleDetPrpRspMessage(ctx context.Context, eui common.EUI64, opId int64) messages.MessageMsgp {
+
+	key := fmt.Sprintf("%s_%d_det", eui, opId)
+	if v, ok := b.propagationCache.Get(key); ok {
+		epEui := v.(*common.EUI64)
+
+		msg := messages.NewPrpAck(opId, *epEui, true, false)
+
+		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
+		if error_response != nil {
+			return error_response
+		}
+	}
+
+	defaultResponse := messages.NewDetPrpCmp(opId)
+	return &defaultResponse
+
+}
+
+func (b *Backend) handlePrpRspError(ctx context.Context, eui common.EUI64, opId int64) messages.MessageMsgp {
+
+	key := fmt.Sprintf("%s_%d_att", eui, opId)
+	if v, ok := b.propagationCache.Get(key); ok {
+		epEui := v.(*common.EUI64)
+
+		msg := messages.NewPrpAck(opId, *epEui, false, true)
+
+		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
+		if error_response != nil {
+			return error_response
+		}
+	}
+	key = fmt.Sprintf("%s_%d_det", eui, opId)
+	if v, ok := b.propagationCache.Get(key); ok {
+		epEui := v.(*common.EUI64)
+
+		msg := messages.NewPrpAck(opId, *epEui, false, false)
+
+		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
+		if error_response != nil {
+			return error_response
+		}
+	}
+
+	defaultResponse := messages.NewBssciErrorAck(opId)
+	return &defaultResponse
+
+}
+
+func (b *Backend) handleVmStatusRspMessage(ctx context.Context, eui common.EUI64, msg *messages.VmStatusRsp) messages.MessageMsgp {
 	error_response := b.forwardBasestationMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewVmStatusCmp(msg.GetOpId())
@@ -705,7 +828,7 @@ func (b *Backend) handleVmStatusRspMessage(ctx context.Context, eui common.EUI64
 	return error_response
 }
 
-func (b *Backend) handleDlRxStatMessage(ctx context.Context, eui common.EUI64, msg *messages.DlRxStat) messages.Message {
+func (b *Backend) handleDlRxStatMessage(ctx context.Context, eui common.EUI64, msg *messages.DlRxStat) messages.MessageMsgp {
 	error_response := b.forwardBasestationMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewDlRxStatRsp(msg.GetOpId())
@@ -714,7 +837,7 @@ func (b *Backend) handleDlRxStatMessage(ctx context.Context, eui common.EUI64, m
 	return error_response
 }
 
-func (b *Backend) handleDlDataResMessage(ctx context.Context, eui common.EUI64, msg *messages.DlDataRes) messages.Message {
+func (b *Backend) handleDlDataResMessage(ctx context.Context, eui common.EUI64, msg *messages.DlDataRes) messages.MessageMsgp {
 	error_response := b.forwardBasestationMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewDlDataResRsp(msg.GetOpId())
@@ -723,17 +846,17 @@ func (b *Backend) handleDlDataResMessage(ctx context.Context, eui common.EUI64, 
 	return error_response
 }
 
-func (b *Backend) handleAttMessage(ctx context.Context, eui common.EUI64, msg *messages.Att) messages.Message {
+func (b *Backend) handleAttMessage(ctx context.Context, eui common.EUI64, msg *messages.Att) messages.MessageMsgp {
 	// Att has to be handled by downstream application
 	return b.forwardEndnodeMessage(ctx, eui, msg)
 }
 
-func (b *Backend) handleDetMessage(ctx context.Context, eui common.EUI64, msg *messages.Det) messages.Message {
+func (b *Backend) handleDetMessage(ctx context.Context, eui common.EUI64, msg *messages.Det) messages.MessageMsgp {
 	// Det has to be handled by downstream application
 	return b.forwardEndnodeMessage(ctx, eui, msg)
 }
 
-func (b *Backend) handleUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.UlData) messages.Message {
+func (b *Backend) handleUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.UlData) messages.MessageMsgp {
 	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewUlDataRsp(msg.GetOpId())
@@ -742,7 +865,7 @@ func (b *Backend) handleUlDataMessage(ctx context.Context, eui common.EUI64, msg
 	return error_response
 }
 
-func (b *Backend) handleVmUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.VmUlData) messages.Message {
+func (b *Backend) handleVmUlDataMessage(ctx context.Context, eui common.EUI64, msg *messages.VmUlData) messages.MessageMsgp {
 	error_response := b.forwardEndnodeMessage(ctx, eui, msg)
 	if error_response == nil {
 		response := messages.NewVmUlDataRsp(msg.GetOpId())
@@ -752,7 +875,7 @@ func (b *Backend) handleVmUlDataMessage(ctx context.Context, eui common.EUI64, m
 }
 
 // sends a server response to a basestation
-func (b *Backend) sendServerResponseToBasestation(bsEui common.EUI64, msg messages.Message) error {
+func (b *Backend) sendServerResponseToBasestation(bsEui common.EUI64, msg messages.MessageMsgp) error {
 	if msg != nil {
 		// b.Lock()
 		// defer b.Unlock()
@@ -794,6 +917,19 @@ func (b *Backend) sendServerMessageToBasestation(bsEui common.EUI64, msg message
 		opId := bsConnection.GetAndDecrementOpId()
 		msg.SetOpId(opId)
 
+		// attPrp and detPrp store EUI in propagation cache
+		if msg, ok := msg.(*messages.DetPrp); ok {
+			key := fmt.Sprintf("%s_%d_det", bsEui, opId)
+			value := msg.EpEui
+			b.propagationCache.SetDefault(key, value)
+		}
+
+		if msg, ok := msg.(*messages.AttPrp); ok {
+			key := fmt.Sprintf("%s_%d_att", bsEui, opId)
+			value := msg.EpEui
+			b.propagationCache.SetDefault(key, value)
+		}
+
 		err = bsConnection.Write(msg, b.writeTimeout)
 		if err != nil {
 			logger.Error().Err(err).Msg("failed to send to basestation")
@@ -809,7 +945,7 @@ func (b *Backend) sendServerMessageToBasestation(bsEui common.EUI64, msg message
 	return nil
 }
 
-func log_and_notify_msgp_error(logger zerolog.Logger, err error, opId int64) messages.Message {
+func log_and_notify_msgp_error(logger zerolog.Logger, err error, opId int64) messages.MessageMsgp {
 	logger.Error().Err(err).Msg("unmarshal msgp error")
 	response := messages.NewBssciError(opId, 5, "message pack error")
 	return &response

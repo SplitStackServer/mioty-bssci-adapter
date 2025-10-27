@@ -7,7 +7,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// for testing / monkey patching
+// Wrapper around time.Now
+// Allows easier testing / monkey patching
 var getNow = time.Now
 
 func TimestampNsToProto(ts int64) *timestamppb.Timestamp {

@@ -100,6 +100,7 @@ func (m *DlDataRes) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 	epEuiB := m.EpEui.String()
 
 	result := bs.BasestationDownlinkResult{
+		EpEui:   epEuiB,
 		DlQueId: m.QueId,
 	}
 
@@ -114,10 +115,14 @@ func (m *DlDataRes) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 		result.Result = bs.DownlinkResultEnum_INVALID
 	}
 
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
+
 	message := bs.BasestationUplink{
+		Ts:    ts,
 		BsEui: bsEuiB,
+		OpId:  m.OpId,
 		Message: &bs.BasestationUplink_DlRes{
-			EpEui: epEuiB,
 			DlRes: &result,
 		},
 	}

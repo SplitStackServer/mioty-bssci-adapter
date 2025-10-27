@@ -3,13 +3,14 @@ package messages
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
-	bscommon "github.com/SplitStackServer/splitstack/api/go/v4/common" 
+	bscommon "github.com/SplitStackServer/splitstack/api/go/v4/common"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestNewStatus(t *testing.T) {
@@ -315,16 +316,24 @@ func TestStatusRsp_GetCommand(t *testing.T) {
 
 func TestStatusRsp_IntoProto(t *testing.T) {
 
-	var testTime uint64 = 1000000000000005
-
 	var testUptime uint64 = 1000
 	var testTemp float64 = 45.5
 	var testCpu float64 = 0.5
 	var testMemory float64 = 0.6
 
+	//monkey patch time.now()
+
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+	testTime := uint64(fakeNow.UnixNano())
+
+	getNow = func() time.Time { return fakeNow }
+
 	testTs := timestamppb.Timestamp{
-		Seconds: int64(1000000),
-		Nanos:   int32(5),
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
 	}
 
 	type fields struct {
@@ -332,7 +341,6 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 		OpId        int64
 		Code        uint32
 		Message     string
-		Time        uint64
 		DutyCycle   float32
 		GeoLocation *GeoLocation
 		Uptime      *uint64
@@ -356,7 +364,6 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				OpId:        1,
 				Code:        0,
 				Message:     "test",
-				Time:        testTime,
 				DutyCycle:   0.5,
 				GeoLocation: nil,
 				Uptime:      nil,
@@ -367,6 +374,8 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			args: args{common.EUI64{1}},
 			want: &bs.BasestationUplink{
 				BsEui: "0100000000000000",
+				Ts:    &testTs,
+				OpId:  1,
 				Message: &bs.BasestationUplink_Status{
 					Status: &bs.BasestationStatus{
 						StatusCode:  0,
@@ -389,7 +398,6 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				OpId:        1,
 				Code:        0,
 				Message:     "test",
-				Time:        testTime,
 				DutyCycle:   0.5,
 				GeoLocation: &GeoLocation{},
 				Uptime:      nil,
@@ -400,6 +408,8 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			args: args{common.EUI64{1}},
 			want: &bs.BasestationUplink{
 				BsEui: "0100000000000000",
+				Ts:    &testTs,
+				OpId:  1,
 				Message: &bs.BasestationUplink_Status{
 					Status: &bs.BasestationStatus{
 						StatusCode:  0,
@@ -422,7 +432,6 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				OpId:        1,
 				Code:        0,
 				Message:     "test",
-				Time:        testTime,
 				DutyCycle:   0.5,
 				GeoLocation: &GeoLocation{},
 				Uptime:      &testUptime,
@@ -433,6 +442,8 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			args: args{common.EUI64{1}},
 			want: &bs.BasestationUplink{
 				BsEui: "0100000000000000",
+				Ts:    &testTs,
+				OpId:  1,
 				Message: &bs.BasestationUplink_Status{
 					Status: &bs.BasestationStatus{
 						StatusCode:  0,
@@ -455,8 +466,8 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 				Command:     tt.fields.Command,
 				OpId:        tt.fields.OpId,
 				Code:        tt.fields.Code,
+				Time:        testTime,
 				Message:     tt.fields.Message,
-				Time:        tt.fields.Time,
 				DutyCycle:   tt.fields.DutyCycle,
 				GeoLocation: tt.fields.GeoLocation,
 				Uptime:      tt.fields.Uptime,
@@ -467,7 +478,7 @@ func TestStatusRsp_IntoProto(t *testing.T) {
 			got := m.IntoProto(&tt.args.bsEui)
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("StatusRsp.IntoProto() = %v, want %v", got, tt.want)
+				t.Errorf("StatusRsp.IntoProto() = %v,\n want %v", got, tt.want)
 			}
 		})
 	}

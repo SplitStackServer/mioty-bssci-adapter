@@ -50,7 +50,7 @@ func (ts *TestConnectionSuite) TestConnection_Write() {
 	t := ts.T()
 
 	type args struct {
-		msg     messages.Message
+		msg     messages.MessageMsgp
 		timeout time.Duration
 	}
 	tests := []struct {

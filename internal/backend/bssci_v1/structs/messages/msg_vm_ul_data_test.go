@@ -3,6 +3,7 @@ package messages
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
@@ -15,7 +16,7 @@ import (
 func TestNewVmUlData(t *testing.T) {
 	type args struct {
 		opId       int64
-		macType    int64
+		macType    uint8
 		userData   []byte
 		trxTime    uint64
 		freqOff    float64
@@ -82,7 +83,7 @@ func TestVmUlData_GetOpId(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -153,7 +154,7 @@ func TestVmUlData_GetCommand(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -224,7 +225,7 @@ func TestVmUlData_GetEventType(t *testing.T) {
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -300,10 +301,24 @@ func TestVmUlData_IntoProto(t *testing.T) {
 		Nanos:   int32(5),
 	}
 
+	//monkey patch time.now()
+
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+
+	getNow = func() time.Time { return fakeNow }
+
+	testTs := timestamppb.Timestamp{
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
+	}
+
 	type fields struct {
 		Command    structs.Command
 		OpId       int64
-		MacType    int64
+		MacType    uint8
 		UserData   []byte
 		TrxTime    uint64
 		SysTime    uint64
@@ -348,6 +363,7 @@ func TestVmUlData_IntoProto(t *testing.T) {
 			args: args{bsEui: common.EUI64{1}},
 			want: &bs.EndnodeUplink{
 				BsEui: "0100000000000000",
+				Ts:    &testTs,
 				Message: &bs.EndnodeUplink_VmUlData{
 					VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 						Data:    []byte{},

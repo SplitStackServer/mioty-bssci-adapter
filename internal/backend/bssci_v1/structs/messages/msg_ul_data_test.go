@@ -3,6 +3,7 @@ package messages
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
@@ -310,6 +311,20 @@ func TestUlData_IntoProto(t *testing.T) {
 		Nanos:   int32(1005),
 	}
 
+	//monkey patch time.now()
+
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+
+	getNow = func() time.Time { return fakeNow }
+
+	testTs := timestamppb.Timestamp{
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
+	}
+
 	var testMode string = "test"
 	var testFormat byte = 0x83
 
@@ -362,8 +377,8 @@ func TestUlData_IntoProto(t *testing.T) {
 				DlAck:      true,
 			},
 			want: &bs.EndnodeUplink{
+				Ts:    &testTs,
 				BsEui: "0000000000000000",
-
 				Message: &bs.EndnodeUplink_UlData{
 					UlData: &bs.EndnodeUlDataMessage{
 						Data:   []byte{0, 1, 2, 3},
@@ -375,6 +390,7 @@ func TestUlData_IntoProto(t *testing.T) {
 					},
 				},
 				Meta: &bs.EndnodeUplinkMetadata{
+					OpId:          10,
 					RxTime:        &testRxTimePb,
 					RxDuration:    &testRxDurationPb,
 					PacketCnt:     2,
@@ -405,7 +421,7 @@ func TestUlData_IntoProto(t *testing.T) {
 			},
 			want: &bs.EndnodeUplink{
 				BsEui: "0000000000000000",
-
+				Ts:    &testTs,
 				Message: &bs.EndnodeUplink_UlData{
 					UlData: &bs.EndnodeUlDataMessage{
 						EpEui:  "0001020304050607",
@@ -415,6 +431,7 @@ func TestUlData_IntoProto(t *testing.T) {
 					},
 				},
 				Meta: &bs.EndnodeUplinkMetadata{
+					OpId:          10,
 					RxTime:        &testRxTimePb,
 					RxDuration:    &testRxDurationPb,
 					PacketCnt:     2,
@@ -449,7 +466,7 @@ func TestUlData_IntoProto(t *testing.T) {
 				DlAck:       tt.fields.DlAck,
 			}
 			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UlData.IntoProto() = %v, want %v", got, tt.want)
+				t.Errorf("UlData.IntoProto() = %v,\n want %v", got, tt.want)
 			}
 		})
 	}

@@ -117,30 +117,36 @@ func (m *UlData) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 		format = uint32(*m.Format)
 	}
 
-	metadata := UplinkMetadata{
-		RxTime:     m.RxTime,
-		RxDuration: m.RxDuration,
-		PacketCnt:  m.PacketCnt,
-		Profile:    m.Profile,
-		SNR:        m.SNR,
-		RSSI:       m.RSSI,
-		EqSnr:      m.EqSnr,
-		Subpackets: m.Subpackets,
-	}
+	metadata := NewUplinkMetadata(
+		m.OpId,
+		m.RxTime,
+		m.RxDuration,
+		m.PacketCnt,
+		m.SNR,
+		m.RSSI,
+		m.EqSnr,
+		m.Profile,
+		m.Subpackets,
+	)
+
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
 
 	message := bs.EndnodeUplink{
-		BsEui:      bsEuiB,
+		Ts:    ts,
+		BsEui: bsEuiB,
 		Message: &bs.EndnodeUplink_UlData{
 			UlData: &bs.EndnodeUlDataMessage{
-				EpEui: epEuiB,
-				Data:   m.UserData,
-				Format: format,
-				Mode:   m.Mode,
-				DlAck:  m.DlAck,
-				DlOpen: m.DlOpen,
+				EpEui:       epEuiB,
+				Data:        m.UserData,
+				Format:      format,
+				Mode:        m.Mode,
+				DlAck:       m.DlAck,
+				DlOpen:      m.DlOpen,
+				ResponseExp: m.ResponseExp,
 			},
 		},
-		Meta:   metadata.IntoProto(),
+		Meta: metadata.IntoProto(),
 	}
 	return &message
 }

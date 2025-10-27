@@ -3,6 +3,7 @@ package messages
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
@@ -298,6 +299,20 @@ func TestAtt_IntoProto(t *testing.T) {
 		Nanos:   int32(1005),
 	}
 
+	//monkey patch time.now()
+
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+
+	getNow = func() time.Time { return fakeNow }
+
+	testTs := timestamppb.Timestamp{
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
+	}
+
 	var testShAddr uint16 = 0x1010
 	var testShAddr32 uint32 = 0x1010
 
@@ -350,9 +365,10 @@ func TestAtt_IntoProto(t *testing.T) {
 			},
 			want: &bs.EndnodeUplink{
 				BsEui: "0000000000000000",
+				Ts:    &testTs,
 				Message: &bs.EndnodeUplink_Att{
 					Att: &bs.EndnodeAttMessage{
-						OpId:          10,
+
 						EpEui:         "0001020304050607",
 						Sign:          0x00010203,
 						Nonce:         0x04050607,
@@ -361,6 +377,7 @@ func TestAtt_IntoProto(t *testing.T) {
 					},
 				},
 				Meta: &bs.EndnodeUplinkMetadata{
+					OpId:          10,
 					RxTime:        &testRxTimePb,
 					RxDuration:    &testRxDurationPb,
 					PacketCnt:     0,
@@ -391,10 +408,9 @@ func TestAtt_IntoProto(t *testing.T) {
 			},
 			want: &bs.EndnodeUplink{
 				BsEui: "0000000000000000",
-
+				Ts:    &testTs,
 				Message: &bs.EndnodeUplink_Att{
 					Att: &bs.EndnodeAttMessage{
-						OpId:          10,
 						EpEui:         "0001020304050607",
 						Sign:          0x00010203,
 						Nonce:         0x04050607,
@@ -403,6 +419,7 @@ func TestAtt_IntoProto(t *testing.T) {
 					},
 				},
 				Meta: &bs.EndnodeUplinkMetadata{
+					OpId:          10,
 					RxTime:        &testRxTimePb,
 					RxDuration:    &testRxDurationPb,
 					PacketCnt:     0,
@@ -482,7 +499,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 
 	type args struct {
 		opId int64
-		pb   *bs.EndnodeAttachResponse
+		pb   *bs.EndnodeAttachSuccessResponse
 	}
 	tests := []struct {
 		name    string
@@ -494,7 +511,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			name: "attRsp",
 			args: args{
 				opId: 10,
-				pb: &bs.EndnodeAttachResponse{
+				pb: &bs.EndnodeAttachSuccessResponse{
 					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        nil,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
@@ -512,7 +529,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			name: "attRsp_shAddr",
 			args: args{
 				opId: 10,
-				pb: &bs.EndnodeAttachResponse{
+				pb: &bs.EndnodeAttachSuccessResponse{
 					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        &testShAddr32,
 					NwkSessionKey: []byte{3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0, 3, 2, 1, 0},
@@ -530,7 +547,7 @@ func TestNewAttRspFromProto(t *testing.T) {
 			name: "attRsp_invalid_NwkSessionKey",
 			args: args{
 				opId: 10,
-				pb: &bs.EndnodeAttachResponse{
+				pb: &bs.EndnodeAttachSuccessResponse{
 					EndnodeEui:    "0x0001020304050607",
 					ShAddr:        &testShAddr32,
 					NwkSessionKey: []byte{},

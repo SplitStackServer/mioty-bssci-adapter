@@ -94,25 +94,28 @@ func (m *Det) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 
 	sign := binary.LittleEndian.Uint32(m.Sign[:])
 
-	metadata := UplinkMetadata{
-		RxTime:     m.RxTime,
-		RxDuration: m.RxDuration,
-		PacketCnt:  m.PacketCnt,
-		Profile:    m.Profile,
-		SNR:        m.SNR,
-		RSSI:       m.RSSI,
-		EqSnr:      m.EqSnr,
-		Subpackets: m.Subpackets,
-	}
+	metadata := NewUplinkMetadata(
+		m.OpId,
+		m.RxTime,
+		m.RxDuration,
+		m.PacketCnt,
+		m.SNR,
+		m.RSSI,
+		m.EqSnr,
+		m.Profile,
+		m.Subpackets,
+	)
+
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
 
 	message := bs.EndnodeUplink{
-		BsEui:      bsEuiB,
+		BsEui: bsEuiB,
+		Ts:    ts,
 		Message: &bs.EndnodeUplink_Det{
 			Det: &bs.EndnodeDetMessage{
-
-				OpId: m.OpId,
 				EpEui: epEuiB,
-				Sign: sign,
+				Sign:  sign,
 			},
 		},
 		Meta: metadata.IntoProto(),
@@ -139,7 +142,7 @@ func NewDetRsp(opId int64, sign [4]byte) DetRsp {
 	}
 }
 
-func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachResponse) (*DetRsp, error) {
+func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachSuccessResponse) (*DetRsp, error) {
 	if pb != nil {
 		sign := pb.Sign
 		signB := [4]byte{
@@ -152,7 +155,7 @@ func NewDetRspFromProto(opId int64, pb *bs.EndnodeDetachResponse) (*DetRsp, erro
 		msg := NewDetRsp(opId, signB)
 		return &msg, nil
 	}
-	return nil, errors.New("invalid EndnodeDetachResponse command")
+	return nil, errors.New("invalid EndnodeDetachSuccessResponse command")
 }
 
 func (m *DetRsp) GetOpId() int64 {

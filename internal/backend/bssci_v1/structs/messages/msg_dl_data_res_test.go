@@ -3,6 +3,7 @@ package messages
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
@@ -192,6 +193,20 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 		Nanos:   int32(5),
 	}
 
+	//monkey patch time.now()
+
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+
+	getNow = func() time.Time { return fakeNow }
+
+	testTs := timestamppb.Timestamp{
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
+	}
+
 	var testPacketCnt uint32 = 10
 
 	type fields struct {
@@ -228,6 +243,8 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			},
 			want: &bs.BasestationUplink{
 				BsEui: "0200000000000000",
+				Ts:    &testTs,
+				OpId:  10,
 				Message: &bs.BasestationUplink_DlRes{
 					DlRes: &bs.BasestationDownlinkResult{
 						DlQueId:     20,
@@ -253,6 +270,8 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			},
 			want: &bs.BasestationUplink{
 				BsEui: "0200000000000000",
+				Ts:    &testTs,
+				OpId:  10,
 				Message: &bs.BasestationUplink_DlRes{
 					DlRes: &bs.BasestationDownlinkResult{
 						DlQueId: 20,
@@ -276,6 +295,8 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 			},
 			want: &bs.BasestationUplink{
 				BsEui: "0200000000000000",
+				Ts:    &testTs,
+				OpId:  10,
 				Message: &bs.BasestationUplink_DlRes{
 					DlRes: &bs.BasestationDownlinkResult{
 						EpEui:   "0100000000000000",
@@ -298,7 +319,7 @@ func TestDlDataRes_IntoProto(t *testing.T) {
 				PacketCnt: tt.fields.PacketCnt,
 			}
 			if got := m.IntoProto(&tt.args.bsEui); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("DlDataRes.IntoProto() = %v, want %v", got, tt.want)
+				t.Errorf("DlDataRes.IntoProto() = %v,\n want %v", got, tt.want)
 			}
 		})
 	}

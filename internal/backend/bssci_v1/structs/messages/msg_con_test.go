@@ -279,9 +279,10 @@ func TestCon_IntoProto(t *testing.T) {
 			},
 			want: &bs.BasestationUplink{
 				BsEui: testBsEui.String(),
+				Ts:    &testTs,
+				OpId:  0,
 				Message: &bs.BasestationUplink_Con{
 					Con: &bs.BasestationConnection{
-						Ts:        &testTs,
 						Version:   testVersion,
 						Bidi:      true,
 						Vendor:    &testVendor,
@@ -309,9 +310,10 @@ func TestCon_IntoProto(t *testing.T) {
 			},
 			want: &bs.BasestationUplink{
 				BsEui: testBsEui.String(),
+				Ts:    &testTs,
+				OpId:  0,
 				Message: &bs.BasestationUplink_Con{
 					Con: &bs.BasestationConnection{
-						Ts:        &testTs,
 						Version:   testVersion,
 						Bidi:      true,
 						Vendor:    &testVendor,

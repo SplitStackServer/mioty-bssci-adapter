@@ -15,12 +15,19 @@ type Message interface {
 	GetOpId() int64
 	// get the name of this message type
 	GetCommand() structs.Command
+}
+
+// Each message must implement this
+type MessageMsgp interface {
+	Message
 	// message pack interfaces
 	msgp.Encodable
 	msgp.Marshaler
 	msgp.Unmarshaler
 	msgp.Decodable
 }
+
+
 
 type EndnodeMessage interface {
 	Message
@@ -35,6 +42,6 @@ type BasestationMessage interface {
 }
 
 type ServerMessage interface {
-	Message
+	MessageMsgp
 	SetOpId(opId int64)
 }
