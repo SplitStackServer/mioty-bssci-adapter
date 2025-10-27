@@ -113,15 +113,20 @@ func (m *StatusRsp) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
-		ts := TimestampNsToProto(int64(m.Time))
+		tsBs := TimestampNsToProto(int64(m.Time))
+
+		now := getNow().UnixNano()
+		ts := TimestampNsToProto(now)
 
 		message = bs.BasestationUplink{
+			Ts:    ts,
 			BsEui: bsEuiB,
+			OpId:  m.OpId,
 			Message: &bs.BasestationUplink_Status{
 				Status: &bs.BasestationStatus{
 					StatusCode:  m.Code,
 					StatusMsg:   m.Message,
-					Ts:          ts,
+					Ts:          tsBs,
 					DutyCycle:   m.DutyCycle,
 					Uptime:      m.Uptime,
 					Temp:        m.Temp,

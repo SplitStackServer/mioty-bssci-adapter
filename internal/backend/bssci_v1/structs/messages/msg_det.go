@@ -94,23 +94,28 @@ func (m *Det) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 
 	sign := binary.LittleEndian.Uint32(m.Sign[:])
 
-	metadata := UplinkMetadata{
-		RxTime:     m.RxTime,
-		RxDuration: m.RxDuration,
-		PacketCnt:  m.PacketCnt,
-		Profile:    m.Profile,
-		SNR:        m.SNR,
-		RSSI:       m.RSSI,
-		EqSnr:      m.EqSnr,
-		Subpackets: m.Subpackets,
-	}
+	metadata := NewUplinkMetadata(
+		m.OpId,
+		m.RxTime,
+		m.RxDuration,
+		m.PacketCnt,
+		m.SNR,
+		m.RSSI,
+		m.EqSnr,
+		m.Profile,
+		m.Subpackets,
+	)
+
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
 
 	message := bs.EndnodeUplink{
-		BsEui:      bsEuiB,
+		BsEui: bsEuiB,
+		Ts:    ts,
 		Message: &bs.EndnodeUplink_Det{
 			Det: &bs.EndnodeDetMessage{
 				EpEui: epEuiB,
-				Sign: sign,
+				Sign:  sign,
 			},
 		},
 		Meta: metadata.IntoProto(),

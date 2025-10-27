@@ -73,8 +73,13 @@ func (m *DlRxStat) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 		bsEuiB := bsEui.String()
 		epEuiB := m.EpEui.String()
 
+		now := getNow().UnixNano()
+		ts := TimestampNsToProto(now)
+
 		message = bs.BasestationUplink{
+			Ts:    ts,
 			BsEui: bsEuiB,
+			OpId:  m.OpId,
 			Message: &bs.BasestationUplink_DlRxStat{
 				DlRxStat: &bs.BasestationDownlinkRxStatus{
 					EpEui:     epEuiB,

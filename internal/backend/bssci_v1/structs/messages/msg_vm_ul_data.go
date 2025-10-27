@@ -111,8 +111,12 @@ func (m *VmUlData) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 		Subpackets: m.Subpackets,
 	}
 
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
+
 	message := bs.EndnodeUplink{
 		BsEui: bsEuiB,
+		Ts:    ts,
 		Message: &bs.EndnodeUplink_VmUlData{
 			VmUlData: &bs.EndnodeVariableMacUlDataMessage{
 				Data:      m.UserData,

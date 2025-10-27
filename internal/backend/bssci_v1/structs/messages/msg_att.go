@@ -127,19 +127,24 @@ func (m *Att) IntoProto(bsEui *common.EUI64) *bs.EndnodeUplink {
 		shAddr = &shAddrT
 	}
 
-	metadata := UplinkMetadata{
-		RxTime:     m.RxTime,
-		RxDuration: m.RxDuration,
-		PacketCnt:  0,
-		Profile:    m.Profile,
-		SNR:        m.SNR,
-		RSSI:       m.RSSI,
-		EqSnr:      m.EqSnr,
-		Subpackets: m.Subpackets,
-	}
+	metadata := NewUplinkMetadata(
+		m.OpId,
+		m.RxTime,
+		m.RxDuration,
+		0, // Attach message has no packet count. Set to 0.
+		m.SNR,
+		m.RSSI,
+		m.EqSnr,
+		m.Profile,
+		m.Subpackets,
+	)
+
+	now := getNow().UnixNano()
+	ts := TimestampNsToProto(now)
 
 	message := bs.EndnodeUplink{
 		BsEui: bsEuiB,
+		Ts:    ts,
 		Message: &bs.EndnodeUplink_Att{
 			Att: &bs.EndnodeAttMessage{
 				EpEui:         epEuiB,

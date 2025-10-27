@@ -3,6 +3,7 @@ package messages
 import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
 
 type UplinkMetadata struct {
+	OpId       int64       `json:"opId"`
 	RxTime     uint64      `json:"rxTime"`
 	RxDuration *uint64     `json:"rxDuration,omitempty"`
 	PacketCnt  uint32      `json:"packetCnt"`
@@ -13,6 +14,30 @@ type UplinkMetadata struct {
 	Subpackets *Subpackets `json:"subpackets,omitempty"`
 }
 
+func NewUplinkMetadata(
+	opId int64,
+	rxTime uint64,
+	rxDuration *uint64,
+	packetCnt uint32,
+	snr float64,
+	rssi float64,
+	eqSnr *float64,
+	profile *string,
+	subpackets *Subpackets,
+) UplinkMetadata {
+	return UplinkMetadata{
+		OpId:       opId,
+		RxTime:     rxTime,
+		RxDuration: rxDuration,
+		PacketCnt:  packetCnt,
+		SNR:        snr,
+		RSSI:       rssi,
+		EqSnr:      eqSnr,
+		Profile:    profile,
+		Subpackets: subpackets,
+	}
+}
+
 func (m *UplinkMetadata) IntoProto() *bs.EndnodeUplinkMetadata {
 	var message bs.EndnodeUplinkMetadata
 	if m != nil {
@@ -20,6 +45,7 @@ func (m *UplinkMetadata) IntoProto() *bs.EndnodeUplinkMetadata {
 		rxTime := TimestampNsToProto(int64(m.RxTime))
 
 		message = bs.EndnodeUplinkMetadata{
+			OpId:       m.OpId,
 			RxTime:    rxTime,
 			PacketCnt: m.PacketCnt,
 			Profile:   m.Profile,

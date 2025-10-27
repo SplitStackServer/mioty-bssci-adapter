@@ -82,10 +82,11 @@ func (m *Con) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 		ts := TimestampNsToProto(now)
 
 		message = bs.BasestationUplink{
+			Ts:    ts,
 			BsEui: bsEuiB,
+			OpId:  m.OpId,
 			Message: &bs.BasestationUplink_Con{
 				Con: &bs.BasestationConnection{
-					Ts:        ts,
 					Version:   m.Version,
 					Bidi:      m.Bidi,
 					Vendor:    m.Vendor,

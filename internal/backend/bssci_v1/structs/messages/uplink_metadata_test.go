@@ -30,6 +30,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 	testEqSnr := 3.0
 
 	type fields struct {
+		OpId       int64
 		RxTime     uint64
 		RxDuration *uint64
 		PacketCnt  uint32
@@ -45,6 +46,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 		want   *bs.EndnodeUplinkMetadata
 	}{
 		{name: "metadata1", fields: fields{
+			OpId:       10,
 			RxTime:     testRxTime,
 			RxDuration: &testRxDuration,
 			PacketCnt:  10,
@@ -54,6 +56,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 			EqSnr:      &testEqSnr,
 			Subpackets: nil,
 		}, want: &bs.EndnodeUplinkMetadata{
+			OpId:          10,
 			RxTime:        &testRxTimePb,
 			RxDuration:    &testRxDurationPb,
 			PacketCnt:     10,
@@ -65,6 +68,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 		}},
 
 		{name: "metadata2", fields: fields{
+			OpId:       10,
 			RxTime:     testRxTime,
 			RxDuration: &testRxDuration,
 			PacketCnt:  10,
@@ -74,6 +78,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 			EqSnr:      &testEqSnr,
 			Subpackets: &Subpackets{},
 		}, want: &bs.EndnodeUplinkMetadata{
+			OpId:          10,
 			RxTime:        &testRxTimePb,
 			RxDuration:    &testRxDurationPb,
 			PacketCnt:     10,
@@ -87,6 +92,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &UplinkMetadata{
+				OpId:       tt.fields.OpId,
 				RxTime:     tt.fields.RxTime,
 				RxDuration: tt.fields.RxDuration,
 				PacketCnt:  tt.fields.PacketCnt,
@@ -97,7 +103,7 @@ func TestUplinkMetadata_IntoProto(t *testing.T) {
 				Subpackets: tt.fields.Subpackets,
 			}
 			if got := m.IntoProto(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UplinkMetadata.IntoProto() = %v, want %v", got, tt.want)
+				t.Errorf("UplinkMetadata.IntoProto() = %v,\n want %v", got, tt.want)
 			}
 		})
 	}

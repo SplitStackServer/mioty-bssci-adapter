@@ -3,6 +3,7 @@ package messages
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
@@ -198,6 +199,18 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 		Nanos:   int32(5),
 	}
 
+	var seconds int64 = 1000000
+	var nanos int64 = 123
+
+	fakeNow := time.Unix(seconds, nanos)
+
+	getNow = func() time.Time { return fakeNow }
+
+	testTs := timestamppb.Timestamp{
+		Seconds: int64(seconds),
+		Nanos:   int32(nanos),
+	}
+
 	type fields struct {
 		Command   structs.Command
 		OpId      int64
@@ -229,7 +242,9 @@ func TestDlRxStat_IntoProto(t *testing.T) {
 			},
 			args: args{bsEui: common.EUI64{2}},
 			want: &bs.BasestationUplink{
-				BsEui:      "0200000000000000",
+				BsEui: "0200000000000000",
+				Ts:    &testTs,
+				OpId:  10,
 				Message: &bs.BasestationUplink_DlRxStat{
 					DlRxStat: &bs.BasestationDownlinkRxStatus{
 						EpEui:     "0100000000000000",
