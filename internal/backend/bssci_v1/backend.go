@@ -254,11 +254,11 @@ func (b *Backend) HandleServerCommand(pb *bs.ServerCommand) error {
 				return err
 			}
 		}
-	}
 
-	// default:
-	// 	return errors.New("empty protobuf command")
-	// }
+	default:
+		return errors.New("empty protobuf command")
+
+	}
 
 	return b.sendServerMessageToBasestation(bsEui, msg)
 }
@@ -294,6 +294,24 @@ func (b *Backend) HandleServerResponse(pb *bs.ServerResponse) error {
 		}
 		msg = msgA
 		log.Debug().Str("proto", "ServerResponse_AttRsp").Int64("op_id", opId).Msgf("attaching endnode %v to basestation %v", command.EndnodeEui, bsEui.String())
+	case *bs.ServerResponse_DetRspErr:
+		command := pb.GetDetRspErr()
+		if command == nil {
+			return errors.New("invalid EndnodeDetachErrorResponse command")
+		}
+		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
+
+		msg = &msgA
+		log.Debug().Str("proto", "ServerResponse_DetRspErr").Int64("op_id", opId).Msgf("Server failed detaching endnode %v from basestation %v", command.EndnodeEui, bsEui.String())
+	case *bs.ServerResponse_AttRspErr:
+		command := pb.GetAttRspErr()
+		if command == nil {
+			return errors.New("invalid EndnodeAttachErrorResponse command")
+		}
+		msgA := messages.NewBssciError(opId, 5, command.GetMessage())
+
+		msg = &msgA
+		log.Debug().Str("proto", "ServerResponse_AttRspErr").Int64("op_id", opId).Msgf("Server failed attaching endnode %v to basestation %v", command.EndnodeEui, bsEui.String())
 
 	case *bs.ServerResponse_Err:
 		command := pb.GetErr()

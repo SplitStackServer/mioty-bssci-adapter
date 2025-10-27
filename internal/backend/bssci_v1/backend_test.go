@@ -544,6 +544,53 @@ func (ts *TestBackendSuite) SetupSuite() {
 			wantErr: true,
 		},
 		{
+			name: "ServerResponse_DetRspErr",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_DetRspErr{
+					DetRspErr: &bs.EndnodeDetachErrorResponse{
+						EndnodeEui: "01020304050607",
+						Message:    "Error message",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ServerResponse_DetRspErr_Err",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_DetRspErr{
+					DetRspErr: nil,
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "ServerResponse_AttRspErr",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_AttRspErr{
+					AttRspErr: &bs.EndnodeAttachErrorResponse{
+						EndnodeEui: "01020304050607",
+						Message:    "Error message",
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "ServerResponse_AttRspErr_Err",
+			rsp: &bs.ServerResponse{
+				BsEui: ts.bs_eui.String(),
+				Response: &bs.ServerResponse_AttRspErr{
+					AttRspErr: nil,
+				},
+			},
+			wantErr: true,
+		},
+
+		{
 			name:    "Nil",
 			rsp:     nil,
 			wantErr: true,
