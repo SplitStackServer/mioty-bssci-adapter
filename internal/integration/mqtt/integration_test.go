@@ -21,6 +21,14 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+
+const (
+	testStateTopicTemplate    = "test/bssci/{{ .BsEui }}/state"
+	testEventTopicTemplate    = "test/bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
+	testCommandTopicTemplate  = "test/bssci/{{ .BsEui }}/command/#"
+	testResponseTopicTemplate = "test/bssci/{{ .BsEui }}/response/#"
+)
+
 type TestIntegrationSuite struct {
 	suite.Suite
 
@@ -82,16 +90,10 @@ func (ts *TestIntegrationSuite) SetupSuite() {
 	ts.integration, err = NewIntegration(conf)
 	assert.NoError(err)
 
-	// override topics to make cleanup easier
-	testStateTopicTemplate := "test/" + stateTopicTemplate
-	testEventTopicTemplate := "test/" + eventTopicTemplate
-	testCommandTopicTemplate := "test/" + commandTopicTemplate
-	testResponseTopicTemplate := "test/" + responseTopicTemplate
-
 	ts.integration.stateTopicTemplate, _ = template.New("state").Parse(testStateTopicTemplate)
-	ts.integration.eventTopicTemplate, _ = template.New("state").Parse(testEventTopicTemplate)
+	ts.integration.eventTopicTemplate, _ = template.New("event").Parse(testEventTopicTemplate)
 	ts.integration.commandTopicTemplate, _ = template.New("command").Parse(testCommandTopicTemplate)
-	ts.integration.responseTopicTemplate, _ = template.New("state").Parse(testResponseTopicTemplate)
+	ts.integration.responseTopicTemplate, _ = template.New("response").Parse(testResponseTopicTemplate)
 
 	assert.NoError(ts.integration.Start())
 

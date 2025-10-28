@@ -64,6 +64,13 @@ func init() {
 	viper.SetDefault("integration.mqtt_v3.max_token_wait", time.Minute)
 	viper.SetDefault("integration.mqtt_v3.terminate_on_connect_error", false)
 
+	// mqtt_v3 topic templates
+	viper.SetDefault("integration.mqtt_v3.event_topic_template", "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}")
+	viper.SetDefault("integration.mqtt_v3.command_topic_template", "bssci/{{ .BsEui }}/command/#")
+	viper.SetDefault("integration.mqtt_v3.response_topic_template", "bssci/{{ .BsEui }}/response/#")
+	viper.SetDefault("integration.mqtt_v3.state_topic_template", "bssci/{{ .BsEui }}/state")
+
+
 	viper.SetDefault("integration.mqtt_v3.auth.type", "generic")
 	viper.SetDefault("integration.mqtt_v3.auth.generic.servers", []string{"tcp://127.0.0.1:1883"})
 	viper.SetDefault("integration.mqtt_v3.auth.generic.clean_session", true)

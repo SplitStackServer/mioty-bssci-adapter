@@ -1,7 +1,7 @@
 FROM alpine:3.22.2
-
+ARG TARGETPLATFORM
 RUN apk --no-cache add ca-certificates
-COPY mioty-bssci-adapter/ /usr/bin/mioty-bssci-adapter
+COPY $TARGETPLATFORM/mioty-bssci-adapter /usr/bin/mioty-bssci-adapter
 COPY packaging/files/mioty-bssci-adapter.toml /etc/mioty-bssci-adapter/mioty-bssci-adapter.toml
 USER nobody:nogroup
 ENTRYPOINT ["/usr/bin/mioty-bssci-adapter"]

@@ -24,13 +24,6 @@ import (
 )
 
 const (
-	stateTopicTemplate    = "bssci/{{ .BsEui }}/state"
-	eventTopicTemplate    = "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
-	commandTopicTemplate  = "bssci/{{ .BsEui }}/command/#"
-	responseTopicTemplate = "bssci/{{ .BsEui }}/response/#"
-)
-
-const (
 	eventSourceEndpoint    = "ep"
 	eventSourceBasestation = "bs"
 )
@@ -118,19 +111,19 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 	}
 
 	// set topic templates
-	integ.eventTopicTemplate, err = template.New("state").Parse(eventTopicTemplate)
+	integ.eventTopicTemplate, err = template.New("event").Parse(conf.Integration.MQTTV3.EventTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse event topic template error")
 	}
-	integ.stateTopicTemplate, err = template.New("state").Parse(stateTopicTemplate)
+	integ.stateTopicTemplate, err = template.New("state").Parse(conf.Integration.MQTTV3.StateTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse state topic template error")
 	}
-	integ.commandTopicTemplate, err = template.New("command").Parse(commandTopicTemplate)
+	integ.commandTopicTemplate, err = template.New("command").Parse(conf.Integration.MQTTV3.CommandTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse command topic template error")
 	}
-	integ.responseTopicTemplate, err = template.New("state").Parse(responseTopicTemplate)
+	integ.responseTopicTemplate, err = template.New("response").Parse(conf.Integration.MQTTV3.ResponseTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse response topic template error")
 	}
@@ -544,10 +537,13 @@ func (integ *Integration) subscribeBasestation(ctx context.Context, bsEui common
 }
 
 func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
+	logger := log.With().Str("topic", msg.Topic()).Logger()
+	logger.Debug().Msg("received message for command handler")
+
 	var pb bs.ServerCommand
 
 	if err := integ.unmarshal(msg.Payload(), &pb); err != nil {
-		log.Error().Err(err).Msg("unmarshal server command error")
+		logger.Error().Err(err).Msg("unmarshal server command error")
 		return
 	}
 
@@ -555,10 +551,13 @@ func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
 }
 
 func (integ *Integration) handleServerResponse(c paho.Client, msg paho.Message) {
+	logger := log.With().Str("topic", msg.Topic()).Logger()
+	logger.Debug().Msg("received message for response handler")
+
 	var pb bs.ServerResponse
 
 	if err := integ.unmarshal(msg.Payload(), &pb); err != nil {
-		log.Error().Err(err).Msg("unmarshal server response error")
+		logger.Error().Err(err).Msg("unmarshal server response error")
 		return
 	}
 

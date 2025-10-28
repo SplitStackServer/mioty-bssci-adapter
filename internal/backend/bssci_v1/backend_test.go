@@ -3,6 +3,7 @@ package bssci_v1
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 
 	"net"
 	"os"
@@ -435,6 +436,16 @@ func (ts *TestBackendSuite) SetupSuite() {
 			wantErr: true,
 		},
 		{
+			name: "ServerCommand_VmBatch",
+			cmd: &bs.ServerCommand{
+				BsEui: ts.bs_eui.String(),
+				Command: &bs.ServerCommand_VmBatch{
+					VmBatch: &bs.BatchVariableMac{ActivateVms: []uint32{1}, DeactivateVms: []uint32{2}},
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "ServerCommand_VmStatus",
 			cmd: &bs.ServerCommand{
 				BsEui: ts.bs_eui.String(),
@@ -795,6 +806,43 @@ func (ts *TestBackendSuite) TestBackend_HandleServerResponse() {
 			}
 		})
 	}
+}
+
+func (ts *TestBackendSuite) TestBackend_PropagationCache() {
+	t := ts.T()
+
+	assert := assert.New(t)
+
+	// server, client := net.Pipe()
+	// bsConnection := connection{
+	// 	conn: client,
+	// 	// stats:      stats.NewCollector(),
+	// 	opId:     -1,
+	// 	SnBsUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+	// 	SnScUuid: uuid.UUID{0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7},
+	// }
+
+	bsEui := common.EUI64{1, 1, 1, 1, 1, 1, 1, 1}
+	epEui := common.EUI64{1, 1, 1, 1, 1, 1, 1, 1}
+	opId := int64(-5)
+	keyAtt := fmt.Sprintf("%s_%d_att", bsEui, opId)
+	keyDet := fmt.Sprintf("%s_%d_det", bsEui, opId)
+
+	ctx := context.Background()
+
+	// test attach propagation response handling with cache
+	ts.backend.propagationCache.SetDefault(keyAtt, epEui)
+	msgAttCmp := ts.backend.handleAttPrpRspMessage(ctx, bsEui, opId)
+	assert.IsType(&messages.AttPrpCmp{}, msgAttCmp)
+
+	// test detach propagation response handling with cache
+	ts.backend.propagationCache.SetDefault(keyDet, epEui)
+	msgDetCmp := ts.backend.handleDetPrpRspMessage(ctx, bsEui, opId)
+	assert.IsType(&messages.DetPrpCmp{}, msgDetCmp)
+
+	msgErrAck := ts.backend.handlePrpRspError(ctx, bsEui, opId)
+	assert.IsType(&messages.BssciErrorAck{}, msgErrAck)
+
 }
 
 func (ts *TestBackendSuite) TestBackend_initBasestation() {

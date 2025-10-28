@@ -1,7 +1,7 @@
 # This configuration provides a mioty BSSCI Version 1.0.0 backend and
-# integrates with a MQTT broker. Many options and defaults have been omitted
-# for simplicity.
-
+# integrates with a MQTT broker. This is the minimal configuration.
+[general]
+log_level=0
 
 # Gateway backend configuration.
 [backend]
