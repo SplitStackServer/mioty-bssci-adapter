@@ -53,17 +53,24 @@ type="{{ .Backend.Type }}"
 
   # Stats interval.
   #
-  # This defines the interval in which the mioty BSSCI Adapter collects and forwards basestation statistics
-  # the uplink / downlink statistics.
+  # This defines the interval in which the mioty BSSCI Adapter requests status messages from the connected basestations
+  #
+  # Valid units are 'ms', 's', 'm', 'h'. Note that these values can be combined, e.g. '24h30m15s'.
   stats_interval="{{ .Backend.BssciV1.StatsInterval }}"
 
   # Ping interval.
+  #
+  # This defines the interval in which mioty BSSCI Adapter sends ping messages to the connected basestations
+  #
+  # Valid units are 'ms', 's', 'm', 'h'. Note that these values can be combined, e.g. '24h30m15s'.
   ping_interval="{{ .Backend.BssciV1.PingInterval }}"
 
 
   # Keep alive period .
   #
   # This interval must be greater than the configured ping interval.
+  #
+  # Valid units are 'ms', 's', 'm', 'h'. Note that these values can be combined, e.g. '24h30m15s'.
   keep_alive_period="{{ .Backend.BssciV1.KeepAlivePeriod }}"
 
 # Integration configuration.
