@@ -544,10 +544,13 @@ func (integ *Integration) subscribeBasestation(ctx context.Context, bsEui common
 }
 
 func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
+	logger := log.With().Str("topic", msg.Topic()).Logger()
+	logger.Debug().Msg("received message for command handler")
+
 	var pb bs.ServerCommand
 
 	if err := integ.unmarshal(msg.Payload(), &pb); err != nil {
-		log.Error().Err(err).Msg("unmarshal server command error")
+		logger.Error().Err(err).Msg("unmarshal server command error")
 		return
 	}
 
@@ -555,10 +558,13 @@ func (integ *Integration) handleServerCommand(c paho.Client, msg paho.Message) {
 }
 
 func (integ *Integration) handleServerResponse(c paho.Client, msg paho.Message) {
+	logger := log.With().Str("topic", msg.Topic()).Logger()
+	logger.Debug().Msg("received message for response handler")
+
 	var pb bs.ServerResponse
 
 	if err := integ.unmarshal(msg.Payload(), &pb); err != nil {
-		log.Error().Err(err).Msg("unmarshal server response error")
+		logger.Error().Err(err).Msg("unmarshal server response error")
 		return
 	}
 
