@@ -27,6 +27,8 @@ builds:
     goarch:
       - amd64
       - arm64
+signs:
+  - artifacts: checksum
 
 nfpms:
   - id: bundle
@@ -60,7 +62,8 @@ dockers_v2:
       - bin
     images:
       - "splitstackserver/mioty-bssci-adapter"
-      - "ghcr.io/splitstackserver/mioty-bssci-adapter"
+      # fix the replace in go.mod before using ghcr
+      # - "ghcr.io/splitstackserver/mioty-bssci-adapter"
     tags:
       - "v{{ .Version }}"
       - "{{ if .IsNightly }}nightly{{ end }}"
@@ -74,12 +77,7 @@ dockers_v2:
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.version": "{{.Version}}"
       "org.opencontainers.image.source": "{{.GitURL}}"
-    # goos: linux
-    # goarch: amd64
-    # image_templates:
-    #   - "github.com/splitstackserver/mioty-bssci-adapter/mioty-bssci-adapter:latest"
-
-
+    
 
 release:
   prerelease: true
