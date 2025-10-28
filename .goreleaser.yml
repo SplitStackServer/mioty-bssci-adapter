@@ -55,29 +55,29 @@ nfpms:
       postinstall: "packaging/scripts/post-install.sh"
       postremove: "packaging/scripts/post-remove.sh"
 
-dockers_v2:
-  - id: default
-    dockerfile: Dockerfile-releaser
-    ids:
-      - bin
-    images:
-      - "splitstackserver/mioty-bssci-adapter"
-      # fix the replace in go.mod before using ghcr
-      # - "ghcr.io/splitstackserver/mioty-bssci-adapter"
-    tags:
-      - "v{{ .Version }}"
-      - "{{ if .IsNightly }}nightly{{ end }}"
-      - "{{ if not .IsNightly }}latest{{ end }}"
-    extra_files:
-        - packaging/files/mioty-bssci-adapter.toml
-    labels:
-      "org.opencontainers.image.description": "My software"
-      "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.name": "{{.ProjectName}}"
-      "org.opencontainers.image.revision": "{{.FullCommit}}"
-      "org.opencontainers.image.version": "{{.Version}}"
-      "org.opencontainers.image.source": "{{.GitURL}}"
-    
+# dockers_v2:
+#   - id: default
+#     dockerfile: Dockerfile-releaser
+#     ids:
+#       - bin
+#     images:
+#       - "splitstackserver/mioty-bssci-adapter"
+#       # fix the replace in go.mod before using ghcr
+#       # - "ghcr.io/splitstackserver/mioty-bssci-adapter"
+#     tags:
+#       - "v{{ .Version }}"
+#       - "{{ if .IsNightly }}nightly{{ end }}"
+#       - "{{ if not .IsNightly }}latest{{ end }}"
+#     extra_files:
+#         - packaging/files/mioty-bssci-adapter.toml
+#     labels:
+#       "org.opencontainers.image.description": "My software"
+#       "org.opencontainers.image.created": "{{.Date}}"
+#       "org.opencontainers.image.name": "{{.ProjectName}}"
+#       "org.opencontainers.image.revision": "{{.FullCommit}}"
+#       "org.opencontainers.image.version": "{{.Version}}"
+#       "org.opencontainers.image.source": "{{.GitURL}}"
+
 
 release:
   prerelease: true
