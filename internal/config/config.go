@@ -36,7 +36,10 @@ type Config struct {
 			MaxReconnectInterval    time.Duration `mapstructure:"max_reconnect_interval"`
 			MaxTokenWait            time.Duration `mapstructure:"max_token_wait"`
 			TerminateOnConnectError bool          `mapstructure:"terminate_on_connect_error"`
-
+			EventTopicTemplate      string        `mapstructure:"event_topic_template"`
+			CommandTopicTemplate    string        `mapstructure:"command_topic_template"`
+			ResponseTopicTemplate    string        `mapstructure:"response_topic_template"`
+			StateTopicTemplate      string        `mapstructure:"state_topic_template"`
 			Auth struct {
 				Type    string `mapstructure:"type"`
 				Generic struct {

@@ -24,13 +24,6 @@ import (
 )
 
 const (
-	stateTopicTemplate    = "bssci/{{ .BsEui }}/state"
-	eventTopicTemplate    = "bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}"
-	commandTopicTemplate  = "bssci/{{ .BsEui }}/command/#"
-	responseTopicTemplate = "bssci/{{ .BsEui }}/response/#"
-)
-
-const (
 	eventSourceEndpoint    = "ep"
 	eventSourceBasestation = "bs"
 )
@@ -118,19 +111,19 @@ func NewIntegration(conf config.Config) (*Integration, error) {
 	}
 
 	// set topic templates
-	integ.eventTopicTemplate, err = template.New("state").Parse(eventTopicTemplate)
+	integ.eventTopicTemplate, err = template.New("event").Parse(conf.Integration.MQTTV3.EventTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse event topic template error")
 	}
-	integ.stateTopicTemplate, err = template.New("state").Parse(stateTopicTemplate)
+	integ.stateTopicTemplate, err = template.New("state").Parse(conf.Integration.MQTTV3.StateTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse state topic template error")
 	}
-	integ.commandTopicTemplate, err = template.New("command").Parse(commandTopicTemplate)
+	integ.commandTopicTemplate, err = template.New("command").Parse(conf.Integration.MQTTV3.CommandTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse command topic template error")
 	}
-	integ.responseTopicTemplate, err = template.New("state").Parse(responseTopicTemplate)
+	integ.responseTopicTemplate, err = template.New("response").Parse(conf.Integration.MQTTV3.ResponseTopicTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse response topic template error")
 	}
