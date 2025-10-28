@@ -78,13 +78,6 @@ marshaler="{{ .Integration.Marshaler }}"
   # MQTT integration configuration.
   [integration.mqtt_v3]
 
-  # State retained.
-  #
-  # By default this value is set to true and states are published as retained
-  # MQTT messages. Setting this to false means that states will not be retained
-  # by the MQTT broker.
-  state_retained={{ .Integration.MQTTV3.StateRetained }}
-
   # Keep alive will set the amount of time (in seconds) that the client should
   # wait before sending a PING request to the broker. This will allow the client
   # to know that a connection has not been lost with the server.
@@ -101,6 +94,58 @@ marshaler="{{ .Integration.Marshaler }}"
   # process will be terminated on a connection error.
   terminate_on_connect_error={{ .Integration.MQTTV3.TerminateOnConnectError }}
 
+  # State retained.
+  #
+  # By default this value is set to true and states are published as retained
+  # MQTT messages. Setting this to false means that states will not be retained
+  # by the MQTT broker.
+  state_retained={{ .Integration.MQTTV3.StateRetained }}
+
+  # State topic template.
+  #
+  # States are sent by the gateway as retained MQTT messages (by default)
+  # so that the last message will be stored by the MQTT broker.
+  # Only enabled when 'state_retained' is set to true.
+  #
+  # The following variables can be used in the template:
+  #   * .BsEui - basestation EUI64
+  #
+  # Default: bssci/{{ .BsEui }}/state
+  state_topic_template = "{{ .Integration.MQTTV3.StateTopicTemplate }}"
+
+
+  # Event topic template.
+  #
+  # Events from basestations and endnodes are published on this topic.
+  #
+  # The following variables can be used in the template:
+  #   * .BsEui        - basestation EUI64
+  #   * .EventSource  - event source (ep=endpoint, bs=basestation)
+  #   * .EventType    - event type (e.g. BasestationUplink, EndnodeUplink, etc.)
+  #
+  # Default: bssci/{{ .BsEui }}/event/{{ .EventSource }}/{{ .EventType }}
+  event_topic_template = "{{ .Integration.MQTTV3.EventTopicTemplate }}"
+
+  # Command topic template.
+  #
+  # Commands from SplitStack Server are received on this topic.
+  #
+  # The following variables can be used in the template:
+  #   * .BsEui - basestation EUI64
+  #
+  # Default: bssci/{{ .BsEui }}/command/#
+  command_topic_template = "{{ .Integration.MQTTV3.CommandTopicTemplate }}"
+
+  # Response topic template.
+  #
+  # Responses from SplitStack Server are received on this topic. Responses are similar to commands 
+  # but are used to directly reply to events sent by a basestation. 
+  #
+  # The following variables can be used in the template:
+  #   * .BsEui - basestation EUI64
+  #
+  # Default: bssci/{{ .BsEui }}/response/#
+  response_topic_template = "{{ .Integration.MQTTV3.ResponseTopicTemplate }}"
 
   # MQTT authentication.
   [integration.mqtt_v3.auth]
