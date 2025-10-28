@@ -60,6 +60,7 @@ func (m *PrpAck) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 
 	if m != nil && bsEui != nil {
 		bsEuiB := bsEui.String()
+		epEuiB := m.EpEui.String()
 
 		now := getNow().UnixNano()
 		ts := TimestampNsToProto(now)
@@ -77,7 +78,7 @@ func (m *PrpAck) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 			OpId:  m.OpId,
 			Message: &bs.BasestationUplink_PrpAck{
 				PrpAck: &bs.BasestationPropagationAck{
-					EpEui:     bsEuiB,
+					EpEui:     epEuiB,
 					Success:   m.Success,
 					State:     state,
 				},
