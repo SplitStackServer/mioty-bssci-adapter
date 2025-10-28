@@ -755,9 +755,9 @@ func (b *Backend) handleAttPrpRspMessage(ctx context.Context, eui common.EUI64, 
 
 	key := fmt.Sprintf("%s_%d_att", eui, opId)
 	if v, ok := b.propagationCache.Get(key); ok {
-		epEui := v.(*common.EUI64)
+		epEui := v.(common.EUI64)
 
-		msg := messages.NewPrpAck(opId, *epEui, true, true)
+		msg := messages.NewPrpAck(opId, epEui, true, true)
 
 		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
 		if error_response != nil {
@@ -774,9 +774,9 @@ func (b *Backend) handleDetPrpRspMessage(ctx context.Context, eui common.EUI64, 
 
 	key := fmt.Sprintf("%s_%d_det", eui, opId)
 	if v, ok := b.propagationCache.Get(key); ok {
-		epEui := v.(*common.EUI64)
+		epEui := v.(common.EUI64)
 
-		msg := messages.NewPrpAck(opId, *epEui, true, false)
+		msg := messages.NewPrpAck(opId, epEui, true, false)
 
 		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
 		if error_response != nil {
@@ -793,9 +793,9 @@ func (b *Backend) handlePrpRspError(ctx context.Context, eui common.EUI64, opId 
 
 	key := fmt.Sprintf("%s_%d_att", eui, opId)
 	if v, ok := b.propagationCache.Get(key); ok {
-		epEui := v.(*common.EUI64)
+		epEui := v.(common.EUI64)
 
-		msg := messages.NewPrpAck(opId, *epEui, false, true)
+		msg := messages.NewPrpAck(opId, epEui, false, true)
 
 		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
 		if error_response != nil {
@@ -804,9 +804,9 @@ func (b *Backend) handlePrpRspError(ctx context.Context, eui common.EUI64, opId 
 	}
 	key = fmt.Sprintf("%s_%d_det", eui, opId)
 	if v, ok := b.propagationCache.Get(key); ok {
-		epEui := v.(*common.EUI64)
+		epEui := v.(common.EUI64)
 
-		msg := messages.NewPrpAck(opId, *epEui, false, false)
+		msg := messages.NewPrpAck(opId, epEui, false, false)
 
 		error_response := b.forwardBasestationMessage(ctx, eui, &msg)
 		if error_response != nil {
