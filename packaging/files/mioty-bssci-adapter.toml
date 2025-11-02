@@ -36,7 +36,7 @@ marshaler="json"
     # Generic MQTT authentication.
     [integration.mqtt_v3.auth.generic]
     # MQTT server (e.g. scheme://host:port where scheme is tcp, ssl or ws)
-    server="tcp://mosquitto:1883"
+    servers="tcp://mosquitto:1883"
 
     # Connect with the given username (optional)
     username=""

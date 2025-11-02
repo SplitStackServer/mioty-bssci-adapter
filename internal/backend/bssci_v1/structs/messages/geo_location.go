@@ -1,6 +1,6 @@
 package messages
 
-import "github.com/SplitStackServer/splitstack/api/go/v4/common"
+import "github.com/SplitStackServer/splitstack/api/go/v5/common"
 
 //go:generate msgp
 //msgp:tuple GeoLocation

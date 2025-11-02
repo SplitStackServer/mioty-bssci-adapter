@@ -7,7 +7,7 @@ import (
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/integration"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 )

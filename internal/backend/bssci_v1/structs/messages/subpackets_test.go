@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 )
 
 func TestSubpackets_IntoProto(t *testing.T) {

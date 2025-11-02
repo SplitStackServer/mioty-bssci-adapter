@@ -1,12 +1,11 @@
 package messages
 
 import (
-
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 )
 
 //go:generate msgp
@@ -32,11 +31,11 @@ type PrpAck struct {
 func NewPrpAck(opId int64, epEui common.EUI64, success bool, attach bool,
 ) PrpAck {
 	return PrpAck{
-		Command:   structs.MsgPrpAck,
-		OpId:      opId,
-		EpEui:     epEui,
-		Success:   success,
-		Attach:    attach,
+		Command: structs.MsgPrpAck,
+		OpId:    opId,
+		EpEui:   epEui,
+		Success: success,
+		Attach:  attach,
 	}
 }
 
@@ -65,7 +64,7 @@ func (m *PrpAck) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 		now := getNow().UnixNano()
 		ts := TimestampNsToProto(now)
 
-		var state bs.BasestationPropagationAck_State 
+		var state bs.BasestationPropagationAck_State
 		if m.Attach {
 			state = bs.BasestationPropagationAck_ATTACH
 		} else {
@@ -78,9 +77,9 @@ func (m *PrpAck) IntoProto(bsEui *common.EUI64) *bs.BasestationUplink {
 			OpId:  m.OpId,
 			Message: &bs.BasestationUplink_PrpAck{
 				PrpAck: &bs.BasestationPropagationAck{
-					EpEui:     epEuiB,
-					Success:   m.Success,
-					State:     state,
+					EpEui:   epEuiB,
+					Success: m.Success,
+					State:   state,
 				},
 			},
 		}

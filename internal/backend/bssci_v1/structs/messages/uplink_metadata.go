@@ -1,6 +1,6 @@
 package messages
 
-import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
+import "github.com/SplitStackServer/splitstack/api/go/v5/bs"
 
 type UplinkMetadata struct {
 	OpId       int64       `json:"opId"`
@@ -45,7 +45,7 @@ func (m *UplinkMetadata) IntoProto() *bs.EndnodeUplinkMetadata {
 		rxTime := TimestampNsToProto(int64(m.RxTime))
 
 		message = bs.EndnodeUplinkMetadata{
-			OpId:       m.OpId,
+			OpId:      m.OpId,
 			RxTime:    rxTime,
 			PacketCnt: m.PacketCnt,
 			Profile:   m.Profile,

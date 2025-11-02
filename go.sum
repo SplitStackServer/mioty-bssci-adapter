@@ -1,3 +1,5 @@
+github.com/SplitStackServer/splitstack v0.0.0-20250414201540-b788eb22fbc3 h1:4SrtFuJ9RB7W8sJndnfaNDJxH+FE/7C+3MoG1z9qgnc=
+github.com/SplitStackServer/splitstack v0.0.0-20250414201540-b788eb22fbc3/go.mod h1:DbUTv4It9cSBebcQ9My/VFieSwusixW/bO2tBbl/pFI=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=

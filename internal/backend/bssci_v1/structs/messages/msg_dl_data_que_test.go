@@ -7,7 +7,7 @@ import (
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/bssci_v1/structs"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 )
 
 func TestNewDlDataQue(t *testing.T) {

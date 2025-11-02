@@ -9,7 +9,7 @@ import (
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 )
 
 func TestNewVmStatus(t *testing.T) {

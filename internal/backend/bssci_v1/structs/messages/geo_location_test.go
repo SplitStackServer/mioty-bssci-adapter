@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/common"
+	"github.com/SplitStackServer/splitstack/api/go/v5/common"
 )
 
 func TestGeoLocation_IntoProto(t *testing.T) {

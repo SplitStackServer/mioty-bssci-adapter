@@ -7,7 +7,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/joho/godotenv"
 	"google.golang.org/protobuf/proto"
@@ -20,7 +20,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
-
 
 const (
 	testStateTopicTemplate    = "test/bssci/{{ .BsEui }}/state"
@@ -194,11 +193,11 @@ func (ts *TestIntegrationSuite) TestIntegration_PublishPublishEndnodeEvent() {
 	assert := require.New(ts.T())
 
 	pb := bs.EndnodeUplink{
-		BsEui:      "test_bs",
+		BsEui: "test_bs",
 		Message: &bs.EndnodeUplink_UlData{
 			UlData: &bs.EndnodeUlDataMessage{
 				EpEui: "test_ep",
-				Data: []byte{0, 1, 2, 3},
+				Data:  []byte{0, 1, 2, 3},
 			},
 		},
 	}

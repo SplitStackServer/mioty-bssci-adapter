@@ -1,6 +1,6 @@
 package messages
 
-import "github.com/SplitStackServer/splitstack/api/go/v4/bs"
+import "github.com/SplitStackServer/splitstack/api/go/v5/bs"
 
 //go:generate msgp
 

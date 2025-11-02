@@ -20,7 +20,7 @@ import (
 
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/config"
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 )
 
 const (

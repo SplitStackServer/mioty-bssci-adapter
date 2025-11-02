@@ -3,10 +3,10 @@ module github.com/SplitStackServer/mioty-bssci-adapter
 go 1.25.1
 
 // Local module replacement for development until proper versioning is set up
-replace github.com/SplitStackServer/splitstack/api/go/v4 => /home/alexa/splitstack/api/go
+replace github.com/SplitStackServer/splitstack/api/go/v5 => /home/alexa/splitstack/api/go
 
 require (
-	github.com/SplitStackServer/splitstack/api/go/v4 v4.0.0-20250530222856-05acb9cf3504
+	github.com/SplitStackServer/splitstack/api/go/v5 v5.0.0
 	github.com/eclipse/paho.mqtt.golang v1.5.1
 	github.com/google/uuid v1.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible

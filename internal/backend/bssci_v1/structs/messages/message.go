@@ -5,7 +5,7 @@ import (
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/backend/events"
 	"github.com/SplitStackServer/mioty-bssci-adapter/internal/common"
 
-	"github.com/SplitStackServer/splitstack/api/go/v4/bs"
+	"github.com/SplitStackServer/splitstack/api/go/v5/bs"
 	"github.com/tinylib/msgp/msgp"
 )
 
@@ -26,8 +26,6 @@ type MessageMsgp interface {
 	msgp.Unmarshaler
 	msgp.Decodable
 }
-
-
 
 type EndnodeMessage interface {
 	Message
